@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-cognitive_integration.py — RUMI Cognitive Integration Layer
+cognitive_integration.py — Luka Cognitive Integration Layer
 ===============================================================
 
 The central nervous system that wires all cognitive modules into a
 unified request-processing pipeline. This is the most critical module
-in RUMI's cognitive architecture.
+in Luka's cognitive architecture.
 
 Inspired by:
 
@@ -114,7 +114,7 @@ def _clamp(v: float, lo: float = 0.0, hi: float = 1.0) -> float:
 
 class CognitiveResponse:
     """
-    The unified response from RUMI's cognitive pipeline.
+    The unified response from Luka's cognitive pipeline.
 
     Contains not just the answer, but the full reasoning trace,
     which modules contributed, confidence, and emotional state.
@@ -223,7 +223,7 @@ class PipelineMetrics:
 
 class CognitiveIntegration:
     """
-    The central cognitive integration layer — RUMI's supervisory
+    The central cognitive integration layer — Luka's supervisory
     attentional system.
 
     Orchestrates all cognitive modules into a unified pipeline:

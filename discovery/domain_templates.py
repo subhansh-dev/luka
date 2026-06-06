@@ -1,5 +1,5 @@
 """
-domain_templates.py — Domain-Specific Research Templates for RUMI
+domain_templates.py — Domain-Specific Research Templates for Luka
 
 Different domains have different research patterns, methodologies,
 and key metrics. This module provides domain-specific templates that
@@ -34,7 +34,7 @@ DOMAIN_TEMPLATES = {
             "Atmospheric mixing ratio", "Equilibrium temperature",
             "Stellar flux", "Orbital period", "Eccentricity",
         ],
-        "data_sources": ["NASA Exoplanet Archive", "MAST", "arXiv astro-ph", "SIMBAD"],
+        "data_sources": ["NASA Exoplanet Archive", "MAST", "arXiv astro-ph", "SIMBAD", "VizieR", "ESA Sky"],
         "scoring_weights": {
             "novelty": 0.20,      # Astronomy values novel discoveries highly
             "evidence": 0.25,     # Strong observational evidence needed
@@ -51,132 +51,114 @@ DOMAIN_TEMPLATES = {
         ],
     },
 
-    "drug_discovery": {
+    "isro_earth_observation": {
         "research_patterns": [
-            "Does {compound} inhibit {target} via {mechanism}?",
-            "Can {pathway} be modulated to treat {disease}?",
-            "What biomarkers predict response to {therapy}?",
-            "How does {mutation} affect {drug} binding affinity?",
+            "Can {satellite_data} predict {monsoon_pattern} in {region}?",
+            "How does {parameter} from {instrument} correlate with {ground_truth}?",
+            "What anomalies in {ocean_data} indicate {phenomenon}?",
+            "Does {insat_product} improve forecast accuracy over {baseline} for {region}?",
+            "How does {soil_moisture} from {satellite} relate to {crop_yield} in {state}?",
         ],
         "methodology_preferences": [
-            "High-throughput screening", "Molecular docking", "MD simulation",
-            "Clinical trial design", "PK/PD modeling", "ADMET prediction",
-            "Structure-activity relationship", "Dose-response curves",
+            "Satellite image analysis", "Time series analysis",
+            "Spatial interpolation", "Machine learning classification",
+            "Change detection", "NDVI analysis", "Cyclone tracking",
+            "Monsoon onset prediction", "Flood inundation mapping",
+            "Ocean color analysis", "Scatterometry wind retrieval",
         ],
         "key_metrics": [
-            "IC50", "EC50", "Ki", "Selectivity index",
-            "Bioavailability", "Half-life", "Therapeutic index",
-            "Binding affinity (kcal/mol)", "Lipinski compliance",
+            "Sea Surface Temperature (SST) in degC",
+            "Rainfall rate (mm/day)",
+            "Soil Moisture (m3/m3)",
+            "Chlorophyll-a concentration (mg/m3)",
+            "Normalized Difference Vegetation Index (NDVI)",
+            "Cloud top temperature (K)",
+            "Wind speed at 10m (m/s)",
+            "Significant wave height (m)",
+            "Sea surface salinity (PSU)",
+            "Integrated water vapour (mm)",
         ],
-        "data_sources": ["PubChem", "ChEMBL", "DrugBank", "ClinicalTrials.gov"],
+        "data_sources": [
+            "MOSDAC", "Bhuvan", "VEDAS",
+            "arXiv (physics.ao-ph, astro-ph.EP)",
+            "ISRO Data Portal", "IMD (India Meteorological Dept)",
+        ],
         "scoring_weights": {
-            "novelty": 0.15,
-            "evidence": 0.30,     # Strong experimental evidence critical
-            "predictions": 0.20,
-            "mathematical": 0.10,
-            "mechanism": 0.20,    # Mechanism of action important
-            "parsimony": 0.05,
+            "novelty": 0.15,       # Novel applications of ISRO data
+            "evidence": 0.35,      # Observational data is king
+            "predictions": 0.20,   # Testable predictions important
+            "mathematical": 0.10,  # Models useful but not primary
+            "mechanism": 0.10,     # Physical mechanisms matter
+            "parsimony": 0.10,     # Simple explanations preferred
         },
         "validation_criteria": [
-            "Dose-response relationship established",
-            "Selectivity over off-targets demonstrated",
-            "ADMET properties favorable",
-            "In vivo efficacy in animal model",
+            "Ground truth validation with IMD station data",
+            "Cross-validation between ISRO and international satellites",
+            "Consistent across multiple passes/instruments",
+            "Matches known Indian monsoon/climate patterns",
+            "Predicts verifiable near-term observations",
         ],
     },
 
-    "neuroscience": {
+    "solar_system": {
         "research_patterns": [
-            "Does {neurotransmitter} mediate {behavior} via {receptor}?",
-            "How does {brain_region} connectivity relate to {function}?",
-            "Can {stimulation} modulate {circuit} to improve {outcome}?",
+            "What {mechanism} drives {surface_feature} on {body}?",
+            "Can {crater} analysis date the {region} of {planet}?",
+            "Does {atmosphere} composition suggest {interior_process}?",
         ],
         "methodology_preferences": [
-            "fMRI analysis", "Electrophysiology", "Optogenetics",
-            "Behavioral assays", "Connectomics", "Computational modeling",
+            "Geological mapping", "Impact crater counting",
+            "Ephemeris calculation", "Spectral mineralogy",
+            "Gravimetric modeling", "Magnetospheric mapping",
         ],
         "key_metrics": [
-            "BOLD signal change", "Firing rate (Hz)", "LFP power",
-            "Connectivity strength", "Behavioral score", "Reaction time",
+            "Surface age (Gyr)", "Albedo", "Mineral abundance",
+            "Atmospheric pressure (bar)", "Magnetic field strength (nT)",
+            "Heliocentric distance (AU)",
         ],
-        "data_sources": ["Allen Brain Atlas", "Human Connectome Project", "NeuroMorpho"],
+        "data_sources": ["JPL Horizons", "USGS Planetary Data", "NASA PDS", "IAU Gazetteer"],
         "scoring_weights": {
-            "novelty": 0.15,
-            "evidence": 0.25,
-            "predictions": 0.20,
-            "mathematical": 0.10,
-            "mechanism": 0.25,    # Neural mechanisms critical
-            "parsimony": 0.05,
-        },
-        "validation_criteria": [
-            "Replicated across subjects",
-            "Consistent with known anatomy",
-            "Predicts behavioral outcomes",
-            "Dissociable from alternative circuits",
-        ],
-    },
-
-    "physics": {
-        "research_patterns": [
-            "Can {framework} unify {phenomenon1} and {phenomenon2}?",
-            "What symmetry breaking explains {observation}?",
-            "Does {field_theory} predict {effect} at energy {E}?",
-        ],
-        "methodology_preferences": [
-            "Analytical derivation", "Numerical simulation",
-            "Lattice QCD", "Monte Carlo", "Renormalization group",
-            "Perturbation theory", "Effective field theory",
-        ],
-        "key_metrics": [
-            "Cross-section", "Decay rate", "Coupling constant",
-            "Anomalous magnetic moment", "Scattering amplitude",
-        ],
-        "data_sources": ["arXiv hep-ph", "PDG", "INSPIRE-HEP"],
-        "scoring_weights": {
-            "novelty": 0.25,      # Physics values theoretical novelty
-            "evidence": 0.20,
-            "predictions": 0.25,
-            "mathematical": 0.20, # Mathematical rigor critical
-            "mechanism": 0.05,
-            "parsimony": 0.05,
-        },
-        "validation_criteria": [
-            "Mathematically consistent",
-            "Reduces to known limits",
-            "Makes falsifiable predictions",
-            "Respects known symmetries",
-        ],
-    },
-
-    "ecology": {
-        "research_patterns": [
-            "How does {stressor} affect {species} population in {ecosystem}?",
-            "Can {intervention} reverse {trend} in {habitat}?",
-            "What trophic interactions drive {pattern}?",
-        ],
-        "methodology_preferences": [
-            "Population surveys", "Species distribution modeling",
-            "Community ecology analysis", "Remote sensing",
-            "Stable isotope analysis", "eDNA metabarcoding",
-        ],
-        "key_metrics": [
-            "Species richness", "Shannon diversity", "Population density",
-            "Carrying capacity", "Growth rate", "Survival rate",
-        ],
-        "data_sources": ["GBIF", "IUCN Red List", "eBird", "MODIS"],
-        "scoring_weights": {
-            "novelty": 0.15,
-            "evidence": 0.30,     # Field data critical
+            "novelty": 0.20,
+            "evidence": 0.30,
             "predictions": 0.15,
             "mathematical": 0.10,
-            "mechanism": 0.20,
-            "parsimony": 0.10,    # Simple models preferred
+            "mechanism": 0.15,
+            "parsimony": 0.10,
         },
         "validation_criteria": [
-            "Validated across multiple sites",
-            "Consistent with long-term trends",
-            "Accounts for confounding variables",
-            "Predicts future states accurately",
+            "Physics-consistent orbital parameters",
+            "Matches in-situ spacecraft measurements",
+            "Geologically plausible mechanisms",
+            "Consistent with solar system formation models",
+        ],
+    },
+
+    "climate_energy": {
+        "research_patterns": [
+            "How does {solar_activity} impact {parameter} measured by {satellite}?",
+            "Can space-derived {variable} improve {model} of {region}?",
+        ],
+        "methodology_preferences": [
+            "Satellite data assimilation", "Trend analysis",
+            "Correlation mapping", "Solar radiation modeling",
+        ],
+        "key_metrics": [
+            "Insolation (kWh/m2/day)", "Temperature anomaly (K)",
+            "Cloud fraction", "Aerosol optical depth",
+        ],
+        "data_sources": ["NASA POWER", "NOAA NCEI", "CAMS"],
+        "scoring_weights": {
+            "novelty": 0.10,
+            "evidence": 0.40,
+            "predictions": 0.20,
+            "mathematical": 0.10,
+            "mechanism": 0.10,
+            "parsimony": 0.10,
+        },
+        "validation_criteria": [
+            "Correlates with ground-based sensors",
+            "Statistically significant trends",
+            "Peer-reviewed satellite calibration",
         ],
     },
 }
@@ -184,7 +166,7 @@ DOMAIN_TEMPLATES = {
 
 def get_domain_template(domain: str) -> dict:
     """Get the research template for a domain."""
-    return DOMAIN_TEMPLATES.get(domain, DOMAIN_TEMPLATES.get("physics", {}))
+    return DOMAIN_TEMPLATES.get(domain, DOMAIN_TEMPLATES.get("space_astronomy", {}))
 
 
 def get_scoring_weights(domain: str) -> dict:

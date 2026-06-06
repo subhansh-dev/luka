@@ -725,12 +725,12 @@ JUDGE (evaluates evidence):
 - Identify what's missing
 - Rule on admissibility
 
-JURY (5 domain experts vote):
-- Expert 1: Theoretical Physicist
-- Expert 2: Experimental Physicist
-- Expert 3: Mathematician
-- Expert 4: Philosopher of Science
-- Expert 5: Interdisciplinary Researcher
+    JURY (5 space science experts vote):
+    - Expert 1: Astrophysicist (Theoretical)
+    - Expert 2: Planetary Geologist (Experimental)
+    - Expert 3: Aerospace Engineer (Mission Design)
+    - Expert 4: Astrobiologist (Biosignatures)
+    - Expert 5: Space Policy & Ethics Specialist
 
 SELF-CRITIQUE (the hypothesis critiques itself):
 - What assumptions did I make?

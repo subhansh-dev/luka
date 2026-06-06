@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-task_queue.py — RUMI Agent Task Queue
+task_queue.py — Luka Agent Task Queue
 Priority queue with concurrent execution, cancellation, and progress tracking.
 """
 import threading

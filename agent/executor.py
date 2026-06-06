@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-executor.py — RUMI Autonomous Task Executor
+executor.py — Luka Autonomous Task Executor
 Takes a plan from the planner, executes steps with error recovery,
 context injection, and auto-generated code fallback.
 """
@@ -108,7 +108,7 @@ def _run_generated_code(
             pass
 
     system_prompt = (
-        "You are an expert Python developer working for RUMI AI assistant. "
+        "You are an expert Python developer working for Luka, the autonomous space discovery engine. "
         "Write clean, complete, working Python code. "
         "Use standard library + common packages. "
         "Install missing packages with subprocess + pip if needed. "

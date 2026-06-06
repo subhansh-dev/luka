@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-metacognitive_monitor.py — RUMI Metacognitive Monitoring System
+metacognitive_monitor.py — Luka Metacognitive Monitoring System
 ===================================================================
 
 Continuous self-monitoring that watches the cognitive process itself.
-RUMI doesn't just think — she watches herself think, detects when
+Luka doesn't just think — she watches herself think, detects when
 her thinking is going wrong, and adjusts strategies accordingly.
 
 Research foundations:
@@ -247,7 +247,7 @@ class StrategyRecord:
 
 class MetacognitiveMonitor:
     """
-    Watches RUMI's own cognitive processes and provides meta-level guidance.
+    Watches Luka's own cognitive processes and provides meta-level guidance.
 
     Monitors:
     - Cognitive load (how many modules active, working memory pressure)

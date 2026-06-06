@@ -465,3 +465,32 @@ Example:
             return 0.0
         max_edges = n * (n - 1) / 2
         return round(len(relationships) / max_edges, 4) if max_edges > 0 else 0.0
+
+    def identify_unanswered_questions(self, report: dict) -> list:
+        """Identify unanswered questions and priority research topics for future runs."""
+        topic = report.get("topic", "")
+        domain = report.get("domain", "")
+        phases = report.get("phases", {})
+        gaps = phases.get("gap_detection", {}).get("top_gaps", [])
+        anomalies = phases.get("anomaly_detection", {}).get("top_anomalies", [])
+
+        prompt = f"""Based on this discovery report summary, identify the most important UNANSWERED questions.
+
+TOPIC: {topic}
+DOMAIN: {domain}
+GAPS: {json.dumps(gaps[:5])}
+ANOMALIES: {json.dumps(anomalies[:5])}
+
+Suggest 3-5 priority research questions for the next discovery run. Sort by novelty potential.
+
+Output JSON list of strings."""
+
+        try:
+            raw = self.llm_call(prompt, max_tokens=1024)
+            if raw:
+                result = extract_json(raw)
+                if isinstance(result, list):
+                    return result
+        except Exception:
+            pass
+        return []

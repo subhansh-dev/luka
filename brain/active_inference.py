@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-active_inference.py — RUMI Active Inference Engine
+active_inference.py — Luka Active Inference Engine
 ======================================================
 
 Augments the existing Q-learning engine with prediction-error driven learning.
@@ -34,7 +34,7 @@ INFERENCE_FILE = BRAIN_DIR / "active_inference.json"
 
 class ActiveInferenceEngine:
     """
-    Active Inference engine that augments RUMI's Q-learning.
+    Active Inference engine that augments Luka's Q-learning.
 
     Core mechanism:
     1. Before a tool call: predict outcome (will it succeed? how long?)
@@ -393,7 +393,7 @@ class ActiveInferenceEngine:
     def format_for_prompt(self, max_chars: int = 600) -> str:
         """
         Format active inference awareness for system prompt.
-        This gives RUMI awareness of her own prediction capabilities.
+        This gives Luka awareness of her own prediction capabilities.
         """
         stats = self.get_stats()
         uncertain = self.get_uncertain_tools(threshold=0.6)[:3]

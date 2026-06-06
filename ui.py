@@ -1,9 +1,9 @@
 """
-ui.py -- RUMI Terminal UI (v10.0 Hermes Agent Style)
+ui.py -- Luka Terminal UI (v10.0 Hermes Agent Style)
 Works with or without rich/prompt_toolkit — falls back to ANSI codes.
 """
 import sys as _sys
-_sys.stderr.write(f"[RUMI-UI] Python {_sys.version.split()[0]} @ {_sys.executable}\n")
+_sys.stderr.write(f"[Luka-UI] Python {_sys.version.split()[0]} @ {_sys.executable}\n")
 _sys.stderr.flush()
 
 import sys
@@ -346,7 +346,7 @@ FACES = [
 # Role display system (Hermes Agent style)
 ROLES = {
     "user":      {"glyph": "❯", "color": ACCENT_BLUE,   "label": "USER"},
-    "assistant": {"glyph": "●", "color": ACCENT_CYAN,   "label": "RUMI"},
+    "assistant": {"glyph": "●", "color": ACCENT_CYAN,   "label": "Luka"},
     "tool":      {"glyph": "⚡", "color": ACCENT_AMBER,  "label": "TOOL"},
     "system":    {"glyph": "·", "color": TXT_MUTED,      "label": "SYS"},
 }
@@ -376,13 +376,13 @@ BADGE_IDLE      = "[IDLE]"
 # ASCII LOGO
 # ================================================================
 
-RUMI_LOGO = r"""
-  ██████╗ ██╗   ██╗███╗   ███╗██╗
-  ██╔══██╗██║   ██║████╗ ████║██║
-  ██████╔╝██║   ██║██╔████╔██║██║
-  ██╔══██╗██║   ██║██║╚██╔╝██║██║
-  ██║  ██║╚██████╔╝██║ ╚═╝ ██║██║
-  ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝
+Luka_LOGO = r"""
+   ██╗     ██╗   ██╗██╗  ██╗ █████╗
+   ██║     ██║   ██║██║ ██╔╝██╔══██╗
+   ██║     ██║   ██║█████╔╝ ███████║
+   ██║     ██║   ██║██╔═██╗ ██╔══██║
+   ███████╗╚██████╔╝██║  ██╗██║  ██║
+   ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
 """
 
 # ================================================================
@@ -394,13 +394,13 @@ PERSONALITIES = {
         "label": "Cutesy / UwU",
         "desc": "Playful, cute scientist",
         "soul_file": "SOUL_cutesy.md",
-        "rumi_file": "RUMI_cutesy.md",
+        "rumi_file": "Luka_cutesy.md",
     },
     "professional": {
         "label": "Professional / Sharp",
         "desc": "Direct, analytical scientist",
         "soul_file": "SOUL_professional.md",
-        "rumi_file": "RUMI_professional.md",
+        "rumi_file": "Luka_professional.md",
     },
 }
 
@@ -409,7 +409,7 @@ def _set_personality(choice: str):
     p = PERSONALITIES.get(choice)
     if not p:
         return False
-    for dest, src_key in [("SOUL.md", "soul_file"), ("RUMI.md", "rumi_file")]:
+    for dest, src_key in [("SOUL.md", "soul_file"), ("Luka.md", "rumi_file")]:
         src = BASE_DIR / p[src_key]
         dst = BASE_DIR / dest
         if src.exists():
@@ -472,7 +472,7 @@ def _make_status_badge(text: str, color: str) -> Text:
 # HELP TEXT
 # ================================================================
 
-HELP_TEXT = f"""**RUMI** v3.1 — Research Unified Machine Intelligence
+HELP_TEXT = f"""**Luka** v3.1 — Autonomous Space Discovery Engine
 
 **Commands**
   /help            Show this help
@@ -766,11 +766,11 @@ COMMAND_PALETTE_ITEMS = [
 
 
 # ================================================================
-# PREMIUM RUMI UI
+# PREMIUM Luka UI
 # ================================================================
 
 class RumiUI:
-    """Premium AI operating system terminal UI for RUMI Scientist AI."""
+    """Premium AI operating system terminal UI for Luka Scientist AI."""
 
     def __init__(self, face_path=None, size=None):
         self.W = None
@@ -858,7 +858,7 @@ class RumiUI:
         self._heartbeat_thread.start()
 
         # Timeline entry
-        self._timeline.add("system", "RUMI initialized", "Model: Gemini 2.5 Flash")
+        self._timeline.add("system", "Luka initialized", "Model: Gemini 2.5 Flash")
 
     # ----------------------------------------------------------------
     # BOOT SEQUENCE (Hermes Agent style)
@@ -876,8 +876,8 @@ class RumiUI:
 
         # ASCII Logo in cyan
         console.print()
-        console.print(Text(RUMI_LOGO, style=f"bold {ACCENT_CYAN}"))
-        console.print(Text("  Research Unified Machine Intelligence", style=ACCENT_BLUE))
+        console.print(Text(Luka_LOGO, style=f"bold {ACCENT_CYAN}"))
+        console.print(Text("  Autonomous Space Discovery Engine", style=ACCENT_BLUE))
         console.print()
 
         # Provider status — one line
@@ -910,7 +910,7 @@ class RumiUI:
         """Minimal header — just uptime and tokens."""
         uptime = self._get_uptime()
         line = Text()
-        line.append("RUMI", style=f"bold {ACCENT_CYAN}")
+        line.append("Luka", style=f"bold {ACCENT_CYAN}")
         line.append(f"  {uptime}", style=TXT_SECOND)
         line.append(f"  {self._total_tokens:,} tok", style=TXT_SECOND)
         if self._get_mode_str() != "normal":
@@ -1471,7 +1471,7 @@ class RumiUI:
 
         elif cmd == "/exit":
             console.print()
-            console.print(Text("  Shutting down RUMI...", style=f"bold {ACCENT_RED}"))
+            console.print(Text("  Shutting down Luka...", style=f"bold {ACCENT_RED}"))
             console.print()
             self._show_session_summary()
             self._running = False
@@ -1582,7 +1582,7 @@ class RumiUI:
         uptime = self._get_uptime()
         console.print()
         line = Text()
-        line.append("RUMI", style=f"bold {ACCENT_CYAN}")
+        line.append("Luka", style=f"bold {ACCENT_CYAN}")
         line.append(f"  {uptime}", style=TXT_SECOND)
         line.append(f"  {self._total_tokens:,} tok", style=TXT_SECOND)
         line.append(f"  {self._message_count} msgs", style=TXT_SECOND)
@@ -1800,7 +1800,7 @@ class RumiUI:
                 console.print(line)
                 self.show_thinking()
 
-            # RUMI response — role glyph + markdown
+            # Luka response — role glyph + markdown
             elif tl.startswith("rumi:") or tl.startswith("ai:"):
                 prefix_len = 5 if tl.startswith("rumi:") else 3
                 content = text[prefix_len:].strip()
@@ -2147,5 +2147,5 @@ class RumiUI:
         self.set_state("LISTENING")
 
         console.print()
-        console.print(Text(f"  RUMI online. Welcome, {user_name}.", style=f"bold {ACCENT_GREEN}"))
+        console.print(Text(f"  Luka online. Welcome, {user_name}.", style=f"bold {ACCENT_GREEN}"))
         console.print()

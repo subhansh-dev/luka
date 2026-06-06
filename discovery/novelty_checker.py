@@ -129,9 +129,34 @@ class NoveltyChecker:
 
         return unique[:15]
 
-    def _find_similar_work(self, claims: list, papers: list) -> list:
+    def _find_similar_work(self, claims: list, papers: list, domain: str = "") -> list:
         """Find existing work that matches the theory's claims."""
         similar = []
+
+        # Enhance with space-specific sources if needed
+        if "space" in domain.lower() or "astro" in domain.lower():
+            try:
+                from discovery.arxiv_api import search_papers as search_arxiv
+                from discovery.nasa_api import search_exoplanets
+
+                # Check arXiv astro-ph specifically
+                for claim in claims[:3]:
+                    arxiv_papers = search_arxiv(f"cat:astro-ph {claim}", max_results=5)
+                    if arxiv_papers:
+                        papers = (papers or []) + arxiv_papers
+
+                # Check NASA Exoplanet Archive if applicable
+                if "exoplanet" in str(claims).lower():
+                    for claim in claims[:3]:
+                        exos = search_exoplanets(claim, limit=3)
+                        for exo in exos:
+                            papers.append({
+                                "title": f"NASA Exoplanet Archive: {exo['name']}",
+                                "abstract": f"Confirmed exoplanet with orbital period {exo.get('orbital_period_days')} days.",
+                                "source": "nasa_exoplanet_archive"
+                            })
+            except Exception:
+                pass
 
         if not papers:
             return similar

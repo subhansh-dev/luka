@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RUMI — Discovery Dashboard</title>
+<title>Luka — Space Discovery Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.6/dist/vis-network.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -18,9 +18,9 @@
     --text-primary: #e8e8e8;
     --text-secondary: #777;
     --text-dim: #444;
-    --accent: #00d4aa;
-    --accent-glow: rgba(0,212,170,0.15);
-    --accent-dim: rgba(0,212,170,0.4);
+    --accent: #00e5ff;
+    --accent-glow: rgba(0,229,255,0.15);
+    --accent-dim: rgba(0,229,255,0.4);
     --danger: #ff4466;
     --danger-glow: rgba(255,68,102,0.15);
     --warn: #ffaa00;
@@ -663,9 +663,9 @@
   <!-- Header -->
   <div class="header">
     <div class="header-left">
-      <span class="logo">RUMI</span>
+      <span class="logo">LUKA</span>
       <span class="logo-dot"></span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">Discovery Dashboard</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">Autonomous Space Discovery Engine</span>
     </div>
     <div class="header-right">
       <div class="run-indicator">
@@ -849,7 +849,7 @@ let network = null;
 async function loadAllData() {
   // Try v2 reports first, then v1
   const reports = await loadV2Reports();
-  const kg = await loadJSON('../../discovery/graph/knowledge_graph.json');
+  const kg = await loadJSON('../../data/knowledge_graph.json') || await loadJSON('../../discovery/graph/knowledge_graph.json');
   const hyps = await loadJSON('../../discovery/hypotheses/active.json');
   const contras = await loadJSON('../../discovery/contradictions/active.json');
 

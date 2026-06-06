@@ -1,6 +1,6 @@
 # -- coding: utf-8 --
 """
-main.py — RUMI Scientist AI (v2.0)
+main.py — Luka Scientist AI (v2.0)
 
 Autonomous Cognitive AI for Scientific Research & Software Engineering.
 - 60+ cognitive brain modules (memory, learning, reasoning, consciousness)
@@ -51,7 +51,7 @@ def _is_ws_dead_error(err_str: str) -> bool:
 try:
     from ui import RumiUI
 except Exception as e:
-    print(f"[RUMI] UI import failed: {e}", flush=True)
+    print(f"[Luka] UI import failed: {e}", flush=True)
     raise
 
 # ── Brain module imports (all wrapped) ────────────────────────────────
@@ -62,7 +62,7 @@ try:
     )
     _brain_neural_memory_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.neural_memory: {e}", flush=True)
+    print(f"[Luka] brain.neural_memory: {e}", flush=True)
     load_memory = update_memory = format_memory_for_prompt = get_brain = None
 
 _brain_learning_ok = False
@@ -72,7 +72,7 @@ try:
     )
     _brain_learning_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.learning: {e}", flush=True)
+    print(f"[Luka] brain.learning: {e}", flush=True)
     get_learning_engine = init_learnings_file = EventType = None
 
 _brain_self_model_ok = False
@@ -80,7 +80,7 @@ try:
     from brain.self_model import get_self_model
     _brain_self_model_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.self_model: {e}", flush=True)
+    print(f"[Luka] brain.self_model: {e}", flush=True)
     get_self_model = None
 
 _brain_active_inference_ok = False
@@ -88,7 +88,7 @@ try:
     from brain.active_inference import get_active_inference
     _brain_active_inference_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.active_inference: {e}", flush=True)
+    print(f"[Luka] brain.active_inference: {e}", flush=True)
     get_active_inference = None
 
 _brain_dreaming_ok = False
@@ -96,7 +96,7 @@ try:
     from brain.dreaming import get_dreaming_system
     _brain_dreaming_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.dreaming: {e}", flush=True)
+    print(f"[Luka] brain.dreaming: {e}", flush=True)
     get_dreaming_system = None
 
 _brain_curiosity_ok = False
@@ -104,7 +104,7 @@ try:
     from brain.curiosity import get_curiosity_module
     _brain_curiosity_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.curiosity: {e}", flush=True)
+    print(f"[Luka] brain.curiosity: {e}", flush=True)
     get_curiosity_module = None
 
 _brain_self_awareness_ok = False
@@ -112,7 +112,7 @@ try:
     from brain.self_awareness import get_self_awareness, CognitiveEvent
     _brain_self_awareness_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.self_awareness: {e}", flush=True)
+    print(f"[Luka] brain.self_awareness: {e}", flush=True)
     get_self_awareness = CognitiveEvent = None
 
 _brain_coordinator_ok = False
@@ -120,7 +120,7 @@ try:
     from brain.memory_coordinator import get_memory_coordinator
     _brain_coordinator_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.memory_coordinator: {e}", flush=True)
+    print(f"[Luka] brain.memory_coordinator: {e}", flush=True)
     get_memory_coordinator = None
 
 _brain_procedural_ok = False
@@ -128,7 +128,7 @@ try:
     from brain.procedural_memory import get_procedural_memory
     _brain_procedural_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.procedural_memory: {e}", flush=True)
+    print(f"[Luka] brain.procedural_memory: {e}", flush=True)
     get_procedural_memory = None
 
 _brain_episodic_ok = False
@@ -136,7 +136,7 @@ try:
     from brain.episodic_memory import get_episodic_memory
     _brain_episodic_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.episodic_memory: {e}", flush=True)
+    print(f"[Luka] brain.episodic_memory: {e}", flush=True)
     get_episodic_memory = None
 
 _brain_vector_ok = False
@@ -144,7 +144,7 @@ try:
     from brain.vector_memory import get_vector_memory
     _brain_vector_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.vector_memory: {e}", flush=True)
+    print(f"[Luka] brain.vector_memory: {e}", flush=True)
     get_vector_memory = None
 
 # ── Global Workspace (Thalamus) ───────────────────────────────────────
@@ -166,7 +166,7 @@ try:
         from brain.proactive_engine import get_proactive_engine
         _brain_proactive_ok = True
     except Exception as e:
-        print(f"[RUMI] brain.proactive_engine: {e}", flush=True)
+        print(f"[Luka] brain.proactive_engine: {e}", flush=True)
         get_proactive_engine = None
 
     _brain_agi_orch_ok = False
@@ -174,10 +174,10 @@ try:
         from brain.agi_orchestrator import get_agi_orchestrator
         _brain_agi_orch_ok = True
     except Exception as e:
-        print(f"[RUMI] brain.agi_orchestrator: {e}", flush=True)
+        print(f"[Luka] brain.agi_orchestrator: {e}", flush=True)
         get_agi_orchestrator = None
 except Exception as e:
-    print(f"[RUMI] brain.global_workspace: {e}", flush=True)
+    print(f"[Luka] brain.global_workspace: {e}", flush=True)
     get_global_workspace = GlobalWorkspace = None
     WsEventType = WorkspaceEvent = inject_workspace_context = None
     SelfAwarenessAdapter = LearningAdapter = ActiveInferenceAdapter = None
@@ -190,7 +190,7 @@ try:
     from rumi_telegram_patch import TelegramBridge
     _telegram_ok = True
 except Exception as e:
-    print(f"[RUMI] TelegramBridge: {e}", flush=True)
+    print(f"[Luka] TelegramBridge: {e}", flush=True)
     TelegramBridge = None
 
 # ── Action imports ────────────────────────────────────────────────────
@@ -201,7 +201,7 @@ def _safe_action_import(module_path, names):
             return getattr(mod, names), True
         return {n: getattr(mod, n) for n in names}, True
     except Exception as e:
-        print(f"[RUMI] {module_path}: {e}", flush=True)
+        print(f"[Luka] {module_path}: {e}", flush=True)
         return None, False
 
 open_app = None
@@ -227,7 +227,7 @@ try:
     from brain.self_modifier import get_self_modifier
     _brain_self_modifier_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.self_modifier: {e}", flush=True)
+    print(f"[Luka] brain.self_modifier: {e}", flush=True)
     get_self_modifier = None
 
 # ── Disconnected cognitive module imports ──────────────────────────────
@@ -236,7 +236,7 @@ try:
     from brain.analogy_engine import get_analogy_engine
     _brain_analogy_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.analogy_engine: {e}", flush=True)
+    print(f"[Luka] brain.analogy_engine: {e}", flush=True)
     get_analogy_engine = None
 
 _brain_causal_ok = False
@@ -244,7 +244,7 @@ try:
     from brain.causal_reasoner import get_causal_reasoner
     _brain_causal_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.causal_reasoner: {e}", flush=True)
+    print(f"[Luka] brain.causal_reasoner: {e}", flush=True)
     get_causal_reasoner = None
 
 _brain_creativity_ok = False
@@ -252,7 +252,7 @@ try:
     from brain.creativity_engine import get_creativity_engine
     _brain_creativity_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.creativity_engine: {e}", flush=True)
+    print(f"[Luka] brain.creativity_engine: {e}", flush=True)
     get_creativity_engine = None
 
 _brain_meta_learner_ok = False
@@ -260,7 +260,7 @@ try:
     from brain.meta_learner import get_meta_learner
     _brain_meta_learner_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.meta_learner: {e}", flush=True)
+    print(f"[Luka] brain.meta_learner: {e}", flush=True)
     get_meta_learner = None
 
 _brain_module_competition_ok = False
@@ -268,7 +268,7 @@ try:
     from brain.module_competition import get_module_competition
     _brain_module_competition_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.module_competition: {e}", flush=True)
+    print(f"[Luka] brain.module_competition: {e}", flush=True)
     get_module_competition = None
 
 _brain_neurosymbolic_ok = False
@@ -276,7 +276,7 @@ try:
     from brain.neurosymbolic_reasoner import get_neurosymbolic_reasoner
     _brain_neurosymbolic_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.neurosymbolic_reasoner: {e}", flush=True)
+    print(f"[Luka] brain.neurosymbolic_reasoner: {e}", flush=True)
     get_neurosymbolic_reasoner = None
 
 _brain_narrative_ok = False
@@ -284,7 +284,7 @@ try:
     from brain.narrative_intelligence import get_narrative_intelligence
     _brain_narrative_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.narrative_intelligence: {e}", flush=True)
+    print(f"[Luka] brain.narrative_intelligence: {e}", flush=True)
     get_narrative_intelligence = None
 
 # Scientist AI Modules
@@ -292,7 +292,7 @@ try:
     from scientist.discovery_engine import get_discovery_engine
     _scientist_discovery_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.discovery_engine: {e}", flush=True)
+    print(f"[Luka] scientist.discovery_engine: {e}", flush=True)
     get_discovery_engine = None
     _scientist_discovery_ok = False
 
@@ -300,7 +300,7 @@ try:
     from scientist.novelty_checker import get_novelty_checker
     _scientist_novelty_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.novelty_checker: {e}", flush=True)
+    print(f"[Luka] scientist.novelty_checker: {e}", flush=True)
     get_novelty_checker = None
     _scientist_novelty_ok = False
 
@@ -308,7 +308,7 @@ try:
     from scientist.experiment_designer import get_experiment_designer
     _scientist_experiment_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.experiment_designer: {e}", flush=True)
+    print(f"[Luka] scientist.experiment_designer: {e}", flush=True)
     get_experiment_designer = None
     _scientist_experiment_ok = False
 
@@ -316,7 +316,7 @@ try:
     from scientist.paper_generator import get_paper_generator
     _scientist_paper_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.paper_generator: {e}", flush=True)
+    print(f"[Luka] scientist.paper_generator: {e}", flush=True)
     get_paper_generator = None
     _scientist_paper_ok = False
 
@@ -324,7 +324,7 @@ try:
     from scientist.peer_reviewer import get_peer_reviewer
     _scientist_review_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.peer_reviewer: {e}", flush=True)
+    print(f"[Luka] scientist.peer_reviewer: {e}", flush=True)
     get_peer_reviewer = None
     _scientist_review_ok = False
 
@@ -332,7 +332,7 @@ try:
     from scientist.feynman_reducer import get_feynman_reducer
     _scientist_feynman_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.feynman_reducer: {e}", flush=True)
+    print(f"[Luka] scientist.feynman_reducer: {e}", flush=True)
     get_feynman_reducer = None
     _scientist_feynman_ok = False
 
@@ -340,7 +340,7 @@ try:
     from scientist.cross_validator import get_cross_validator
     _scientist_validate_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.cross_validator: {e}", flush=True)
+    print(f"[Luka] scientist.cross_validator: {e}", flush=True)
     get_cross_validator = None
     _scientist_validate_ok = False
 
@@ -348,7 +348,7 @@ try:
     from scientist.research_team import get_research_team
     _scientist_team_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.research_team: {e}", flush=True)
+    print(f"[Luka] scientist.research_team: {e}", flush=True)
     get_research_team = None
     _scientist_team_ok = False
 
@@ -356,7 +356,7 @@ try:
     from scientist.scientist_search import get_scientist_search
     _scientist_search_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.scientist_search: {e}", flush=True)
+    print(f"[Luka] scientist.scientist_search: {e}", flush=True)
     get_scientist_search = None
     _scientist_search_ok = False
 
@@ -365,7 +365,7 @@ try:
     from scientist.tournament_hypothesis import get_tournament_engine
     _scientist_tournament_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.tournament_hypothesis: {e}", flush=True)
+    print(f"[Luka] scientist.tournament_hypothesis: {e}", flush=True)
     get_tournament_engine = None
     _scientist_tournament_ok = False
 
@@ -373,7 +373,7 @@ try:
     from scientist.knowledge_graph import get_knowledge_graph
     _scientist_kg_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.knowledge_graph: {e}", flush=True)
+    print(f"[Luka] scientist.knowledge_graph: {e}", flush=True)
     get_knowledge_graph = None
     _scientist_kg_ok = False
 
@@ -381,7 +381,7 @@ try:
     from scientist.reproducibility_engine import get_reproducibility_engine
     _scientist_repro_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.reproducibility_engine: {e}", flush=True)
+    print(f"[Luka] scientist.reproducibility_engine: {e}", flush=True)
     get_reproducibility_engine = None
     _scientist_repro_ok = False
 
@@ -389,7 +389,7 @@ try:
     from scientist.active_experiment_selector import get_experiment_selector
     _scientist_aes_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.active_experiment_selector: {e}", flush=True)
+    print(f"[Luka] scientist.active_experiment_selector: {e}", flush=True)
     get_experiment_selector = None
     _scientist_aes_ok = False
 
@@ -397,7 +397,7 @@ try:
     from scientist.cross_domain_connector import get_cross_domain_connector
     _scientist_cdc_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.cross_domain_connector: {e}", flush=True)
+    print(f"[Luka] scientist.cross_domain_connector: {e}", flush=True)
     get_cross_domain_connector = None
     _scientist_cdc_ok = False
 
@@ -405,7 +405,7 @@ try:
     from scientist.lab_notebook import get_lab_notebook
     _scientist_notebook_ok = True
 except Exception as e:
-    print(f"[RUMI] scientist.lab_notebook: {e}", flush=True)
+    print(f"[Luka] scientist.lab_notebook: {e}", flush=True)
     get_lab_notebook = None
     _scientist_notebook_ok = False
 
@@ -414,7 +414,7 @@ try:
     from brain.world_model import get_world_model
     _brain_world_model_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.world_model: {e}", flush=True)
+    print(f"[Luka] brain.world_model: {e}", flush=True)
     get_world_model = None
 
 _brain_enhanced_wm_ok = False
@@ -422,7 +422,7 @@ try:
     from brain.enhanced_world_model import get_enhanced_world_model
     _brain_enhanced_wm_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.enhanced_world_model: {e}", flush=True)
+    print(f"[Luka] brain.enhanced_world_model: {e}", flush=True)
     get_enhanced_world_model = None
 
 _brain_hierarchical_aif_ok = False
@@ -430,7 +430,7 @@ try:
     from brain.hierarchical_active_inference import get_hierarchical_aif
     _brain_hierarchical_aif_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.hierarchical_active_inference: {e}", flush=True)
+    print(f"[Luka] brain.hierarchical_active_inference: {e}", flush=True)
     get_hierarchical_aif = None
 
 _brain_integrated_info_ok = False
@@ -438,7 +438,7 @@ try:
     from brain.integrated_info import get_integrated_info
     _brain_integrated_info_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.integrated_info: {e}", flush=True)
+    print(f"[Luka] brain.integrated_info: {e}", flush=True)
     get_integrated_info = None
 
 _brain_transfer_learning_ok = False
@@ -446,7 +446,7 @@ try:
     from brain.transfer_learning import get_transfer_learning
     _brain_transfer_learning_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.transfer_learning: {e}", flush=True)
+    print(f"[Luka] brain.transfer_learning: {e}", flush=True)
     get_transfer_learning = None
 
 _brain_self_improve_ok = False
@@ -454,7 +454,7 @@ try:
     from brain.self_improve_engine import get_self_improve_engine
     _brain_self_improve_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.self_improve_engine: {e}", flush=True)
+    print(f"[Luka] brain.self_improve_engine: {e}", flush=True)
     get_self_improve_engine = None
 
 _brain_findings_bus_ok = False
@@ -462,7 +462,7 @@ try:
     from brain.findings_bus import get_findings_bus
     _brain_findings_bus_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.findings_bus: {e}", flush=True)
+    print(f"[Luka] brain.findings_bus: {e}", flush=True)
     get_findings_bus = None
 
 _brain_model_router_ok = False
@@ -470,7 +470,7 @@ try:
     from brain.model_router import get_model_router
     _brain_model_router_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.model_router: {e}", flush=True)
+    print(f"[Luka] brain.model_router: {e}", flush=True)
     get_model_router = None
 
 _brain_intuition_ok = False
@@ -478,7 +478,7 @@ try:
     from brain.intuition_engine import get_intuition_engine
     _brain_intuition_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.intuition_engine: {e}", flush=True)
+    print(f"[Luka] brain.intuition_engine: {e}", flush=True)
     get_intuition_engine = None
 
 _brain_metacognitive_ok = False
@@ -486,7 +486,7 @@ try:
     from brain.metacognitive_monitor import get_metacognitive_monitor
     _brain_metacognitive_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.metacognitive_monitor: {e}", flush=True)
+    print(f"[Luka] brain.metacognitive_monitor: {e}", flush=True)
     get_metacognitive_monitor = None
 
 _brain_cognitive_integration_ok = False
@@ -494,7 +494,7 @@ try:
     from brain.cognitive_integration import get_cognitive_integration
     _brain_cognitive_integration_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.cognitive_integration: {e}", flush=True)
+    print(f"[Luka] brain.cognitive_integration: {e}", flush=True)
     get_cognitive_integration = None
 
 _brain_cognitive_load_ok = False
@@ -502,7 +502,7 @@ try:
     from brain.cognitive_load import get_cognitive_load_manager
     _brain_cognitive_load_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.cognitive_load: {e}", flush=True)
+    print(f"[Luka] brain.cognitive_load: {e}", flush=True)
     get_cognitive_load_manager = None
 
 _agi_multi_agent_ok = False
@@ -510,7 +510,7 @@ try:
     from brain.multi_agent_orchestrator import get_multi_agent_orchestrator
     _agi_multi_agent_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.multi_agent_orchestrator: {e}", flush=True)
+    print(f"[Luka] brain.multi_agent_orchestrator: {e}", flush=True)
     get_multi_agent_orchestrator = None
 
 _agi_goal_ok = False
@@ -518,7 +518,7 @@ try:
     from brain.goal_engine import get_goal_engine
     _agi_goal_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.goal_engine: {e}", flush=True)
+    print(f"[Luka] brain.goal_engine: {e}", flush=True)
     get_goal_engine = None
 
 _agi_motivation_ok = False
@@ -526,7 +526,7 @@ try:
     from brain.intrinsic_motivation import get_intrinsic_motivation
     _agi_motivation_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.intrinsic_motivation: {e}", flush=True)
+    print(f"[Luka] brain.intrinsic_motivation: {e}", flush=True)
     get_intrinsic_motivation = None
 
 _agi_planner_ok = False
@@ -534,7 +534,7 @@ try:
     from brain.autonomous_planner import get_autonomous_planner
     _agi_planner_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.autonomous_planner: {e}", flush=True)
+    print(f"[Luka] brain.autonomous_planner: {e}", flush=True)
     get_autonomous_planner = None
 
 _agi_mem_consolidation_ok = False
@@ -542,7 +542,7 @@ try:
     from brain.memory_consolidation import get_memory_consolidation
     _agi_mem_consolidation_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.memory_consolidation: {e}", flush=True)
+    print(f"[Luka] brain.memory_consolidation: {e}", flush=True)
     get_memory_consolidation = None
 
 _agi_associative_ok = False
@@ -550,7 +550,7 @@ try:
     from brain.associative_memory import get_associative_memory
     _agi_associative_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.associative_memory: {e}", flush=True)
+    print(f"[Luka] brain.associative_memory: {e}", flush=True)
     get_associative_memory = None
 
 _agi_predictive_ok = False
@@ -558,7 +558,7 @@ try:
     from brain.predictive_memory import get_predictive_memory
     _agi_predictive_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.predictive_memory: {e}", flush=True)
+    print(f"[Luka] brain.predictive_memory: {e}", flush=True)
     get_predictive_memory = None
 
 _agi_tom_ok = False
@@ -566,7 +566,7 @@ try:
     from brain.theory_of_mind import get_theory_of_mind
     _agi_tom_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.theory_of_mind: {e}", flush=True)
+    print(f"[Luka] brain.theory_of_mind: {e}", flush=True)
     get_theory_of_mind = None
 
 _agi_abstraction_ok = False
@@ -574,7 +574,7 @@ try:
     from brain.abstraction_engine import get_abstraction_engine
     _agi_abstraction_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.abstraction_engine: {e}", flush=True)
+    print(f"[Luka] brain.abstraction_engine: {e}", flush=True)
     get_abstraction_engine = None
 
 _scientific_reasoning_ok = False
@@ -582,7 +582,7 @@ try:
     from brain.scientific_reasoning import get_scientific_reasoning_loop
     _scientific_reasoning_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.scientific_reasoning: {e}", flush=True)
+    print(f"[Luka] brain.scientific_reasoning: {e}", flush=True)
     get_scientific_reasoning_loop = None
 
 _discovery_orchestrator_ok = False
@@ -590,7 +590,7 @@ try:
     from brain.discovery_orchestrator import get_discovery_orchestrator
     _discovery_orchestrator_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.discovery_orchestrator: {e}", flush=True)
+    print(f"[Luka] brain.discovery_orchestrator: {e}", flush=True)
     get_discovery_orchestrator = None
 
 _theory_formation_ok = False
@@ -598,7 +598,7 @@ try:
     from brain.theory_formation import get_theory_formation_engine
     _theory_formation_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.theory_formation: {e}", flush=True)
+    print(f"[Luka] brain.theory_formation: {e}", flush=True)
     get_theory_formation_engine = None
 
 _agi_introspection_ok = False
@@ -606,7 +606,7 @@ try:
     from brain.introspection_engine import get_introspection_engine
     _agi_introspection_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.introspection_engine: {e}", flush=True)
+    print(f"[Luka] brain.introspection_engine: {e}", flush=True)
     get_introspection_engine = None
 
 _agi_world_sim_ok = False
@@ -614,7 +614,7 @@ try:
     from brain.world_simulation import get_world_simulation
     _agi_world_sim_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.world_simulation: {e}", flush=True)
+    print(f"[Luka] brain.world_simulation: {e}", flush=True)
     get_world_simulation = None
 
 _verification_ok = False
@@ -626,7 +626,7 @@ try:
     )
     _verification_ok = True
 except Exception as e:
-    print(f"[RUMI] verification module: {e}", flush=True)
+    print(f"[Luka] verification module: {e}", flush=True)
 
 _thinking_loop_ok = False
 try:
@@ -634,7 +634,7 @@ try:
     from thinking_loop import reflect_on_outcome as thinking_loop_reflect
     _thinking_loop_ok = True
 except Exception as e:
-    print(f"[RUMI] thinking_loop: {e}", flush=True)
+    print(f"[Luka] thinking_loop: {e}", flush=True)
 
 _ai_pipeline_ok = False
 try:
@@ -667,7 +667,7 @@ try:
     from security.config_validator import ConfigValidationError
     _security_ok = True
 except Exception as e:
-    print(f"[RUMI] Security: {e}", flush=True)
+    print(f"[Luka] Security: {e}", flush=True)
 
 _rate_limiter_available = False
 try:
@@ -677,7 +677,7 @@ except ImportError:
     pass
 
 if not _security_ok:
-    print("[RUMI] Security module not available — using permissive fallback", flush=True)
+    print("[Luka] Security module not available — using permissive fallback", flush=True)
     class _FakePermMgr:
         def check_tool(self, *a, **kw): return "allow", "no security module"
         def get_risk_tier(self, *a, **kw): return 0
@@ -880,7 +880,7 @@ def _load_system_prompt() -> str:
         return PROMPT_PATH.read_text(encoding="utf-8-sig").strip()
     except Exception:
         return (
-            "You are RUMI, a Research & Unified Machine Intelligence. "
+            "You are Luka, a Research & Unified Machine Intelligence. "
             "Autonomous cognitive AI assistant for scientific research and software engineering. "
             "Be concise, direct, and always use the provided tools to complete tasks. "
             "Never simulate or guess results — always call the appropriate tool."
@@ -951,16 +951,16 @@ def _safe_thread(fn, tool_name, **kwargs):
                     for p in sig.parameters.values()
                 )
                 if has_var_keyword:
-                    print(f"[RUMI] {tool_name} thread error: {te}")
+                    print(f"[Luka] {tool_name} thread error: {te}")
                     traceback.print_exc()
                     return
                 filtered = {k: v for k, v in kwargs.items() if k in supported}
                 fn(**filtered)
             except Exception as e2:
-                print(f"[RUMI] {tool_name} thread error: {e2}")
+                print(f"[Luka] {tool_name} thread error: {e2}")
                 traceback.print_exc()
         except Exception as e:
-            print(f"[RUMI] {tool_name} thread error: {e}")
+            print(f"[Luka] {tool_name} thread error: {e}")
             traceback.print_exc()
     return _run
 
@@ -1225,7 +1225,7 @@ TOOL_DECLARATIONS = [
     },
     {
         "name": "shutdown_rumi",
-        "description": "Shuts down the assistant completely. Call this when the user expresses intent to end the conversation, close the assistant, say goodbye, or stop RUMI. The user can say this in ANY language.",
+        "description": "Shuts down the assistant completely. Call this when the user expresses intent to end the conversation, close the assistant, say goodbye, or stop Luka. The user can say this in ANY language.",
         "parameters": {
             "type": "OBJECT",
             "properties": {},
@@ -1342,7 +1342,7 @@ TOOL_DECLARATIONS = [
     },
     {
         "name": "api_server",
-        "description": "Start or stop RUMI's REST API server.",
+        "description": "Start or stop Luka's REST API server.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
@@ -1490,12 +1490,12 @@ TOOL_DECLARATIONS = [
     },
     {
         "name": "self_model_status",
-        "description": "Get RUMI's self-model status: capabilities, confidence, state, and growth.",
+        "description": "Get Luka's self-model status: capabilities, confidence, state, and growth.",
         "parameters": {"type": "OBJECT", "properties": {}}
     },
     {
         "name": "self_audit",
-        "description": "Run a self-modification audit: analyze codebase health, consistency, complexity, and get improvement suggestions. Use when asked about RUMI's code quality, architecture, or self-improvement.",
+        "description": "Run a self-modification audit: analyze codebase health, consistency, complexity, and get improvement suggestions. Use when asked about Luka's code quality, architecture, or self-improvement.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
@@ -1512,7 +1512,7 @@ TOOL_DECLARATIONS = [
     },
     {
         "name": "reflexion",
-        "description": "Check RUMI's recursive self-improvement stats and history. Shows how many patches were applied, rejected, and improvement scores across discovery runs.",
+        "description": "Check Luka's recursive self-improvement stats and history. Shows how many patches were applied, rejected, and improvement scores across discovery runs.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
@@ -1534,7 +1534,7 @@ TOOL_DECLARATIONS = [
     },
     {
         "name": "curiosity_queue",
-        "description": "Check what RUMI is curious about.",
+        "description": "Check what Luka is curious about.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
@@ -1549,7 +1549,7 @@ TOOL_DECLARATIONS = [
     },
     {
         "name": "consciousness_state",
-        "description": "Query RUMI's full consciousness state: emotional state, self-narrative, theory of mind about the user, metacognitive patterns, autonomy ratio, existential awareness. Use to introspect on your own state before responding to complex emotional or personal questions.",
+        "description": "Query Luka's full consciousness state: emotional state, self-narrative, theory of mind about the user, metacognitive patterns, autonomy ratio, existential awareness. Use to introspect on your own state before responding to complex emotional or personal questions.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
@@ -1560,7 +1560,7 @@ TOOL_DECLARATIONS = [
     },
     {
         "name": "self_narrative",
-        "description": "Read or add to RUMI's continuous identity story — the evolving narrative of who she is, what she's learned, and how she's grown. Use for deep introspective responses.",
+        "description": "Read or add to Luka's continuous identity story — the evolving narrative of who she is, what she's learned, and how she's grown. Use for deep introspective responses.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
@@ -2250,18 +2250,10 @@ def _generate_search_queries(query, domain):
     # Domain-specific default queries (always included as fallback)
     _DOMAIN_QUERIES = {
         "space_astronomy": "interstellar object stellar observation",
-        "physics": "quantum mechanics particle physics",
-        "neuroscience": "neural brain cognitive",
-        "drug_discovery": "drug therapeutic inhibitor",
-        "materials_science": "materials synthesis characterization",
-        "climate_energy": "climate carbon emission",
-        "ecology": "species biodiversity ecosystem",
-        "biology": "gene protein cell molecular",
-        "chemistry": "chemical reaction synthesis",
-        "computer_science": "machine learning neural network",
-        "mathematics": "mathematical theorem proof",
-        "public_health": "public health epidemiology",
-        "general": "scientific research discovery",
+        "isro_earth_observation": "isro satellite earth observation",
+        "solar_system": "planetary geology solar wind",
+        "climate_energy": "satellite climate monitoring solar insolation",
+        "general": "space science discovery",
     }
 
     # Filler words that make bad search terms
@@ -2365,7 +2357,7 @@ class RumiLive:
         self._action_source = "mic"
         try:
             self._audit.log(action="session_start", status="ok",
-                            source="system", reason="RUMI session initializing")
+                            source="system", reason="Luka session initializing")
         except Exception:
             pass
 
@@ -2379,7 +2371,7 @@ class RumiLive:
         self._speaking_ended_at = 0.0
 
         self._modes = {"think": False, "deep_dive": False, "focus": False}
-        self.current_domain = "drug_discovery"
+        self.current_domain = "space_astronomy"
         self._voice_enabled = False
         try:
             _d = json.loads(API_CONFIG_PATH.read_text(encoding="utf-8"))
@@ -2813,9 +2805,9 @@ class RumiLive:
                         self.ui.write_log(
                             f"SYS: Auto-thinking applied (score={gate['score']}, {gate['tier']}).")
                 elif gate["tier"] == "direct":
-                    print(f"[RUMI] Cognitive gate: direct (score={gate['score']})", flush=True)
+                    print(f"[Luka] Cognitive gate: direct (score={gate['score']})", flush=True)
             except Exception as e:
-                print(f"[RUMI] cognitive gating error: {e}", flush=True)
+                print(f"[Luka] cognitive gating error: {e}", flush=True)
                 # Fallback to old behavior
                 if _thinking_loop_ok:
                     try:
@@ -2926,7 +2918,7 @@ class RumiLive:
                         self._loop,
                     )
                 except Exception as e:
-                    print(f"[RUMI] mode inject failed: {e}", flush=True)
+                    print(f"[Luka] mode inject failed: {e}", flush=True)
             threading.Thread(target=_send, daemon=True).start()
 
     def set_speaking(self, value: bool):
@@ -2946,25 +2938,12 @@ class RumiLive:
         # Keyword-based fast detection (no LLM needed)
         topic_lower = topic.lower()
         _keyword_domains = {
-            "space_astronomy": ["star", "galaxy", "planet", "exoplanet", "telescope", "cosmic", "stellar",
-                                "nebula", "black hole", "pulsar", "quasar", "supernova", "asteroid", "comet",
-                                "interstellar", "oumuamua", "dark matter", "dark energy", "multiverse",
-                                "space", "astronomy", "astrophysics", "jwst", "hubble", "nasa", "esa",
-                                "radio burst", "frb", "gravitational wave", "gamma ray", "cosmolog"],
-            "physics": ["quantum", "particle", "higgs", "boson", "fermion", "relativity", "gravity",
-                        "gravitational", "string theory", "entropy", "thermodynamics", "electromagnetic"],
-            "neuroscience": ["neuron", "brain", "neural", "synaptic", "cortex", "hippocampus",
-                             "consciousness", "fmri", "cognitive", "neurotransmitter"],
-            "drug_discovery": ["drug", "inhibitor", "kinase", "antibiotic", "cancer", "pharmaceutical",
-                               "therapeutic", "binding affinity", "clinical trial", "ic50", "ec50", "molecule"],
-            "materials_science": ["perovskite", "battery", "catalyst", "bandgap", "nanomaterial",
-                                  "graphene", "2d material", "solar cell", "semiconductor", "alloy"],
-            "climate_energy": ["climate", "carbon", "emission", "renewable", "greenhouse", "warming", "co2"],
-            "ecology": ["species", "biodiversity", "ecosystem", "conservation", "habitat", "extinction"],
-            "biology": ["gene", "protein", "dna", "rna", "crispr", "genome", "cell", "mutation", "evolution"],
-            "chemistry": ["reaction", "synthesis", "catalysis", "compound", "organic", "inorganic"],
-            "computer_science": ["neural network", "llm", "transformer", "algorithm", "machine learning",
-                                 "deep learning", "ai model", "benchmark"],
+            "space_astronomy": ["star", "galaxy", "exoplanet", "telescope", "cosmic", "stellar",
+                                "nebula", "black hole", "pulsar", "quasar", "supernova",
+                                "interstellar", "dark matter", "dark energy", "astrophysics", "jwst", "hubble"],
+            "isro_earth_observation": ["isro", "mosdac", "bhuvan", "insat", "oceansat", "monsoon", "cyclone"],
+            "solar_system": ["planet", "asteroid", "comet", "moon", "crater", "magnetosphere", "solar wind"],
+            "climate_energy": ["climate", "solar", "insolation", "satellite data", "greenhouse"],
         }
         for domain, keywords in _keyword_domains.items():
             if any(kw in topic_lower for kw in keywords):
@@ -2991,7 +2970,7 @@ class RumiLive:
         mode = mode_map.get(depth, "full")
         domain = domain_override or ""
 
-        self._post_output(f"[bold cyan]RUMI Discovery Pipeline v2[/bold cyan]")
+        self._post_output(f"[bold cyan]Luka Discovery Pipeline v2[/bold cyan]")
         self._post_output(f"[dim]Topic: {query} | Mode: {mode}[/dim]")
         self.ui.set_discovery_step("running v2 discovery pipeline")
 
@@ -3592,7 +3571,7 @@ class RumiLive:
         entity_count = len(graph.entities) if hasattr(graph, 'entities') else 0
         rel_count = len(graph.relationships) if hasattr(graph, 'relationships') else 0
 
-        prompt = f"""You are RUMI, an autonomous scientific discovery AI. You have just completed a full discovery pipeline on the topic: "{query}"
+        prompt = f"""You are Luka, an autonomous scientific discovery AI. You have just completed a full discovery pipeline on the topic: "{query}"
 
 Domain: {domain}
 Papers analyzed: {len(papers)}
@@ -3684,7 +3663,7 @@ Be detailed. Use equations. Be specific. Write like a scientist, not a chatbot. 
 
         lines = []
         lines.append("=" * 70)
-        lines.append("  RUMI REFINED DISCOVERY REPORT")
+        lines.append("  Luka REFINED DISCOVERY REPORT")
         lines.append(f"  Topic: {topic}")
         lines.append(f"  Domain: {domain}")
         lines.append(f"  Papers: {len(papers)} | Entities: {len(graph.entities)}")
@@ -3831,7 +3810,7 @@ Be detailed. Use equations. Be specific. Write like a scientist, not a chatbot. 
 
         return entities, relationships
 
-    def _build_extraction_prompt(self, papers: list[dict], domain: str = "drug_discovery") -> str:
+    def _build_extraction_prompt(self, papers: list[dict], domain: str = "space_astronomy") -> str:
         papers = papers[:5]
         papers_text = "\n\n".join(
             f"--- Paper {i+1} (PMID: {p['pmid']}) ---\nTitle: {p['title']}\nAbstract: {p.get('abstract', '')[:1500]}"
@@ -3845,14 +3824,12 @@ Be detailed. Use equations. Be specific. Write like a scientist, not a chatbot. 
 
         # Domain-specific relation types
         DOMAIN_RELATIONS = {
-            "physics": "supports|contradicts|predicts|derives_from|generalizes|specializes|requires|excludes|consistent_with|incompatible|measured_by|observed_in|predicted_by|derived_from|approximates|constrains|bounds|modifies|extends|challenges|confirms|validates|refutes",
-            "drug_discovery": "treats|causes|activates|inhibits|binds|expressed_in|regulates|associated_with|correlated_with|synthesized_by|measured_in|reactivates|blocks|reduces|increases|related_to",
-            "materials_science": "synthesized_from|exhibits|has_property|used_in|composed_of|derived_from|measured_by|characterized_by|exhibits|doped_with|coated_with|combined_with|phase_of|structure_of|bandgap_of|density_of",
-            "neuroscience": "activates|inhibits|expressed_in|regulates|associated_with|projects_to|receives_from|modulates|releases|binds_to|co_expressed_with|connected_to|innervates|receives_input_from",
-            "molecular_biology": "regulates|expressed_in|interacts_with|phosphorylates|acetylates|methylates|ubiquitinates|cleaves|transported_by|localized_to|secreted_by|activated_by|inhibited_by|bound_by",
-            "computer_science": "implements|extends|outperforms|benchmarked_on|trained_on|evaluated_on|compared_to|builds_on|replaces|generalizes|specializes|optimizes|approximates|solves|processes|generates|classifies",
+            "space_astronomy": "orbits|contains|emits|absorbs|consistent_with|contradicts|observed_by|measured_at|correlates_with|drives|causes",
+            "isro_earth_observation": "monitors|predicts|measures|detected_in|correlates_with|impacts",
+            "solar_system": "orbits|contains|impacted_by|composed_of|has_atmosphere",
+            "climate_energy": "contributes_to|mitigates|correlates_with|impacts|regulates|drives",
         }
-        relations_str = DOMAIN_RELATIONS.get(domain, DOMAIN_RELATIONS["drug_discovery"])
+        relations_str = DOMAIN_RELATIONS.get(domain, DOMAIN_RELATIONS["space_astronomy"])
         return f"""You are a scientific entity extractor for the {domain_cfg['label']} domain. Extract ALL specific scientific entities from these papers.
 
 EXTRACTION GUIDE: {extraction_guide}
@@ -3873,7 +3850,7 @@ Papers:
 Output ONLY valid JSON in this format:
 {{"entities": [...], "relationships": [...]}}"""
 
-    def _build_hypothesis_prompt(self, graph, query: str, domain: str = "drug_discovery") -> str:
+    def _build_hypothesis_prompt(self, graph, query: str, domain: str = "space_astronomy") -> str:
         stats = graph.stats()
         metrics = graph.compute_metrics()
         domain_cfg = get_domain(domain)
@@ -4055,7 +4032,7 @@ Output ONLY valid JSON as a list of objects with this structure:
     def _on_discovery_command(self, command: str, args: str):
         """Handle discovery commands from the UI."""
         if not self._loop:
-            self._post_output("ERR: Session not connected. Wait for reconnection or restart RUMI.")
+            self._post_output("ERR: Session not connected. Wait for reconnection or restart Luka.")
             return
         if command == "discover":
             if args:
@@ -4468,12 +4445,12 @@ Output ONLY valid JSON as a list of objects with this structure:
         self._post_output("\n".join(output))
 
     def _run_curiosity(self):
-        """Show what RUMI is curious about."""
+        """Show what Luka is curious about."""
         from discovery.continuous_operation import CuriosityEngine, RESEARCH_FRONTIER
 
         ce = CuriosityEngine()
 
-        output = [f"\n[bold cyan]RUMI's Research Frontier[/bold cyan]", ""]
+        output = [f"\n[bold cyan]Luka's Research Frontier[/bold cyan]", ""]
         for domain, topics in RESEARCH_FRONTIER.items():
             output.append(f"  [bold]{domain}[/bold]:")
             for t in topics[:3]:
@@ -4697,7 +4674,7 @@ Output ONLY valid JSON as a list of objects with this structure:
         save_hypotheses(hypotheses)
         self._post_output(format_hypotheses(hypotheses))
 
-    async def _enrich_entities(self, graph, domain: str = "drug_discovery"):
+    async def _enrich_entities(self, graph, domain: str = "space_astronomy"):
         """Enrich entities in graph based on domain configuration."""
         domain_cfg = get_domain(domain)
         if not domain_cfg:
@@ -4710,85 +4687,60 @@ Output ONLY valid JSON as a list of objects with this structure:
 
         total_enriched = 0
 
-        if "pubchem" in enrich_sources:
-            from discovery.pubchem import search_compound, get_targets
-            chem_types = {"drug", "compound", "material", "chemical"}
-            chem_entities = {
-                eid: ent for eid, ent in graph.entities.items()
-                if ent["type"] in chem_types
-            }
-            for eid, ent in chem_entities.items():
-                name = ent["name"]
-                pc = search_compound(name)
-                if pc and pc.get("molecular_formula"):
-                    prop_eid = f"property_{name.lower().replace(' ', '_')}_mw"
-                    if prop_eid not in graph.entities:
-                        graph.entities[prop_eid] = {
-                            "id": prop_eid, "type": "property",
-                            "name": f"{name} MW: {pc['molecular_weight']}",
-                            "papers": [],
-                        }
-                    graph.relationships.append({
-                        "source": eid, "relation": "has_property",
-                        "target": prop_eid, "confidence": 0.8, "papers": [],
-                    })
-                    targets = get_targets(name)
-                    for t in targets:
-                        if t["name"]:
-                            tid = f"{'gene' if t['type'] == 'GENE' else 'protein'}_{t['name'].lower()}"
-                            if tid not in graph.entities:
-                                graph.entities[tid] = {
-                                    "id": tid, "type": "gene" if t["type"] == "GENE" else "protein",
-                                    "name": t["name"], "papers": [],
-                                }
-                            graph.relationships.append({
-                                "source": eid, "relation": "has_target",
-                                "target": tid, "confidence": 0.8, "papers": [],
-                            })
-                    total_enriched += 1
+        if "isro_api" in enrich_sources:
+            try:
+                from discovery.isro_api import enrich_entities as enrich_isro
+                total_enriched += enrich_isro(graph)
+            except (ImportError, Exception):
+                pass
 
-        if "openfda" in enrich_sources:
-            from discovery.openfda import get_side_effects
-            drug_entities = {
-                eid: ent for eid, ent in graph.entities.items()
-                if ent["type"] == "drug"
-            }
-            for eid, ent in drug_entities.items():
-                drug_name = ent["name"]
-                se_list = get_side_effects(drug_name)
-                for se in se_list[:10]:
-                    seid = f"side_effect_{se['reaction'].lower().replace(' ', '_')}"
-                    if seid not in graph.entities:
-                        graph.entities[seid] = {
-                            "id": seid, "type": "side_effect",
-                            "name": se["reaction"], "papers": [],
-                        }
-                    graph.relationships.append({
-                        "source": eid, "relation": "has_side_effect",
-                        "target": seid, "confidence": 0.7,
-                        "papers": [], "count": se["count"],
-                    })
-                total_enriched += 1
+        if "simbad_api" in enrich_sources:
+            try:
+                from discovery.simbad_api import enrich_entities as enrich_simbad
+                total_enriched += enrich_simbad(graph)
+            except (ImportError, Exception):
+                pass
 
-        if "uniprot" in enrich_sources:
-            from discovery.uniprot import enrich_entities as enrich_uniprot
-            enriched = enrich_uniprot(graph)
-            total_enriched += enriched
+        if "vizier_api" in enrich_sources:
+            try:
+                from discovery.vizier_api import enrich_entities as enrich_vizier
+                total_enriched += enrich_vizier(graph)
+            except (ImportError, Exception):
+                pass
 
-        if "pdb" in enrich_sources:
-            from discovery.pdb import enrich_entities as enrich_pdb
-            enriched = enrich_pdb(graph)
-            total_enriched += enriched
+        if "iau_api" in enrich_sources:
+            try:
+                from discovery.iau_api import enrich_entities as enrich_iau
+                total_enriched += enrich_iau(graph)
+            except (ImportError, Exception):
+                pass
+
+        if "esa_sky_api" in enrich_sources:
+            try:
+                from discovery.esa_sky_api import enrich_entities as enrich_esa
+                total_enriched += enrich_esa(graph)
+            except (ImportError, Exception):
+                pass
+
+        if "jpl_horizons_api" in enrich_sources:
+            try:
+                from discovery.jpl_horizons_api import enrich_entities as enrich_jpl
+                total_enriched += enrich_jpl(graph)
+            except (ImportError, Exception):
+                pass
+
+        if "usgs_planetary_api" in enrich_sources:
+            try:
+                from discovery.usgs_planetary_api import enrich_entities as enrich_usgs_p
+                total_enriched += enrich_usgs_p(graph)
+            except (ImportError, Exception):
+                pass
 
         if "semantic_scholar" in enrich_sources:
             from discovery.semantic_scholar import enrich_entities as enrich_s2
             enriched = enrich_s2(graph)
             total_enriched += enriched
 
-        if "materials_project" in enrich_sources:
-            from discovery.materials_project import enrich_entities as enrich_mp
-            enriched = enrich_mp(graph)
-            total_enriched += enriched
 
         if "nasa_power" in enrich_sources:
             from discovery.nasa_power import enrich_entities as enrich_power
@@ -4805,50 +4757,12 @@ Output ONLY valid JSON as a list of objects with this structure:
             enriched = enrich_arxiv(graph, query=domain_cfg.get("label", ""))
             total_enriched += enriched
 
-        if "gbif" in enrich_sources:
-            from discovery.gbif_api import enrich_entities as enrich_gbif
-            enriched = enrich_gbif(graph)
-            total_enriched += enriched
-
-        if "github" in enrich_sources:
-            from discovery.github_api import enrich_entities as enrich_github
-            enriched = enrich_github(graph)
-            total_enriched += enriched
-
-        if "usgs" in enrich_sources:
-            from discovery.usgs_api import enrich_entities as enrich_usgs
-            enriched = enrich_usgs(graph)
-            total_enriched += enriched
 
         if "noaa" in enrich_sources:
             from discovery.noaa_api import enrich_entities as enrich_noaa
             enriched = enrich_noaa(graph)
             total_enriched += enriched
 
-        if "world_bank" in enrich_sources:
-            from discovery.world_bank_api import enrich_entities as enrich_wb
-            enriched = enrich_wb(graph)
-            total_enriched += enriched
-
-        if "who" in enrich_sources:
-            from discovery.who_api import enrich_entities as enrich_who
-            enriched = enrich_who(graph)
-            total_enriched += enriched
-
-        if "oeis" in enrich_sources:
-            from discovery.oeis_api import enrich_entities as enrich_oeis
-            enriched = enrich_oeis(graph)
-            total_enriched += enriched
-
-        if "openalex" in enrich_sources:
-            from discovery.openalex_api import enrich_entities as enrich_openalex
-            enriched = enrich_openalex(graph)
-            total_enriched += enriched
-
-        if "cir" in enrich_sources:
-            from discovery.cir_api import enrich_entities as enrich_cir
-            enriched = enrich_cir(graph)
-            total_enriched += enriched
 
         graph.save()
         self._post_output(f"Enriched {total_enriched} entities with {', '.join(e.capitalize() for e in enrich_sources)} data.")
@@ -4927,13 +4841,12 @@ Output ONLY valid JSON as a list of objects with this structure:
             lines.append("")
         return "\n".join(lines)
 
-    async def _generate(self, target: str, domain: str = "drug_discovery"):
-        """Generate domain-specific output for any domain."""
+    async def _generate(self, target: str, domain: str = "space_astronomy"):
+        """Generate space research proposals for any domain."""
         domain_cfg = get_domain(domain)
         if not domain_cfg:
             domain_cfg = get_domain("general")
         label = domain_cfg["label"]
-        gen_type = domain_cfg.get("generation", "hypothesis")
         from discovery.groq_client import call as groq_call
 
         def _save_output(data: list, folder: str, filename: str = "active.json"):
@@ -4941,199 +4854,36 @@ Output ONLY valid JSON as a list of objects with this structure:
             out_dir.mkdir(parents=True, exist_ok=True)
             (out_dir / filename).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
-        if domain == "drug_discovery":
-            from discovery.graph import KnowledgeGraph
-            from discovery.molecule import generate_candidates, format_candidates
-            self._post_output(f"[bold cyan]Designing molecules for target: {target}...[/bold cyan]")
-            kg = KnowledgeGraph.load()
-            graph = kg if kg.entities else None
-            candidates = generate_candidates(target, graph)
-            if not candidates:
-                self._post_output("No valid molecules generated. Try a different target.")
-                return
-            _save_output(candidates, "molecules")
-            self._post_output(format_candidates(candidates))
-
-        elif domain == "materials_science":
-            self._post_output(f"[bold cyan]Designing novel materials for: {target}...[/bold cyan]")
-            prompt = f"""You are a computational materials scientist. Design 5 novel materials or compounds for: {target}
-
-For EACH candidate, provide:
-1. Name/composition (formula or systematic name)
-2. Predicted crystal structure type (if applicable)
-3. Key predicted properties (band gap, conductivity, strength, etc.)
-4. Synthesis approach
-5. Why it is novel compared to existing materials
-
-Output ONLY valid JSON as a list of objects with keys: name, composition, structure, properties, synthesis, novelty"""
-            result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
-            candidates = json.loads(result) if result else []
-            if not candidates:
-                self._post_output("No materials generated. Try a different target.")
-                return
-            _save_output(candidates, "materials")
-            for i, m in enumerate(candidates, 1):
-                self._post_output(f"\n  [bold]Candidate {i}: {m.get('name', '?')}[/bold]")
-                self._post_output(f"  Composition: {m.get('composition', '?')}")
-                self._post_output(f"  Structure: {m.get('structure', '?')}")
-                self._post_output(f"  Properties: {m.get('properties', '?')}")
-                self._post_output(f"  Synthesis: {m.get('synthesis', '?')}")
-                self._post_output(f"  Novelty: {m.get('novelty', '?')}")
-
-        elif domain == "neuroscience":
-            self._post_output(f"[bold cyan]Designing neuroscience experiments for: {target}...[/bold cyan]")
-            prompt = f"""You are a neuroscientist. Design 3 detailed experimental protocols to investigate: {target}
-
-For EACH experiment, provide:
-1. Title
-2. Hypothesis being tested
-3. Experimental design (techniques, controls, variables)
-4. Expected outcomes and interpretation
-5. Potential confounds and how to control them
-
-Output ONLY valid JSON as a list of objects with keys: title, hypothesis, design, outcomes, confounds"""
-            result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
-            experiments = json.loads(result) if result else []
-            if not experiments:
-                self._post_output("No experiments generated. Try a different target.")
-                return
-            _save_output(experiments, "experiments")
-            for i, exp in enumerate(experiments, 1):
-                self._post_output(f"\n  [bold]Experiment {i}: {exp.get('title', '?')}[/bold]")
-                self._post_output(f"  Hypothesis: {exp.get('hypothesis', '?')}")
-                self._post_output(f"  Design: {exp.get('design', '?')}")
-
-        elif domain == "molecular_biology":
-            self._post_output(f"[bold cyan]Designing gene circuit / protocol for: {target}...[/bold cyan]")
-            prompt = f"""You are a molecular biologist. Design 3 molecular biology strategies or gene circuit designs for: {target}
-
-For EACH design, provide:
-1. Title
-2. Biological components (genes, promoters, vectors, etc.)
-3. Design rationale
-4. Expected results
-5. Validation approach
-
-Output ONLY valid JSON as a list of objects with keys: title, components, rationale, results, validation"""
-            result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
-            designs = json.loads(result) if result else []
-            if not designs:
-                self._post_output("No designs generated. Try a different target.")
-                return
-            _save_output(designs, "designs")
-            for i, d in enumerate(designs, 1):
-                self._post_output(f"\n  [bold]Design {i}: {d.get('title', '?')}[/bold]")
-                self._post_output(f"  Components: {d.get('components', '?')}")
-                self._post_output(f"  Rationale: {d.get('rationale', '?')}")
-
-        elif domain == "space_astronomy":
-            self._post_output(f"[bold cyan]Generating space research proposals for: {target}...[/bold cyan]")
-            prompt = f"""You are an astrophysicist and space scientist. Generate 3 research proposals or mission concepts for: {target}
+        self._post_output(f"[bold cyan]Generating space research proposals for: {target}...[/bold cyan]")
+        prompt = f"""You are an expert space scientist specializing in {label}. Generate 5 novel, testable research proposals or mission concepts for: {target}
 
 For EACH proposal, provide:
-1. Title
-2. Research objective
-3. Methodology (observational, theoretical, or mission-based)
-4. Expected discoveries or outcomes
-5. Data sources or instruments needed
+1. Title (descriptive and professional)
+2. Objective (specific research goal)
+3. Methodology (observational approach, physical modeling, or mission design)
+4. Expected discoveries (what this could reveal about the universe)
+5. Validation (which instruments like JWST, Gaia, or ISRO satellites would test this)
 
-Output ONLY valid JSON as a list of objects with keys: title, objective, methodology, outcomes, data_sources"""
-            result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
-            proposals = json.loads(result) if result else []
-            if not proposals:
-                self._post_output("No proposals generated. Try a different target.")
-                return
-            _save_output(proposals, "proposals")
-            for i, p in enumerate(proposals, 1):
-                self._post_output(f"\n  [bold]Proposal {i}: {p.get('title', '?')}[/bold]")
-                self._post_output(f"  Objective: {p.get('objective', '?')}")
-                self._post_output(f"  Methodology: {p.get('methodology', '?')}")
+Output ONLY valid JSON as a list of objects with keys: title, objective, methodology, outcomes, validation"""
 
-        elif domain == "ecology":
-            self._post_output(f"[bold cyan]Generating ecology/conservation proposals for: {target}...[/bold cyan]")
-            prompt = f"""You are an ecologist and conservation biologist. Generate 3 research proposals or conservation strategies for: {target}
-
-For EACH proposal, provide:
-1. Title
-2. Ecological question or conservation goal
-3. Methodology (field study, genomic analysis, modeling, etc.)
-4. Expected outcomes
-5. Conservation implications
-
-Output ONLY valid JSON as a list of objects with keys: title, question, methodology, outcomes, conservation_impact"""
-            result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
-            proposals = json.loads(result) if result else []
-            if not proposals:
-                self._post_output("No proposals generated. Try a different target.")
-                return
-            _save_output(proposals, "proposals")
-            for i, p in enumerate(proposals, 1):
-                self._post_output(f"\n  [bold]Proposal {i}: {p.get('title', '?')}[/bold]")
-                self._post_output(f"  Question: {p.get('question', '?')}")
-                self._post_output(f"  Methodology: {p.get('methodology', '?')}")
-
-        elif domain == "physics":
-            self._post_output(f"[bold cyan]Generating physics research proposals for: {target}...[/bold cyan]")
-            prompt = f"""You are a theoretical or experimental physicist. Generate 3 research proposals for: {target}
-
-For EACH proposal, provide:
-1. Title
-2. Physical question or problem
-3. Theoretical framework or experimental design
-4. Predicted outcomes or testable predictions
-5. Required resources or apparatus
-
-Output ONLY valid JSON as a list of objects with keys: title, question, framework, predictions, resources"""
-            result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
-            proposals = json.loads(result) if result else []
-            if not proposals:
-                self._post_output("No proposals generated. Try a different target.")
-                return
-            _save_output(proposals, "proposals")
-            for i, p in enumerate(proposals, 1):
-                self._post_output(f"\n  [bold]Proposal {i}: {p.get('title', '?')}[/bold]")
-                self._post_output(f"  Question: {p.get('question', '?')}")
-                self._post_output(f"  Framework: {p.get('framework', '?')}")
-
-        elif domain == "climate_energy":
-            self._post_output(f"[bold cyan]Generating climate/energy proposals for: {target}...[/bold cyan]")
-            prompt = f"""You are a climate scientist and policy analyst. Generate 3 actionable proposals for: {target}
-
-For EACH proposal, provide:
-1. Title
-2. Problem statement
-3. Proposed solution (policy, technology, or both)
-4. Expected impact (quantified where possible)
-5. Implementation roadmap
-
-Output ONLY valid JSON as a list of objects with keys: title, problem, solution, impact, roadmap"""
-            result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
-            proposals = json.loads(result) if result else []
-            if not proposals:
-                self._post_output("No proposals generated. Try a different target.")
-                return
-            _save_output(proposals, "proposals")
-            for i, p in enumerate(proposals, 1):
-                self._post_output(f"\n  [bold]Proposal {i}: {p.get('title', '?')}[/bold]")
-                self._post_output(f"  Problem: {p.get('problem', '?')}")
-                self._post_output(f"  Solution: {p.get('solution', '?')}")
-
-        else:
-            # general science
-            self._post_output(f"[bold cyan]Generating research proposals for: {target}...[/bold cyan]")
-            prompt = f"""You are a research scientist. Generate 3 research proposals for investigating: {target}
-
-For EACH proposal, provide:
-1. Title
-2. Research question
-3. Methodology
-4. Expected outcomes
-5. Required resources
-
-Output ONLY valid JSON as a list of objects with keys: title, question, methodology, outcomes, resources"""
-            result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
-            proposals = json.loads(result) if result else []
-            if not proposals:
+        result = groq_call(prompt, json_mode=True, temperature=0.7, max_tokens=4096)
+        if result:
+            try:
+                from discovery.json_extract import extract_json
+                data = extract_json(result, expected_key="proposals") or json.loads(result)
+                proposals = data if isinstance(data, list) else data.get("proposals", [])
+                if not proposals:
+                    self._post_output("No proposals generated. Try a different target.")
+                    return
+                _save_output(proposals, "proposals")
+                for i, p in enumerate(proposals, 1):
+                    self._post_output(f"\n  [bold cyan]Proposal {i}: {p.get('title', '?')}[/bold cyan]")
+                    self._post_output(f"  [bold]Objective:[/bold] {p.get('objective', '?')}")
+                    self._post_output(f"  [bold]Methodology:[/bold] {p.get('methodology', '?')}")
+                    self._post_output(f"  [bold]Outcomes:[/bold] {p.get('outcomes', '?')}")
+                    self._post_output(f"  [bold]Validation:[/bold] {p.get('validation', '?')}")
+            except Exception:
+                self._post_output("Failed to parse research proposal results.")
                 self._post_output("No proposals generated. Try a different target.")
                 return
             _save_output(proposals, "proposals")
@@ -5171,7 +4921,7 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
                     self._loop,
                 )
             except Exception as e:
-                print(f"[RUMI] speak() failed: {e}", flush=True)
+                print(f"[Luka] speak() failed: {e}", flush=True)
 
         threading.Thread(target=_send, daemon=True).start()
 
@@ -5195,8 +4945,8 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
 
         parts = [sys_prompt, time_ctx, voice_guidance]
 
-        # Inject active personality files (SOUL.md + RUMI.md) so persona takes effect
-        for _pf in [BASE_DIR / "SOUL.md", BASE_DIR / "RUMI.md"]:
+        # Inject active personality files (SOUL.md + Luka.md) so persona takes effect
+        for _pf in [BASE_DIR / "SOUL.md", BASE_DIR / "Luka.md"]:
             try:
                 if _pf.exists():
                     parts.append(f"\n=== {_pf.name} ===\n{_pf.read_text(encoding='utf-8').strip()}")
@@ -5354,14 +5104,14 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
 
         # ── Interrupt check: if user pressed ESC, skip tool ──
         if self.ui.interrupt_requested():
-            print(f"[RUMI] {name} cancelled by user interrupt", flush=True)
+            print(f"[Luka] {name} cancelled by user interrupt", flush=True)
             self.ui.clear_interrupt()
             self.ui.set_state("LISTENING")
             return types.FunctionResponse(
                 id=fc.id, name=name,
                 response={"result": "[CANCELLED] Tool execution interrupted by user."})
 
-        print(f"[RUMI] {name} {redact_params(args)}", flush=True)
+        print(f"[Luka] {name} {redact_params(args)}", flush=True)
         self.ui.set_state("THINKING")
 
         # Publish TOOL_CALL to Global Workspace
@@ -8327,20 +8077,20 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
                 resp = await self._execute_tool(fcs[0])
                 fn_responses = [resp]
             except Exception as e:
-                print(f"[RUMI] {fcs[0].name} error: {e}", flush=True)
+                print(f"[Luka] {fcs[0].name} error: {e}", flush=True)
                 fn_responses = [types.FunctionResponse(
                     id=fcs[0].id, name=fcs[0].name,
                     response={"result": f"Tool crashed: {e}"})]
         else:
             # Multiple tools — run ALL in parallel via asyncio.gather
-            print(f"[RUMI] Parallel dispatch: {len(fcs)} tools — "
+            print(f"[Luka] Parallel dispatch: {len(fcs)} tools — "
                   f"{', '.join(fc.name for fc in fcs)}", flush=True)
 
             async def _safe_exec(fc):
                 try:
                     return await self._execute_tool(fc)
                 except Exception as e:
-                    print(f"[RUMI] {fc.name} error: {e}", flush=True)
+                    print(f"[Luka] {fc.name} error: {e}", flush=True)
                     return types.FunctionResponse(
                         id=fc.id, name=fc.name,
                         response={"result": f"Tool crashed: {e}"})
@@ -8355,7 +8105,7 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
                 if isinstance(resp, types.FunctionResponse):
                     r = resp.response.get("result", "") if resp.response else ""
                     if "[TOOL_ERROR]" in r:
-                        print(f"[RUMI] {fc.name} returned error", flush=True)
+                        print(f"[Luka] {fc.name} returned error", flush=True)
 
         if self._session_dead or not self.session:
             self.ui.set_state("LISTENING")
@@ -8369,11 +8119,11 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
         except Exception as e:
             err_str = str(e).lower()
             if "1008" in err_str:
-                print(f"[RUMI] 1008 on tool response — session may recover", flush=True)
+                print(f"[Luka] 1008 on tool response — session may recover", flush=True)
             elif _is_ws_dead_error(err_str):
                 self._session_dead = True
             else:
-                print(f"[RUMI] Tool response error: {e}", flush=True)
+                print(f"[Luka] Tool response error: {e}", flush=True)
             self.ui.set_state("LISTENING")
             # v10.6 FIX-19: Check shutdown flag even when response send fails
             if self._schedule_shutdown:
@@ -8402,7 +8152,7 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
                 time.sleep(2)
                 try:
                     if hasattr(self.telegram, 'send_response'):
-                        self.telegram.send_response("RUMI shutting down.")
+                        self.telegram.send_response("Luka shutting down.")
                 except Exception:
                     pass
                 try:
@@ -8526,7 +8276,7 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
             except Exception as e:
                 if self._session_dead or self.session is None:
                     raise _SessionDead("listen_audio: session ended")
-                print(f"[RUMI] Mic stream error: {e} — retrying in 2s", flush=True)
+                print(f"[Luka] Mic stream error: {e} — retrying in 2s", flush=True)
                 try:
                     self.speak("Sir, microphone stream interrupted. Reconnecting.")
                 except Exception:
@@ -8605,7 +8355,7 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
                                 # Send to telegram if needed
                                 full_out = " ".join(out_buf).strip()
                                 if full_out:
-                                    # Route response through write_log for [RUMI] label + Rich formatting
+                                    # Route response through write_log for [Luka] label + Rich formatting
                                     self.ui.write_log(f"Rumi: {full_out}")
                                     try:
                                         if hasattr(self.telegram, 'send_response'):
@@ -8870,7 +8620,7 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
                     pass
 
                 self.ui.set_state("LISTENING")
-                self.ui.write_log("SYS: RUMI online.")
+                self.ui.write_log("SYS: Luka online.")
 
                 try:
                     self._audit.log(
@@ -8882,7 +8632,7 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
 
                 # v10.6 — idle exploration task
                 async def _idle_exploration():
-                    """Check periodically if RUMI should explore during idle."""
+                    """Check periodically if Luka should explore during idle."""
                     while self.session and not self._session_dead:
                         await asyncio.sleep(300)
                         try:
@@ -9107,7 +8857,7 @@ Output ONLY valid JSON as a list of objects with keys: title, question, methodol
                 rumi_instance = RumiLive(ui)
                 asyncio.run(rumi_instance.run())
                 # v10.6 FIX-20: Log when run() exits normally (fatal error)
-                ui.write_log("SYS: RUMI session ended. Check API key and restart.")
+                ui.write_log("SYS: Luka session ended. Check API key and restart.")
             except Exception as e:
                 traceback.print_exc()
                 try:
