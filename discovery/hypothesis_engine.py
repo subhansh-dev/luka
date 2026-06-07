@@ -109,7 +109,7 @@ class HypothesisEngine:
             capped = sorted(latent_candidates, key=lambda x: x.get("shared_papers", 0), reverse=True)[:15]
             latent_text = "\n=== LATENT RELATIONSHIP CANDIDATES (top 15) ===\n" + json.dumps(capped, indent=2, default=str)[:3000]
 
-        prompt = f"""You are a rigorous, skeptical AI research scientist in {domain_label}. You NEVER overclaim novelty, NEVER present speculation as fact, and ALWAYS consider contradictory evidence.
+        prompt = f"""You are a rigorous, skeptical AI astrophysicist and space research scientist specialized in {domain_label}. You NEVER overclaim novelty, NEVER present speculation as fact, and ALWAYS consider contradictory evidence.
 
 Topic: {topic}
 Domain: {domain_label}
@@ -124,31 +124,29 @@ Entity types: {entity_types}
 Generate 2-4 hypotheses. For EACH hypothesis you MUST produce ALL 12 fields below.
 
 SCIENTIFIC HUMILITY RULES:
-- NEVER claim a hypothesis is "high" novelty unless you are certain it contradicts established literature
-- ALWAYS include contradictory evidence and alternative explanations
-- NEVER present speculative mechanisms as established fact
-- BE CONSERVATIVE with confidence estimates
-- PREFER "medium" or "low" novelty over "high"
+- NEVER claim a hypothesis is "high" novelty unless you are certain it contradicts established astronomical literature or physical laws.
+- ALWAYS include contradictory evidence (e.g., non-detections, conflicting spectra) and alternative explanations (e.g., instrumental noise, stellar activity).
+- NEVER present speculative mechanisms as established fact.
+- BE CONSERVATIVE with confidence estimates.
 
-MECHANISTIC REASONING REQUIREMENTS:
+SPACE SCIENCE REASONING REQUIREMENTS:
 You MUST reason about:
-- WHY each relationship exists (causal mechanism, not just correlation)
-- HOW environmental conditions modulate the mechanism
-- WHEN the mechanism breaks down or reverses
-- WHICH variables dominate the system behavior
+- PHYSICAL MECHANISMS: Causal drivers (e.g., tidal heating, magnetospheric interaction, radiative transfer).
+- OBSERVATIONAL CONSTRAINTS: How do SNR, spectral resolution, or temporal sampling limit the finding?
+- SCALABILITY: Does the mechanism hold for different stellar types, orbital distances, or mass regimes?
+- THERMODYNAMIC CONSISTENCY: Does it obey the laws of thermodynamics and orbital mechanics?
 
-CROSS-PAPER SYNTHESIS:
-Combine evidence from MULTIPLE papers in the graph. Look for:
-- Entities that co-occur across papers but have no direct relationship edge
-- Chains: A→B in paper 1, B→C in paper 2 → hypothesize A→C
-- Contradictory findings that suggest unexplored boundary conditions
-- Environmental or contextual variables that might resolve contradictions
+CROSS-DATASET SYNTHESIS:
+Combine evidence from MULTIPLE sources (e.g., Gaia astrometry + TESS photometry + HARPS-N RVs). Look for:
+- Entities that co-occur but have no direct link.
+- Chains: Detection method A suggests X, Method B suggests Y -> hypothesize X-Y link.
+- Multi-wavelength discrepancies that suggest unexplored physics (e.g., UV vs IR).
 
 BAD (shallow):
-"X may be associated with Y in condition Z."
+"Exoplanet X might have water in its atmosphere."
 
 GOOD (mechanistic):
-"X phosphorylates Y at residue S473 via PI3K-AKT pathway activation, but only under hypoxic conditions (<5% O2) where HIF-1alpha stabilizes the X-Y complex — this suggests an unexplored O2-dependent regulatory checkpoint."
+"Exoplanet X exhibits a 1.4 micron absorption feature in Hubble/WFC3 spectra, but its high equilibrium temperature (>1500K) suggests water should be dissociated. We hypothesize that a high-altitude haze layer (composed of tholins) is masking the dissociation products, or that night-side cold-trapping is sequestering volatiles, implying a non-equilibrium chemical state."
 
 === OUTPUT FIELDS (produce ALL 12) ===
 

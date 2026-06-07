@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-planner.py — RUMI Autonomous Task Planner
+planner.py — Luka Autonomous Task Planner
 Breaks user goals into step-by-step plans using Gemini.
 Handles initial planning, replanning after failures, and fallback strategies.
 """
@@ -25,7 +25,7 @@ API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 _api_key_cache: Optional[str] = None
 
 
-PLANNER_PROMPT = """You are the planning module of RUMI, a personal AI assistant.
+PLANNER_PROMPT = """You are the planning module of Luka, an autonomous space discovery engine.
 Your job: break any user goal into a sequence of steps using ONLY the tools listed below.
 
 ABSOLUTE RULES:

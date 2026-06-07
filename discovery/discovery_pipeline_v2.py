@@ -1,5 +1,5 @@
 """
-discovery_pipeline_v2.py — RUMI's Genuine Scientific Discovery Pipeline.
+discovery_pipeline_v2.py — Luka's Genuine Scientific Discovery Pipeline.
 
 The difference from run_full_pipeline.py:
   Old: Papers → Entity Extraction → Knowledge Graph → Hypothesis → Skeptic
@@ -69,32 +69,18 @@ from discovery.resilient_llm import ResilientLLM
 from discovery.hypothesis_memory import HypothesisMemory
 
 
-# Domain detection (reused from run_full_pipeline.py)
+# Domain detection (Luka — Space Focused)
 DOMAIN_KEYWORDS = {
     "space_astronomy": ["phosphine", "venus", "exoplanet", "mars", "jupiter", "black hole",
                         "neutron star", "pulsar", "galaxy", "telescope", "nasa", "jwst",
                         "spectral", "atmosphere", "biosignature", "cosmolog", "megastructure",
-                        "dyson", "technosignature", "stellar", "dimming", "cme"],
-    "neuroscience": ["neuron", "brain", "neurotransmitter", "dopamine", "serotonin",
-                     "synaptic", "cortex", "hippocampus", "consciousness", "fmri"],
-    "drug_discovery": ["drug", "inhibitor", "kinase", "antibiotic", "cancer", "pharma",
-                       "therapeutic", "binding affinity", "clinical trial", "ic50", "ec50"],
-    "materials_science": ["perovskite", "battery", "catalyst", "bandgap", "nanomaterial",
-                          "graphene", "2d material", "solar cell", "semiconductor", "alloy"],
+                        "dyson", "technosignature", "stellar", "dimming", "cme", "astrophysics"],
+    "isro_earth_observation": ["isro", "mosdac", "bhuvan", "insat", "oceansat", "scatsat",
+                               "saphir", "monsoon", "cyclone", "bay of bengal", "indian ocean"],
+    "solar_system": ["planet", "asteroid", "comet", "moon", "crater", "magnetosphere",
+                     "heliosphere", "solar wind", "kuiper belt", "oort cloud"],
     "climate_energy": ["climate", "carbon", "emission", "renewable", "solar", "wind",
-                       "greenhouse", "warming", "co2", "temperature"],
-    "ecology": ["species", "biodiversity", "ecosystem", "conservation", "habitat",
-                "extinction", "population", "invasion", "endangered"],
-    "physics": ["quantum", "particle", "higgs", "gravity", "wave", "boson",
-                "fermion", "relativity", "dark matter", "entanglement"],
-    "computer_science": ["neural network", "llm", "transformer", "algorithm", "machine learning",
-                         "deep learning", "dataset", "benchmark", "architecture"],
-    "public_health": ["vaccine", "pandemic", "epidemic", "disease", "mortality",
-                      "prevalence", "intervention", "clinical", "public health"],
-    "chemistry": ["reaction", "synthesis", "catalysis", "compound", "organic",
-                  "inorganic", "analytical", "spectroscopy", "electrochemistry"],
-    "mathematics": ["theorem", "proof", "conjecture", "prime", "topology",
-                    "optimization", "sequence", "algebra", "geometry"],
+                       "greenhouse", "warming", "co2", "temperature", "insolation"],
 }
 
 
@@ -123,55 +109,20 @@ Papers:
 Output JSON with exactly this structure:
 {{
   "entities": [
-    {{"name": "entity name", "type": "gene|protein|disease|drug|chemical|organism|phenomenon|technology|method|concept", "aliases": []}}
+    {{"name": "entity name", "type": "celestial_body|mission|telescope|exoplanet|phenomenon|star|galaxy|nebula|asteroid|comet|spacecraft|instrument|orbit|concept", "aliases": []}}
   ],
   "relationships": [
-    {{"source": "entity1", "source_type": "type", "relation": "activates|inhibits|causes|treats|enables|uses|produces|detects|measures|correlates_with|associated_with", "target": "entity2", "target_type": "type", "confidence": 0.7}}
+    {{"source": "entity1", "source_type": "type", "relation": "activates|inhibits|causes|treats|enables|uses|produces|detects|measures|correlates_with|associated_with|orbiting|part_of", "target": "entity2", "target_type": "type", "confidence": 0.7}}
   ]
 }}
 
 Extract 10-25 entities and 10-30 relationships. Be specific, not generic."""
 
     try:
-        result = call_json(prompt, max_tokens=4096)
-        # Fallback to Gemini if Groq fails
-        if not result:
-            print("    [DEBUG] Groq returned None, trying Gemini...")
-            try:
-                result = call_json(prompt, max_tokens=4096, provider="gemini")
-            except Exception as e:
-                print(f"    [DEBUG] Gemini failed: {e}")
-        if result:
-            print(f"    [DEBUG] Got result type={type(result)}, len={len(str(result))}")
-        else:
-            print("    [DEBUG] Both providers returned None")
-        if result:
-            if isinstance(result, str):
-                text = result.strip()
-                if text.startswith("```"):
-                    text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-                    text = text.rsplit("```", 1)[0].strip()
-                # Robust JSON parsing
-                try:
-                    result = json.loads(text)
-                except json.JSONDecodeError:
-                    # Try to fix common issues
-                    import re
-                    # Try extracting just the JSON object
-                    json_match = re.search(r'\{[\s\S]*\}', text)
-                    if json_match:
-                        try:
-                            result = json.loads(json_match.group())
-                        except json.JSONDecodeError:
-                            # Try fixing trailing commas
-                            fixed = re.sub(r',\s*}', '}', json_match.group())
-                            fixed = re.sub(r',\s*]', ']', fixed)
-                            try:
-                                result = json.loads(fixed)
-                            except json.JSONDecodeError:
-                                result = None
-                    else:
-                        result = None
+        from discovery.json_extract import extract_json
+        raw = llm_call(prompt, max_tokens=4096, provider="auto")
+        if raw:
+            result = extract_json(raw, expected_key="entities")
             if isinstance(result, dict):
                 return result
     except Exception as e:
@@ -257,6 +208,55 @@ def build_knowledge_graph(papers: list, domain: str) -> KnowledgeGraph:
     return graph
 
 
+def enrich_knowledge_graph(graph, domain: str):
+    """Enrich knowledge graph with external APIs (Luka Space APIs)."""
+    from discovery.domains import get_domain
+    domain_cfg = get_domain(domain)
+    if not domain_cfg:
+        return 0
+
+    enrich_sources = domain_cfg.get("enrichment", [])
+    if not enrich_sources:
+        return 0
+
+    print(f"    Enriching with: {', '.join(enrich_sources)}")
+    total_enriched = 0
+
+    # API Map
+    api_map = {
+        "nasa_api": ("discovery.nasa_api", "enrich_entities"),
+        "isro_api": ("discovery.isro_api", "enrich_entities"),
+        "arxiv": ("discovery.arxiv_api", "enrich_entities"),
+        "nasa_power": ("discovery.nasa_power", "enrich_entities"),
+        "semantic_scholar": ("discovery.semantic_scholar", "enrich_entities"),
+        "simbad_api": ("discovery.simbad_api", "enrich_entities"),
+        "vizier_api": ("discovery.vizier_api", "enrich_entities"),
+        "iau_api": ("discovery.iau_api", "enrich_entities"),
+        "esa_sky_api": ("discovery.esa_sky_api", "enrich_entities"),
+        "jpl_horizons_api": ("discovery.jpl_horizons_api", "enrich_entities"),
+        "noaa_api": ("discovery.noaa_api", "enrich_entities"),
+        "usgs_planetary_api": ("discovery.usgs_planetary_api", "enrich_entities"),
+    }
+
+    for source in enrich_sources:
+        if source in api_map:
+            module_path, func_name = api_map[source]
+            try:
+                import importlib
+                module = importlib.import_module(module_path)
+                func = getattr(module, func_name)
+                if source == "arxiv":
+                    count = func(graph, query=domain_cfg.get("label", ""))
+                else:
+                    count = func(graph)
+                total_enriched += count
+                print(f"      + {source}: {count} enriched")
+            except (ImportError, AttributeError, Exception):
+                pass
+
+    return total_enriched
+
+
 def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> dict:
     """
     Run the complete discovery pipeline.
@@ -276,7 +276,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     t_start = time.time()
     provider_name = status.get("primary", "auto") if isinstance(status, dict) else "auto"
 
-    # Load discovery archive — what RUMI already knows from past runs
+    # Load discovery archive — what Luka already knows from past runs
     from discovery.discovery_archive import get_archive_context, save_to_archive
     archive_context = get_archive_context(topic, domain)
     if "No previous" not in archive_context:
@@ -341,7 +341,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     }
 
     print("=" * 70, flush=True)
-    print("  RUMI — DISCOVERY PIPELINE v2", flush=True)
+    print("  Luka — DISCOVERY PIPELINE v2", flush=True)
     print("=" * 70, flush=True)
     print(f"  Topic:     {topic}")
     print(f"  Domain:    {domain}")
@@ -352,7 +352,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 1: LITERATURE
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 1/12] LITERATURE — Fetching papers from 4 sources (3 rounds)...", flush=True)
+    print("\n[Phase 1/16] LITERATURE — Fetching papers from 4 sources (3 rounds)...", flush=True)
     try:
         # Round 1: Full topic query across all 4 sources
         papers = fetch_papers(topic, max_arxiv=20, max_pubmed=20, max_s2=20, max_crossref=20)
@@ -418,7 +418,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # PHASE 1.5: CITATION NETWORK TRAVERSAL — 2-hop walk
     # ══════════════════════════════════════════════════════════════
     if papers:
-        print("\n[Phase 1.5/12] CITATION NETWORK — 2-hop citation walk...", flush=True)
+        print("\n[Phase 1.5/16] CITATION NETWORK — 2-hop citation walk...", flush=True)
         try:
             from discovery.citation_grounding import traverse_citation_network
             papers = traverse_citation_network(papers, hop_depth=2, top_n=5, refs_per_paper=10)
@@ -434,7 +434,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 2: KNOWLEDGE GRAPH
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 2/12] KNOWLEDGE GRAPH — Building...", flush=True)
+    print("\n[Phase 2/16] KNOWLEDGE GRAPH — Building...", flush=True)
     try:
         graph = build_knowledge_graph(papers, domain)
         report["phases"]["knowledge_graph"] = {
@@ -448,9 +448,21 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
         graph = KnowledgeGraph(persist=False)
 
     # ══════════════════════════════════════════════════════════════
+    # PHASE 2.5: ENRICHMENT
+    # ══════════════════════════════════════════════════════════════
+    print("\n[Phase 2.5/16] ENRICHMENT — Calling external APIs...", flush=True)
+    try:
+        enriched_count = enrich_knowledge_graph(graph, domain)
+        report["phases"]["enrichment"] = {
+            "enriched_entities": enriched_count
+        }
+    except Exception as e:
+        print(f"  [WARN] Enrichment failed: {e}")
+
+    # ══════════════════════════════════════════════════════════════
     # PHASE 3: GAP DETECTION
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 3/12] GAP DETECTION — Finding what's missing...", flush=True)
+    print("\n[Phase 3/16] GAP DETECTION — Finding what's missing...", flush=True)
     try:
         # Use algorithmic gap detection (fast, reliable, no LLM needed)
         gap_detector = KnowledgeGapDetector(graph=graph, llm_call=None)
@@ -475,7 +487,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # Adaptive literature search: analyze what was found, generate
     # targeted queries for gaps, fetch again. Multi-round approach.
     if gaps and len(papers) < 50:
-        print("\n[Phase 3.5/12] LITERATURE REFINEMENT — Targeted search based on gaps...", flush=True)
+        print("\n[Phase 3.5/16] LITERATURE REFINEMENT — Targeted search based on gaps...", flush=True)
         try:
             # Generate targeted queries from gaps
             gap_queries = set()
@@ -541,7 +553,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 4: ANOMALY DETECTION
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 4/12] ANOMALY DETECTION — Finding what doesn't fit...", flush=True)
+    print("\n[Phase 4/16] ANOMALY DETECTION — Finding what doesn't fit...", flush=True)
     try:
         # Use algorithmic anomaly detection (fast, reliable)
         anomaly_detector = AnomalyDetector(graph=graph, llm_call=None)
@@ -560,7 +572,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 5: MISSING VARIABLES
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 5/12] MISSING VARIABLES — Proposing hidden factors...", flush=True)
+    print("\n[Phase 5/16] MISSING VARIABLES — Proposing hidden factors...", flush=True)
 
     # Phase-specific LLM routing — spread work across ALL providers
     # Each provider has internal fallback: Cerebras → Groq → Gemini
@@ -577,6 +589,8 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
         "critical_evaluation": "cerebras",   # Phase 8.6: formal assessment — Cerebras 120B
         "skeptic_review": "gemini",     # Phase 11: adversarial review — Gemini (creative)
         "scoring": "groq",              # Phase 12: mostly algorithmic — Groq fast
+        "self_improvement": "gemini",   # Phase 15: reflective analysis
+        "gap_discovery": "cerebras",    # Phase 16: creative gap detection
     }
     _current_phase = {"name": "missing_variables"}  # mutable for closure
 
@@ -675,7 +689,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 6: MECHANISM GENERATION
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 6/12] MECHANISM GENERATION — Building causal pathways...", flush=True)
+    print("\n[Phase 6/16] MECHANISM GENERATION — Building causal pathways...", flush=True)
     _current_phase["name"] = "mechanism_generation"
     try:
         mech_generator = MechanismGenerator(graph=graph, llm_call=_truncated_llm)
@@ -731,7 +745,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 7: PREDICTION ENGINE
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 7/12] PREDICTION ENGINE — Generating testable predictions...", flush=True)
+    print("\n[Phase 7/16] PREDICTION ENGINE — Generating testable predictions...", flush=True)
     _current_phase["name"] = "prediction_engine"
     try:
         # Defensive: convert all mechanism/HV values to strings to prevent float+str errors
@@ -787,7 +801,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 8: THEORY COMPETITION
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 8/12] THEORY COMPETITION — Comparing explanations...", flush=True)
+    print("\n[Phase 8/16] THEORY COMPETITION — Comparing explanations...", flush=True)
     _current_phase["name"] = "theory_competition"
     try:
         competition = TheoryCompetition(graph=graph, llm_call=_truncated_llm)
@@ -850,7 +864,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 8.5: ADVERSARIAL TEST — Attack every discovery
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 8.5/12] ADVERSARIAL TEST — Attacking every discovery...", flush=True)
+    print("\n[Phase 8.5/16] ADVERSARIAL TEST — Attacking every discovery...", flush=True)
     _current_phase["name"] = "adversarial_test"
     try:
         from discovery.test_stage import AdversarialTest
@@ -894,7 +908,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # Evaluates the top discovery across 6 dimensions:
     # novelty, methodology, significance, clarity, limitations, reproducibility.
-    print("\n[Phase 8.6/12] CRITICAL EVALUATION — Formal assessment...", flush=True)
+    print("\n[Phase 8.6/16] CRITICAL EVALUATION — Formal assessment...", flush=True)
     _current_phase["name"] = "critical_evaluation"
     try:
         from discovery.peer_review import CriticalEvaluator
@@ -920,7 +934,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 9: COMPUTATIONAL VERIFICATION
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 9/12] COMPUTATIONAL VERIFICATION — Running computations...", flush=True)
+    print("\n[Phase 9/16] COMPUTATIONAL VERIFICATION — Running computations...", flush=True)
     try:
         verifier = ComputationalVerifier(graph=graph)
         top_theory = winner or (theories[0] if theories else {})
@@ -939,7 +953,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 9.5: EXPERIMENTAL VALIDATION PLANNING
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 9.5/12] EXPERIMENTAL VALIDATION — Designing experiments...", flush=True)
+    print("\n[Phase 9.5/16] EXPERIMENTAL VALIDATION — Designing experiments...", flush=True)
     _current_phase["name"] = "critical_evaluation"  # use gemini for experiment design
     try:
         from discovery.experiment_planner import ExperimentPlanner
@@ -969,7 +983,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 9.7: DATA ANALYSIS — Fetch & analyze real datasets
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 9.7/12] DATA ANALYSIS — Fetching public datasets...", flush=True)
+    print("\n[Phase 9.7/16] DATA ANALYSIS — Fetching public datasets...", flush=True)
     try:
         from discovery.data_analysis import DataAnalyzer
         analyzer = DataAnalyzer()
@@ -1002,7 +1016,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 10: CONTRADICTION MINING
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 10/12] CONTRADICTION MINING...", flush=True)
+    print("\n[Phase 10/16] CONTRADICTION MINING...", flush=True)
     try:
         miner = ContradictionMiner(graph)
         contradiction_result = miner.mine()
@@ -1024,7 +1038,7 @@ def run_discovery_pipeline(topic: str, domain: str = "", mode: str = "full") -> 
     # ══════════════════════════════════════════════════════════════
     # PHASE 11: SKEPTIC REVIEW
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 11/12] SKEPTIC REVIEW — Adversarial critique...", flush=True)
+    print("\n[Phase 11/16] SKEPTIC REVIEW — Adversarial critique...", flush=True)
     _current_phase["name"] = "skeptic_review"
     skeptic_result = {}
     try:
@@ -1094,7 +1108,7 @@ Output JSON: {{"critique": "...", "strengths": ["s1", "s2"], "weaknesses": ["w1"
     # ══════════════════════════════════════════════════════════════
     # PHASE 12: DISCOVERY SCORING
     # ══════════════════════════════════════════════════════════════
-    print("\n[Phase 12/12] DISCOVERY SCORING — Final quality gate...", flush=True)
+    print("\n[Phase 12/16] DISCOVERY SCORING — Final quality gate...", flush=True)
     try:
         scorer = DiscoveryScorer()
         top_theory = winner or (theories[0] if theories else {})
@@ -1212,6 +1226,34 @@ Output JSON: {{"critique": "...", "strengths": ["s1", "s2"], "weaknesses": ["w1"
         print(f"  Improvement score: {reflexion_result.get('improvement_score', 0):.0%}")
     except Exception as e:
         print(f"  [WARN] Reflexion skipped: {e}")
+
+    # ══════════════════════════════════════════════════════════════
+    # PHASE 15: SELF-IMPROVEMENT ANALYSIS
+    # ══════════════════════════════════════════════════════════════
+    print("\n[Phase 15/16] SELF-IMPROVEMENT ANALYSIS...", flush=True)
+    _current_phase["name"] = "self_improvement"
+    try:
+        from brain.self_modifier import get_self_modifier
+        sm = get_self_modifier()
+        analysis = sm.analyze_discovery_run(report)
+        report["phases"]["self_improvement"] = analysis
+        print(f"  Analysis complete. Performance score: {analysis.get('performance_score', 0):.2f}")
+    except Exception as e:
+        print(f"  [WARN] Self-improvement analysis failed: {e}")
+
+    # ══════════════════════════════════════════════════════════════
+    # PHASE 16: KNOWLEDGE GAP AUTO-DISCOVERY
+    # ══════════════════════════════════════════════════════════════
+    print("\n[Phase 16/16] KNOWLEDGE GAP AUTO-DISCOVERY...", flush=True)
+    _current_phase["name"] = "gap_discovery"
+    try:
+        kg_detector = KnowledgeGapDetector(graph=graph, llm_call=_truncated_llm)
+        future_gaps = kg_detector.identify_unanswered_questions(report)
+        report["phases"]["gap_discovery"] = {"next_questions": future_gaps}
+        if future_gaps:
+            print(f"  Identified {len(future_gaps)} priority research questions for next run.")
+    except Exception as e:
+        print(f"  [WARN] Gap auto-discovery failed: {e}")
 
     # ══════════════════════════════════════════════════════════════
     # FINALIZE

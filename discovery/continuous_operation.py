@@ -24,68 +24,35 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 
-# Research frontier — topics RUMI wants to explore
+# Research frontier — topics Luka wants to explore (Space Focused)
 RESEARCH_FRONTIER = {
-    "cosmology": [
+    "space_astronomy": [
         "Hubble tension resolution via early dark energy",
         "Dark energy equation of state w(z) deviation from -1",
-        "Neutrino mass ordering from CMB lensing",
-        "Primordial magnetic field generation mechanism",
-        "Cosmic lithium problem resolution",
-        "Dark matter self-interaction cross-section",
-        "CMB anomaly at ell<30 (hemispherical asymmetry)",
-        "Reionization optical depth tau tension",
-        "Sigma-8 tension between CMB and weak lensing",
-        "Baryon acoustic oscillation scale evolution",
+        "Exoplanet atmospheric biosignatures in M-dwarf systems",
+        "Primordial black hole abundance from microlensing",
+        "Fast Radio Burst (FRB) progenitor mechanisms",
+        "Gravitational wave background from cosmic strings",
+        "JWST observations of high-redshift galaxy formation",
+        "Dark matter self-interaction in galaxy clusters",
+        "Biosignature false positives in oxidizing atmospheres",
+        "Technosignature search strategies for K-type stars",
     ],
-    "particle_physics": [
-        "Muon g-2 anomaly explanation",
-        "Dark photon search strategy",
-        "Sterile neutrino mass range",
-        "Axion-like particle coupling bounds",
-        "Proton radius puzzle resolution",
-        "Neutron lifetime discrepancy",
-        "Fifth force from dark sector",
-        "Baryogenesis mechanism beyond leptogenesis",
+    "isro_earth_observation": [
+        "Monsoon onset prediction using INSAT-3DR data",
+        "Cyclone intensity estimation via ScatSat-1 wind retrieval",
+        "Ocean color anomalies in the Arabian Sea",
+        "LULC change detection in the Himalayan region",
+        "Sea surface salinity variability in the Bay of Bengal",
+        "Soil moisture impact on Indian crop yields",
     ],
-    "materials_science": [
-        "Room-temperature superconductor mechanism",
-        "Topological insulator surface state stability",
-        "Quantum spin liquid candidate materials",
-        "Moiré flat band superconductivity",
-        "2D material bandgap engineering",
-        "Phonon engineering for thermoelectrics",
-        "Defect engineering for quantum emitters",
-        "Amorphous solid thermal transport",
-    ],
-    "biology": [
-        "Origin of life: RNA world vs metabolism-first",
-        "Protein folding speed limit",
-        "Neural code: rate vs temporal",
-        "Epigenetic inheritance mechanism",
-        "Microbiome-brain axis signal pathway",
-        "Aging: program vs damage accumulation",
-        "Convergent evolution molecular basis",
-        "Horizontal gene transfer frequency",
-    ],
-    "climate": [
-        "Cloud feedback sign and magnitude",
-        "Carbon cycle feedback sensitivity",
-        "Tipping point interaction network",
-        "Aerosol indirect effect magnitude",
-        "Ocean heat uptake efficiency",
-        "Permafrost thaw rate under warming",
-        "Methane clathrate stability threshold",
-        "Ice sheet collapse timescale",
-    ],
-    "information_theory": [
-        "Quantum advantage boundary in computation",
-        "Thermodynamic cost of computation minimum",
-        "Consciousness: integrated information theory vs global workspace",
-        "Language model emergence mechanism",
-        "Scaling laws origin and limits",
-        "Hallucination mechanism in transformers",
-        "Mechanistic interpretability of circuits",
+    "solar_system": [
+        "Europa clipper mission planning for plume detection",
+        "Enceladus subsurface ocean hydrothermal activity",
+        "Mars methane seasonal variability mechanisms",
+        "Asteroid 16 Psyche metal-rich surface composition",
+        "Venus phosphine origin: abiotic vs biotic",
+        "Solar wind interaction with Lunar crustal remanence",
     ],
 }
 

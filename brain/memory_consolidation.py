@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-memory_consolidation.py — RUMI Memory Consolidation (Sleep-Like Processing)
+memory_consolidation.py — Luka Memory Consolidation (Sleep-Like Processing)
 =============================================================================
 
 Implements sleep-like memory consolidation that compresses episodic memories

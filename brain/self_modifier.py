@@ -921,6 +921,41 @@ class SelfModifier:
                 "latest_metrics": metrics_hist[-1] if metrics_hist else None,
             }
 
+    def analyze_discovery_run(self, report: dict) -> dict:
+        """Self-assessment of a discovery run performance."""
+        phases = report.get("phases", {})
+        score_data = phases.get("discovery_scoring", {})
+        score = score_data.get("discovery_score", 0)
+        grade = score_data.get("grade", "F")
+
+        # Analyze performance
+        strengths = score_data.get("strengths", [])
+        weaknesses = score_data.get("weaknesses", [])
+
+        # Performance metric
+        perf_score = score / 100.0
+
+        # Identify underperforming modules
+        underperforming = []
+        if len(phases.get("literature", {}).get("papers", [])) < 5:
+            underperforming.append("literature_fetch")
+        if phases.get("knowledge_graph", {}).get("entities", 0) < 10:
+            underperforming.append("entity_extraction")
+        if score < 50:
+            underperforming.append("hypothesis_generation")
+
+        analysis = {
+            "performance_score": perf_score,
+            "grade": grade,
+            "underperforming_modules": underperforming,
+            "recommendations": []
+        }
+
+        if underperforming:
+            analysis["recommendations"].append(f"Tune parameters for: {', '.join(underperforming)}")
+
+        return analysis
+
 
 # ════════════════════════════════════════════════════════════════════════
 #  Singleton

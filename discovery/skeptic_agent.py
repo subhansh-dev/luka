@@ -49,7 +49,8 @@ Analyze rigorously:
 4. Confounders — what unaccounted variables could explain the observations?
 5. Methodological critique — how would you redesign the experiment to be more rigorous?
 6. Novelty assessment — is this genuinely underexplored, or does it rephrase known concepts?
-7. Top 3 weaknesses — the most damaging specific flaws
+7. Physics Consistency — Does this violate laws of thermodynamics, orbital mechanics, or known astrophysical constraints?
+8. Top 3 weaknesses — the most damaging specific flaws
 
 Output JSON:
 {{"critique": "detailed adversarial critique (2-3 paragraphs)", "logical_flaws": ["flaw1", "flaw2"], "evidence_ratings": [{{"claim": "specific claim", "rating": "strong|moderate|weak", "reason": "why"}}], "alternative_mechanisms": ["alt1", "alt2"], "confounders": ["confounder1"], "methodological_critique": "specific improvements", "novelty_assessment": "independent assessment", "weaknesses": ["top weakness 1", "top weakness 2", "top weakness 3"], "recommendation": "accept|revise|reject", "revised_confidence": 0.0-1.0}}"""
