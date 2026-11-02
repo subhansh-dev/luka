@@ -1,7 +1,17 @@
+"""NoveltyChecker — DEPRECATED.
+
+Superseded by discovery/novelty_detector.py::NoveltyDetector, which uses
+calibrated PubMed-literature-overlap scoring and is the live module
+(imported by main.py and discovery/hypothesis_tournament.py).
+
+This module survives only for backward compatibility with the (itself
+dormant) discovery_enhancer.py. Do not extend it; use NoveltyDetector.
+"""
+
 """
 novelty_checker.py — Is this hypothesis actually NEW, or already known?
 
-RUMI proposed "Early Dark Energy" — but that's a major research area
+Luka proposed "Early Dark Energy" — but that's a major research area
 with hundreds of papers. A real discovery engine must ask:
   "Has anyone proposed this exact mechanism before?"
 

@@ -1,41 +1,118 @@
 """
-run_discovery.py — Full RUMI Discovery Runner
+run_discovery.py — Full Luka Discovery Runner
 
-Matches the interactive RUMI terminal flow:
+Matches the interactive Luka terminal flow:
   1. Discovery Pipeline v2 (16 phases)
-  2. Refinement Pipeline (13 stages)  
+  2. Refinement Pipeline (13 stages)
   3. Reflexion (self-improvement)
 
 Usage:
     python run_discovery.py "your topic here"
     python run_discovery.py "your topic" --domain space_astronomy
     python run_discovery.py "your topic" --mode quick
+    python run_discovery.py --cause "Why X?" --domain physics --mode full
 """
 
 import sys
 import os
 import json
 import time
+import socket
 from pathlib import Path
+
+# Global network timeout — prevents DNS hangs
+socket.setdefaulttimeout(30)
+
+# Fix Unicode encoding on Windows
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
 def main():
+    from discovery.scoring_config import (
+        RECURSE_TEMPERATURES,
+        RECURSE_PREV_WEIGHT,
+        RECURSE_CURR_WEIGHT,
+        RECURSE_CONVERGENCE_DELTA,
+    )
     import argparse
-    parser = argparse.ArgumentParser(description="RUMI Full Discovery Runner")
-    parser.add_argument("topic", help="Research topic")
+    parser = argparse.ArgumentParser(description="Luka Full Discovery Runner")
+    parser.add_argument("topic", nargs="?", default="", help="Research topic")
+    parser.add_argument("--cause", default="", help="Simple observation/question (e.g. 'Why did the apple fall?')")
     parser.add_argument("--domain", default="", help="Domain override (e.g. space_astronomy, physics)")
     parser.add_argument("--mode", default="full", choices=["quick", "standard", "full"], help="Pipeline depth")
     parser.add_argument("--iterate", action="store_true", help="Run twice: first pass, analyze weaknesses, second pass with refined context")
+    parser.add_argument("--recurse", action="store_true", help="Recurrent mode: run Phases 6-8 three times with temperature decay (0.7 -> 0.4 -> 0.2)")
+    parser.add_argument("--v3", action="store_true", help="Use v3 brain-enhanced pipeline (causal + world model + theory formation)")
+    parser.add_argument("--brain", action="store_true", default=True, help="Enhance pipeline with brain cognitive modules (default: on)")
+    parser.add_argument("--no-brain", action="store_true", dest="no_brain", help="Disable brain module enhancement")
     args = parser.parse_args()
 
+    # Brain enhancement flags
+    use_brain = args.brain and not args.no_brain
+    use_v3 = args.v3
+
+    cause = args.cause
     topic = args.topic
     domain = args.domain
     mode = args.mode
 
+    # ── CAUSE MODE: Transform observation into research topic ──
+    cause_data = None
+    if cause:
+        print(f"{'='*70}")
+        print(f"Luka CAUSE MODE — The Newton Step")
+        print(f"{'='*70}")
+        print(f"  Observation: {cause}")
+        print()
+
+        try:
+            from discovery.curious_questioning import CuriousQuestioning
+            from discovery.llm_client import call_json as llm_call
+            cq = CuriousQuestioning(llm_call=llm_call)
+            cause_data = cq.run(cause, domain, papers=[])
+
+            core_question = cause_data.get("reframed", "")
+            hypothesis = cause_data.get("question_hypothesis", "")
+            questions = cause_data.get("questions", [])
+
+            print(f"  [Curious Engine] Questions generated: {len(questions)}")
+            if core_question:
+                print(f"  [Curious Engine] Core Question: {core_question[:100]}")
+            if hypothesis:
+                print(f"  [Curious Engine] Hypothesis: {hypothesis[:100]}")
+            print()
+
+            if core_question and len(core_question) > 20:
+                topic = core_question
+            elif hypothesis and len(hypothesis) > 20:
+                topic = hypothesis[:200]
+            else:
+                topic = cause
+
+            if not domain:
+                from discovery.discovery_pipeline_v2 import detect_domain
+                domain = detect_domain(topic)
+                print(f"  [Auto-Detect] Domain: {domain}")
+
+            print(f"  [Topic Generated] {topic[:100]}")
+            print()
+
+        except Exception as e:
+            print(f"  [WARN] Curious engine failed: {e}")
+            topic = cause
+
+    if not topic:
+        parser.error("Please provide a topic or --cause observation")
+
     print(f"{'='*70}")
-    print(f"RUMI DISCOVERY — {topic}")
+    print(f"Luka DISCOVERY — {topic}")
     print(f"Domain: {domain or 'auto-detect'} | Mode: {mode}")
     print(f"{'='*70}\n")
 
@@ -131,34 +208,227 @@ def main():
             "refined_topic": refined_topic,
         }
 
-    else:
-        # ── Standard single-pass mode ──
-        # ── Stage 1: Discovery Pipeline v2 (16 phases) ──
+    elif args.recurse:
+        # ── RECURRENT MODE: Run full pipeline 3x with temperature decay ──
+        # Loop 1: temp 0.7 (broad exploration)
+        # Loop 2: temp 0.4 (evidence-focused refinement)
+        # Loop 3: temp 0.2 (convergent — pick the best)
+        # Score dampening: 0.7 * previous + 0.3 * current
         print("="*70)
-        print("STAGE 1: DISCOVERY PIPELINE v2 (16 phases)")
+        print("RECURRENT MODE: 3 iterations with temperature decay")
+        print("  Loop 1: temp 0.7 (exploration)")
+        print("  Loop 2: temp 0.4 (refinement)")
+        print("  Loop 3: temp 0.2 (convergence)")
         print("="*70)
-    t0 = time.time()
-    try:
+
         from discovery.discovery_pipeline_v2 import run_discovery_pipeline
-        report = run_discovery_pipeline(topic, domain=domain, mode=mode)
-        phases = report.get("phases", {})
-        print(f"\n  Pipeline complete in {time.time()-t0:.0f}s")
-        print(f"  Papers: {phases.get('literature', {}).get('papers_found', 0)}")
-        print(f"  Entities: {phases.get('knowledge_graph', {}).get('entities', 0)}")
-        print(f"  Theories: {phases.get('theory_competition', {}).get('theories_compared', 0)}")
-        score = phases.get('discovery_scoring', {}).get('discovery_score', 0)
-        grade = phases.get('discovery_scoring', {}).get('grade', 'F')
-        print(f"  Score: {score:.0f}/100 ({grade})")
-    except Exception as e:
-        print(f"  Pipeline FAILED: {e}")
-        import traceback; traceback.print_exc()
-        # Save what we have and exit
-        _save_report(report, topic)
-        return
+        temps = list(RECURSE_TEMPERATURES)
+        all_reports = []
+        all_theories = []
+        best_score = 0
+        best_report = None
+
+        for loop_idx, temp in enumerate(temps):
+            print(f"\n{'='*70}")
+            print(f"  RECURRENT LOOP {loop_idx+1}/3 (temperature: {temp})")
+            print(f"{'='*70}")
+
+            # Build context from previous loops
+            loop_context = ""
+            if all_theories:
+                top_theories = sorted(all_theories, key=lambda t: t.get("scores", {}).get("overall", 0), reverse=True)[:3]
+                loop_context = "\n\nPREVIOUS LOOP TOP THEORIES (refine these, don't repeat):\n"
+                for i, t in enumerate(top_theories, 1):
+                    loop_context += f"{i}. {t.get('name','?')} (score: {t.get('scores',{}).get('overall',0):.3f}): {str(t.get('description',''))[:150]}\n"
+
+            t0 = time.time()
+            try:
+                loop_report = run_discovery_pipeline(
+                    topic + loop_context if loop_context else topic,
+                    domain=domain, mode=mode,
+                    original_topic=cause or topic
+                )
+                all_reports.append(loop_report)
+
+                # Collect theories
+                loop_theories = loop_report.get("phases", {}).get("theory_competition", {}).get("theories", [])
+                all_theories.extend(loop_theories)
+
+                # Score dampening: blend with previous best (weights in scoring_config)
+                loop_score = loop_report.get("phases", {}).get("discovery_scoring", {}).get("discovery_score", 0)
+                if loop_idx > 0 and best_score > 0:
+                    dampened = best_score * RECURSE_PREV_WEIGHT + loop_score * RECURSE_CURR_WEIGHT
+                    print(f"  Dampened score: {dampened:.0f} (prev {best_score:.0f} * {RECURSE_PREV_WEIGHT} + current {loop_score:.0f} * {RECURSE_CURR_WEIGHT})")
+                    loop_score = dampened
+
+                if loop_score > best_score:
+                    best_score = loop_score
+                    best_report = loop_report
+
+                print(f"\n  Loop {loop_idx+1} complete in {time.time()-t0:.0f}s")
+                print(f"  Score: {loop_score:.0f}/100")
+                print(f"  Theories: {len(loop_theories)} (total accumulated: {len(all_theories)})")
+
+                # Convergence check (threshold in scoring_config)
+                if loop_idx > 0:
+                    prev_score = all_reports[-2].get("phases", {}).get("discovery_scoring", {}).get("discovery_score", 0)
+                    delta = abs(loop_score - prev_score)
+                    if delta < RECURSE_CONVERGENCE_DELTA:
+                        print(f"  Converged (delta {delta:.1f} < {RECURSE_CONVERGENCE_DELTA}) — stopping early")
+                        break
+
+            except Exception as e:
+                print(f"  Loop {loop_idx+1} FAILED: {e}")
+
+        # Use best report as final
+        report = best_report or (all_reports[-1] if all_reports else {})
+
+        # Merge all unique theories
+        if all_theories and report:
+            seen_names = set()
+            unique_theories = []
+            for t in all_theories:
+                name = t.get("name", "").lower().strip()
+                if name and name not in seen_names:
+                    seen_names.add(name)
+                    unique_theories.append(t)
+            unique_theories.sort(key=lambda t: t.get("scores", {}).get("overall", 0), reverse=True)
+            report.setdefault("phases", {}).setdefault("theory_competition", {})["theories"] = unique_theories[:10]
+            report["recurrent"] = {
+                "loops": len(all_reports),
+                "temps": temps[:len(all_reports)],
+                "best_score": best_score,
+                "total_theories": len(unique_theories),
+            }
+
+    else:
+        # ── DUAL-TRACK MODE: Track A (conventional) + Track B (curiosity-driven) ──
+        if use_v3:
+            print("="*70)
+            print("  v3 MODE: Brain-enhanced pipeline active")
+            print("="*70)
+            from discovery.brain_pipeline import run_brain_pipeline as run_discovery_pipeline
+        else:
+            from discovery.discovery_pipeline_v2 import run_discovery_pipeline
+
+        # ── Step 1: TRACK A — Conventional Pipeline (NO constraint) ──
+        print("="*70)
+        print("TRACK A: CONVENTIONAL PIPELINE")
+        print("="*70)
+        t0 = time.time()
+        try:
+            report_a = run_discovery_pipeline(topic, domain=domain, mode=mode,
+                                               original_topic=cause or topic)
+            phases_a = report_a.get("phases", {})
+            score_a = phases_a.get('discovery_scoring', {}).get('discovery_score', 0)
+            grade_a = phases_a.get('discovery_scoring', {}).get('grade', 'F')
+            winner_a = report_a.get("canonical_winner", {})
+            print(f"\n  Track A complete in {time.time()-t0:.0f}s")
+            print(f"  Winner: {winner_a.get('name', '?')[:50]} (score: {winner_a.get('score', 0):.3f})")
+            print(f"  Score: {score_a:.0f}/100 ({grade_a})")
+        except Exception as e:
+            print(f"  Track A FAILED: {e}")
+            import traceback; traceback.print_exc()
+            report_a = {}
+
+        # ── Step 2: Get constraint from Track A's Phase 0 for Track B ──
+        curiosity_constraint = None
+        if report_a:
+            curiosity_constraint = report_a.get("curious_questioning", {}).get("constraint")
+        if cause_data and not curiosity_constraint:
+            curiosity_constraint = cause_data.get("constraint")
+
+        # ── Cooldown between tracks ──
+        if curiosity_constraint and curiosity_constraint.get("forbidden_theories"):
+            cooldown = 60
+            print(f"\n  [Cooldown] Waiting {cooldown}s for LLM rate limits to reset before Track B...")
+            time.sleep(cooldown)
+            print(f"  [Cooldown] Done. Starting Track B.\n")
+
+        # ── Step 3: TRACK B — Curiosity-Driven Pipeline (WITH constraint) ──
+        report_b = {}
+        if curiosity_constraint and curiosity_constraint.get("forbidden_theories"):
+            print()
+            print("="*70)
+            print("TRACK B: CURIOSITY-DRIVEN PIPELINE")
+            print(f"  Forbidden: {', '.join(curiosity_constraint['forbidden_theories'])}")
+            print("="*70)
+            t0 = time.time()
+            try:
+                report_b = run_discovery_pipeline(topic, domain=domain, mode=mode,
+                                                   curiosity_constraint=curiosity_constraint,
+                                                   original_topic=cause or topic)
+                phases_b = report_b.get("phases", {})
+                score_b = phases_b.get('discovery_scoring', {}).get('discovery_score', 0)
+                grade_b = phases_b.get('discovery_scoring', {}).get('grade', 'F')
+                winner_b = report_b.get("canonical_winner", {})
+                print(f"\n  Track B complete in {time.time()-t0:.0f}s")
+                print(f"  Winner: {winner_b.get('name', '?')[:50]} (score: {winner_b.get('score', 0):.3f})")
+                print(f"  Score: {score_b:.0f}/100 ({grade_b})")
+            except Exception as e:
+                print(f"  Track B FAILED: {e}")
+                import traceback; traceback.print_exc()
+        else:
+            print("\n  [Track B skipped — no curiosity constraint generated]")
+
+        # ── Step 4: Merge — Track A is primary, Track B added for comparison ──
+        report = report_a if report_a else report_b
+
+        if report_b:
+            report["track_b"] = {
+                "winner": report_b.get("canonical_winner"),
+                "score": report_b.get("phases", {}).get("discovery_scoring", {}).get("discovery_score", 0),
+                "grade": report_b.get("phases", {}).get("discovery_scoring", {}).get("grade", "F"),
+                "theories": report_b.get("phases", {}).get("theory_competition", {}).get("theories", []),
+                "constraint": curiosity_constraint,
+            }
+            report["dual_track"] = {
+                "track_a": {
+                    "winner": report_a.get("canonical_winner") if report_a else None,
+                    "score": report_a.get("phases", {}).get("discovery_scoring", {}).get("discovery_score", 0) if report_a else 0,
+                },
+                "track_b": {
+                    "winner": report_b.get("canonical_winner"),
+                    "score": report_b.get("phases", {}).get("discovery_scoring", {}).get("discovery_score", 0),
+                },
+                "constraint": curiosity_constraint,
+            }
+
+        if not report:
+            print("  Both tracks failed. Nothing to save.")
+            return
 
     # ── Stage 2: Refinement + Reflexion already run inside pipeline (Phase 13-14) ──
     # Skip duplicate refinement/reflexion — pipeline handles it internally
     print(f"\n  [Refinement + Reflexion already completed inside pipeline (Phase 13-14)]")
+
+    # ── Stage 3: BRAIN ENHANCEMENT — Upgrade results with cognitive modules ──
+    if use_brain and report:
+        print(f"\n  [Brain Enhancement] Enabled — running cognitive modules on results...")
+        try:
+            from brain.bridge import get_brain_bridge
+            bridge = get_brain_bridge()
+            report = bridge.enhance_report(report)
+        except Exception as e:
+            print(f"  [Brain Enhancement] Failed: {e}")
+            import traceback
+            traceback.print_exc()
+    else:
+        print(f"\n  [Brain Enhancement] Disabled (--no-brain flag)")
+
+    # ── Add cause mode data to report ──
+    if cause_data:
+        report["cause_mode"] = {
+            "original_cause": cause,
+            "core_question": cause_data.get("reframed", ""),
+            "question_hypothesis": cause_data.get("question_hypothesis", ""),
+            "why_it_matters": cause_data.get("why_it_matters", ""),
+            "observations": cause_data.get("observations", []),
+            "questions": cause_data.get("questions", []),
+            "generalizations": cause_data.get("generalizations", []),
+            "constraint": cause_data.get("constraint"),
+            "generated_topic": topic,
+        }
 
     # ── Save Report ──
     total_time = time.time() - total_start
@@ -209,6 +479,11 @@ def main():
         print(f"  Refinement: complete")
     if report.get("reflexion"):
         print(f"  Reflexion: {report['reflexion'].get('patches_applied', 0)} patches applied")
+    # Brain enhancement summary
+    brain_enhancement = report.get("brain_enhancement", {})
+    if brain_enhancement.get("modules_used"):
+        print(f"  Brain Modules: {', '.join(brain_enhancement['modules_used'])}")
+        print(f"  Brain Time: {brain_enhancement.get('duration_s', 0):.1f}s")
     print(f"  Report: {report_path}")
     print(f"  Time: {total_time:.0f}s")
 

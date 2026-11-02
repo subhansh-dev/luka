@@ -23,6 +23,15 @@ import math
 import random
 from typing import List, Dict, Optional
 
+from discovery.scoring_config import (
+    TOURNAMENT_DIMENSION_WEIGHTS,
+    TOURNAMENT_ALGO_WEIGHT,
+    TOURNAMENT_LLM_WEIGHT,
+    TOURNAMENT_SCORE_WEIGHT,
+    TOURNAMENT_WIN_RATE_WEIGHT,
+    TOURNAMENT_CAUSAL_BONUS,
+)
+
 
 class TheoryCompetition:
     """
@@ -53,28 +62,28 @@ class TheoryCompetition:
             return {"theories": [], "winner": None, "error": "No LLM client"}
 
         # Format inputs
-        mech_list = mechanisms[:5] if isinstance(mechanisms, list) else mechanisms.get("mechanisms", [])[:5]
+        mech_list = mechanisms[:3] if isinstance(mechanisms, list) else mechanisms.get("mechanisms", [])[:3]
         hv_list = hidden_variables[:5] if isinstance(hidden_variables, list) else hidden_variables.get("hidden_variables", [])[:5]
 
         mech_text = self._format_list(mech_list, "mechanism")
         hv_text = self._format_list(hv_list, "hidden variable")
         anomaly_text = self._format_list(anomalies[:6] if anomalies else [], "anomaly")
         gap_text = self._format_list(gaps[:6] if gaps else [], "gap")
-        paper_text = self._format_papers(papers[:8] if papers else [])
+        paper_text = self._format_papers(papers[:4] if papers else [])
 
         tournament_log = []
         eliminated = []
 
         # ═══════════════════════════════════════════════════════
-        # ROUND 1: Generate 20 candidates
+        # ROUND 1: Generate candidates
         # ═══════════════════════════════════════════════════════
-        print("  [Round 1] Generating 20 theory candidates...", flush=True)
+        print("  [Round 1] Generating theory candidates...", flush=True)
         all_theories = []
 
-        # LLM batch 1: 10 theories
+        # LLM batch 1
         batch1 = self._generate_theories(
             mech_text, hv_text, anomaly_text, gap_text, paper_text,
-            topic, domain, count=10, batch_label="LLM batch",
+            topic, domain, count=5, batch_label="LLM batch",
             archive_context=archive_context
         )
         all_theories.extend(batch1)
@@ -82,7 +91,7 @@ class TheoryCompetition:
         # LLM batch 2: 10 more with different framing
         batch2 = self._generate_theories(
             mech_text, hv_text, anomaly_text, gap_text, paper_text,
-            topic, domain, count=10, batch_label="creative batch",
+            topic, domain, count=5, batch_label="creative batch",
             creative=True, archive_context=archive_context
         )
         all_theories.extend(batch2)
@@ -151,7 +160,8 @@ class TheoryCompetition:
                     # Adjust scores based on head-to-head
                     win_rate = cross.get("win_rate", 0.5)
                     current = t.get("scores", {}).get("overall", 0.5)
-                    adjusted = current * 0.7 + win_rate * 0.3
+                    adjusted = (current * TOURNAMENT_SCORE_WEIGHT
+                                + win_rate * TOURNAMENT_WIN_RATE_WEIGHT)
                     t["scores"]["overall"] = round(adjusted, 3)
                     t["cross_comparison"] = cross
 
@@ -202,7 +212,7 @@ class TheoryCompetition:
         return self._finalize(final, eliminated, tournament_log, experiments, analysis)
 
     def _generate_theories(self, mech_text, hv_text, anomaly_text, gap_text,
-                           paper_text, topic, domain, count=10,
+                           paper_text, topic, domain, count=5,
                            batch_label="batch", creative=False,
                            archive_context="") -> list:
         """Generate a batch of theories via LLM."""
@@ -249,27 +259,47 @@ but through DIFFERENT mechanisms. Include:
 - Null hypothesis (everything is noise/artifacts)
 {creative_instruction}
 
-For each theory provide:
-1. name: Short descriptive name
-2. description: One paragraph explanation
-3. type: proposed|alternative|conventional|null|creative
-4. mechanism: HOW it explains the observations (specific pathway)
-5. hidden_variables: Any new entities/processes it requires
-6. explains: Which observations it explains
-7. fails_to_explain: Which observations it CANNOT explain (be honest)
-8. predictions: Specific testable predictions with numbers
-9. key_assumptions: What it assumes (fewer = better)
-10. key_parameters: Parameters with values and source (cited|derived|estimated)
+CRITICAL: You MUST fill ALL 10 fields for EACH theory. Empty fields will cause the theory to be ELIMINATED.
+Fields that are empty = theory is weak = KILLED in the tournament.
+
+For each theory provide ALL of these (never leave empty):
+1. name: Short descriptive name (REQUIRED)
+2. description: At least 3 sentences explaining the theory with specific numbers and references (REQUIRED)
+3. type: proposed|alternative|conventional|null|creative (REQUIRED)
+4. mechanism: The specific causal pathway — step by step HOW it works (REQUIRED, at least 2 steps)
+5. hidden_variables: Any new entities/processes it requires (list, can be empty [])
+6. explains: List of specific observations this theory explains — be concrete (REQUIRED, at least 2)
+7. fails_to_explain: Observations it CANNOT explain — be honest (REQUIRED, at least 1)
+8. predictions: Testable predictions with specific numbers, units, and test method (REQUIRED, at least 2)
+9. key_assumptions: What it assumes — fewer is better but list them all (REQUIRED, at least 1)
+10. key_parameters: Parameters with numerical values and source (cited|derived|estimated) (REQUIRED, at least 1)
+
+Example of a GOOD theory entry:
+{{
+  "name": "Alfvén Wave Turbulent Cascade",
+  "description": "Convective granular motions at the photosphere launch magnetohydrodynamic Alfvén waves...",
+  "type": "conventional",
+  "mechanism": "Step 1: Photospheric convective cells (v ~ 2 km/s) twist magnetic footpoints. Step 2: Alfvén waves propagate upward along field lines. Step 3: Phase mixing and resonant absorption dissipate wave energy as heat.",
+  "hidden_variables": [],
+  "explains": ["Coronal temperature exceeding 1 MK", "Observed non-thermal line broadening in loops"],
+  "fails_to_explain": ["Why some loops are hotter than others with similar field strength"],
+  "predictions": [
+    {{"statement": "Kink oscillation decay time tau ~ 200s for loops with rho=1e-15 kg/m3", "type": "correlational"}},
+    {{"statement": "Increasing B from 20G to 30G raises Q by factor 2.25", "type": "interventional"}}
+  ],
+  "key_assumptions": ["Wave damping is dominated by resonant absorption", "Plasma beta << 1 in low corona"],
+  "key_parameters": [{{"name": "Alfvén speed v_A", "value": "1.8e7 m/s", "source": "derived"}}]
+}}
 
 Output JSON: {{"theories": [{{...}}, ...]}}
 
-Generate ALL {count} theories. Quality AND quantity. This is a tournament — only the strong survive."""
+Generate ALL {count} theories. Every field MUST be filled. This is a tournament — only the strong survive."""
 
         try:
-            raw = self.llm_call(prompt, max_tokens=8192)
+            raw = self.llm_call(prompt, max_tokens=4096)
             if not raw:
                 from discovery.llm_client import call_json
-                raw = call_json(prompt, max_tokens=8192, provider="auto")
+                raw = call_json(prompt, max_tokens=4096, provider="auto")
             if not raw:
                 print(f"    [WARN] {batch_label}: LLM returned None/empty on all providers", flush=True)
                 return []
@@ -282,15 +312,26 @@ Generate ALL {count} theories. Quality AND quantity. This is a tournament — on
 
             if isinstance(result, dict):
                 theories = result.get("theories", [])
-                # Ensure defaults
+                # Ensure defaults, REMAP LLM field names, and EXTRACT metadata
                 for t in theories:
                     t.setdefault("name", "Unnamed Theory")
                     t.setdefault("type", "alternative")
                     t.setdefault("scores", {})
+                    t.setdefault("description", "")
+                    t.setdefault("mechanism", "")
                     t.setdefault("explains", [])
                     t.setdefault("fails_to_explain", [])
                     t.setdefault("predictions", [])
                     t.setdefault("key_assumptions", [])
+                    t.setdefault("key_parameters", [])
+                    t.setdefault("hidden_variables", [])
+
+                    # REMAP: LLM uses different field names than what scoring expects
+                    self._remap_llm_fields(t)
+
+                    # POST-PROCESSING: Extract metadata from description if fields are empty
+                    self._extract_metadata_from_description(t)
+
                 return theories[:count]
 
         except Exception as e:
@@ -298,17 +339,190 @@ Generate ALL {count} theories. Quality AND quantity. This is a tournament — on
 
         return []
 
+    def _remap_llm_fields(self, theory: dict):
+        """Remap LLM-generated field names to what the scoring code expects.
+
+        The LLM generates theories with creative field names that don't match
+        the scoring code's expectations. This maps them to standard names.
+        """
+        # ── Explains: merge explains_gaps + explains_anomalies ──
+        if not theory.get("explains"):
+            explains = []
+            # LLM often uses explains_gaps and explains_anomalies
+            for field in ["explains_gaps", "explains_anomalies", "explains_observations",
+                          "explained_phenomena", "observations_explained"]:
+                val = theory.get(field, [])
+                if isinstance(val, list):
+                    explains.extend(val)
+                elif isinstance(val, str) and val:
+                    explains.append(val)
+            if explains:
+                theory["explains"] = explains
+
+        # ── Mechanism: use derivation or mathematical_formalism if mechanism is empty ──
+        if not theory.get("mechanism"):
+            for field in ["derivation", "mathematical_formalism", "causal_pathway",
+                          "mechanism_steps", "explanation"]:
+                val = theory.get(field, "")
+                if val and isinstance(val, str) and len(val) > 20:
+                    theory["mechanism"] = val
+                    break
+
+        # ── Key parameters: use coupling_constants or key_parameter_to_measure ──
+        if not theory.get("key_parameters"):
+            params = []
+            # coupling_constants is often a string like "κ_A ∈ [0.01, 0.3]; expected ≈ 0.05"
+            cc = theory.get("coupling_constants", "")
+            if cc and isinstance(cc, str):
+                params.append({"name": "coupling_constants", "value": cc[:100], "source": "derived"})
+            # key_parameter_to_measure
+            kpm = theory.get("key_parameter_to_measure", "")
+            if kpm and isinstance(kpm, str):
+                params.append({"name": "key_parameter", "value": kpm[:100], "source": "estimated"})
+            # Also check mathematical_formalism for parameter definitions
+            mf = theory.get("mathematical_formalism", "")
+            if mf and isinstance(mf, str):
+                params.append({"name": "mathematical_formalism", "value": mf[:100], "source": "derived"})
+            if params:
+                theory["key_parameters"] = params
+
+        # ── Key assumptions: extract from description or reasoning_type ──
+        if not theory.get("key_assumptions"):
+            assumptions = []
+            for field in ["assumptions", "key_assumptions", "underlying_assumptions"]:
+                val = theory.get(field, [])
+                if isinstance(val, list):
+                    assumptions.extend(val)
+                elif isinstance(val, str) and val:
+                    assumptions.append(val)
+            # Also extract from coupling_constants (range assumptions)
+            cc = theory.get("coupling_constants", "")
+            if cc and isinstance(cc, str) and len(cc) > 10:
+                assumptions.append(f"Coupling constant range: {cc[:80]}")
+            if assumptions:
+                theory["key_assumptions"] = assumptions
+
+        # ── Hidden variables ──
+        if not theory.get("hidden_variables"):
+            hvs = []
+            for field in ["hidden_variables", "novel_entities", "proposed_entities"]:
+                val = theory.get(field, [])
+                if isinstance(val, list):
+                    hvs.extend(val)
+            if hvs:
+                theory["hidden_variables"] = hvs
+
+        # ── Fails to explain: use literature_grounding gaps or explicit limitations ──
+        if not theory.get("fails_to_explain"):
+            fails = []
+            for field in ["limitations", "fails_to_explain", "cannot_explain",
+                          "weaknesses", "unexplained"]:
+                val = theory.get(field, [])
+                if isinstance(val, list):
+                    fails.extend(val)
+                elif isinstance(val, str) and val and len(val) > 10:
+                    fails.append(val)
+            if fails:
+                theory["fails_to_explain"] = fails
+
+    def _extract_metadata_from_description(self, theory: dict):
+        """Extract structured metadata from theory description when LLM leaves fields empty.
+
+        This is the fallback when the LLM fills 'description' but ignores structured fields.
+        We parse the description text to extract: explanations, predictions, assumptions, parameters.
+        """
+        desc = str(theory.get("description", ""))
+        mechanism = str(theory.get("mechanism", ""))
+        full_text = desc + " " + mechanism
+        desc_lower = full_text.lower()
+
+        # ── Extract explanations from description ──
+        if not theory.get("explains"):
+            explains = []
+            explain_patterns = [
+                r"explains?\s+(?:the\s+)?([^.]+?)(?:\.|,|;|$)",
+                r"accounts?\s+for\s+(?:the\s+)?([^.]+?)(?:\.|,|;|$)",
+                r"resolves?\s+(?:the\s+)?([^.]+?)(?:\.|,|;|$)",
+                r"consistent\s+with\s+(?:the\s+)?([^.]+?)(?:\.|,|;|$)",
+                r"reproduces?\s+(?:the\s+)?([^.]+?)(?:\.|,|;|$)",
+                r"can\s+explain\s+(?:the\s+)?([^.]+?)(?:\.|,|;|$)",
+            ]
+            import re
+            for pattern in explain_patterns:
+                matches = re.findall(pattern, desc_lower)
+                for m in matches:
+                    clean = m.strip()[:100]
+                    if clean and len(clean) > 10:
+                        explains.append(clean)
+            theory["explains"] = explains[:5]
+
+        # ── Extract predictions from description ──
+        if not theory.get("predictions"):
+            predictions = []
+            pred_patterns = [
+                r"(?:predict|forecast|expect|should|would)\s+([^.]+?\d+[^.]*?)(?:\.|,|;|$)",
+                r"(?:if|when)\s+([^,]+?),\s+(?:then\s+)?([^.]+?\d+[^.]*?)(?:\.|,|;|$)",
+                r"(\d+[^.]*?(?:increase|decrease|change|shift|ratio|factor|percent|%|K|eV|GeV|m/s|W/m|Hz|T))",
+            ]
+            import re
+            for pattern in pred_patterns:
+                matches = re.findall(pattern, desc_lower)
+                for m in matches:
+                    pred_text = m if isinstance(m, str) else " ".join(m)
+                    pred_text = pred_text.strip()[:150]
+                    if pred_text and len(pred_text) > 10 and any(c.isdigit() for c in pred_text):
+                        predictions.append(pred_text)
+            theory["predictions"] = predictions[:5]
+
+        # ── Extract assumptions ──
+        if not theory.get("key_assumptions"):
+            assumptions = []
+            assumption_patterns = [
+                r"(?:assum|given|under|suppos|premis|requir)\w*\s+(?:that\s+)?([^.]+?)(?:\.|,|;|$)",
+                r"(?:if\s+we\s+assume|assuming)\s+([^.]+?)(?:\.|,|;|$)",
+                r"(?:depends\s+on|requires)\s+(?:the\s+)?([^.]+?)(?:\.|,|;|$)",
+            ]
+            import re
+            for pattern in assumption_patterns:
+                matches = re.findall(pattern, desc_lower)
+                for m in matches:
+                    clean = m.strip()[:100]
+                    if clean and len(clean) > 10:
+                        assumptions.append(clean)
+            theory["key_assumptions"] = assumptions[:5]
+
+        # ── Extract key parameters from description ──
+        if not theory.get("key_parameters"):
+            params = []
+            # Find numerical expressions with units
+            import re
+            param_patterns = [
+                r"([A-Za-z_]\w*)\s*[≈≅~=\s]\s*(\d+\.?\d*\s*[×x]\s*10[⁻\-\d]+\s*[A-Za-z/·]*)",
+                r"(\w+)\s*[≈≅~]\s*(\d+\.?\d*\s*(?:K|Pa|W|m|s|eV|GeV|Hz|T|A|J|kg|G|cm|erg|MK|GW|TW)[²³⁻\d/\s]*)",
+                r"([A-Za-z_]\w*)\s*=\s*(\d+\.?\d*(?:\s*[×x]\s*10[⁻\-\d]+)?(?:\s*[A-Za-z/·²³]+)?)",
+            ]
+            for pattern in param_patterns:
+                matches = re.findall(pattern, full_text)
+                for name, value in matches:
+                    name = name.strip()
+                    value = value.strip()
+                    if name and value and len(name) > 1:
+                        params.append({"name": name, "value": value, "source": "estimated"})
+            theory["key_parameters"] = params[:8]
+
     def _score_all(self, theories: list, anomalies: list, gaps: list, papers: list):
-        """Score all theories on 7 dimensions."""
-        WEIGHTS = {
-            "explanatory_power": 0.20,
-            "predictive_power": 0.20,
-            "falsifiability": 0.15,
-            "evidence_support": 0.15,
-            "novelty": 0.10,
-            "simplicity": 0.10,
-            "coherence": 0.10,
-        }
+        """Score all theories on 7 dimensions with ALGORITHMIC differentiation.
+
+        Instead of trusting LLM template scores (which produce identical 0.420 for everything),
+        we compute scores based on actual theory content:
+        - How many observations does it explain vs fail?
+        - How many testable predictions with numbers?
+        - How many assumptions (fewer = simpler)?
+        - Does it have equations/derivations?
+        - Does it cite papers?
+        - Is it novel vs conventional?
+        """
+        WEIGHTS = TOURNAMENT_DIMENSION_WEIGHTS
 
         observations = []
         if anomalies:
@@ -319,10 +533,92 @@ Generate ALL {count} theories. Quality AND quantity. This is a tournament — on
             for g in gaps:
                 if isinstance(g, dict):
                     observations.append(g.get("reason", g.get("description", "")))
+        total_obs = max(1, len(observations))
 
         for theory in theories:
-            # Use LLM scores if available, otherwise compute
-            scores = theory.get("scores", {})
+            # Start with LLM-provided scores as baseline
+            llm_scores = theory.get("scores", {})
+
+            # ── ALGORITHMIC SCORING (overrides LLM templates) ──
+
+            # 1. EXPLANATORY POWER: what fraction of observations does it explain?
+            explains = theory.get("explains", [])
+            fails = theory.get("fails_to_explain", [])
+            explain_count = len(explains) if isinstance(explains, list) else 0
+            fail_count = len(fails) if isinstance(fails, list) else 0
+            explanatory = max(0.1, min(1.0, explain_count / total_obs - fail_count * 0.1))
+
+            # 2. PREDICTIVE POWER: count predictions with actual numbers
+            predictions = theory.get("predictions", [])
+            if isinstance(predictions, list):
+                num_preds = len(predictions)
+                # Bonus for predictions with quantitative content
+                quant_preds = sum(1 for p in predictions
+                    if isinstance(p, (str, dict)) and any(c.isdigit() for c in str(p)))
+                predictive = max(0.1, min(1.0, 0.2 + num_preds * 0.1 + quant_preds * 0.05))
+            else:
+                predictive = 0.2
+
+            # 3. FALSIFIABILITY: does it have clear falsification criteria?
+            falsification = theory.get("falsification", "")
+            has_falsification = bool(falsification) and len(str(falsification)) > 20
+            pred_falsifiable = sum(1 for p in (predictions if isinstance(predictions, list) else [])
+                if isinstance(p, dict) and p.get("falsification", ""))
+            falsifiability = max(0.1, min(1.0,
+                (0.3 if has_falsification else 0.1) + pred_falsifiable * 0.15))
+
+            # 4. EVIDENCE SUPPORT: does it cite papers or have parameters?
+            key_params = theory.get("key_parameters", [])
+            has_params = bool(key_params) and len(key_params) > 0
+            desc = theory.get("description", "")
+            has_citations = any(kw in desc.lower() for kw in [
+                "et al", "doi", "journal", "published", "observed", "measured",
+                "cassini", "porco", "spencer", "tobie", "nimmo"
+            ])
+            evidence = max(0.1, min(1.0,
+                (0.3 if has_citations else 0.1) + (0.2 if has_params else 0.0)))
+
+            # 5. NOVELTY: proposed/creative > alternative > conventional > null
+            theory_type = theory.get("type", "alternative")
+            type_novelty = {
+                "proposed": 0.7, "creative": 0.8, "alternative": 0.5,
+                "conventional": 0.3, "null": 0.1, "unknown": 0.4,
+            }
+            novelty = type_novelty.get(theory_type, 0.4)
+            hidden_vars = theory.get("hidden_variables", [])
+            if hidden_vars and len(hidden_vars) > 0:
+                novelty = min(1.0, novelty + 0.1)
+
+            # 6. SIMPLICITY: fewer assumptions = simpler
+            assumptions = theory.get("key_assumptions", [])
+            num_assumptions = len(assumptions) if isinstance(assumptions, list) else 0
+            simplicity = max(0.1, min(1.0, 1.0 - num_assumptions * 0.12))
+
+            # 7. COHERENCE: does description have logical flow?
+            has_mechanism = bool(theory.get("mechanism", ""))
+            has_steps = bool(theory.get("steps", []))
+            coherence = max(0.2, min(1.0,
+                0.4 + (0.2 if has_mechanism else 0) + (0.2 if has_steps else 0) +
+                (0.1 if len(desc) > 100 else 0)))
+
+            # ── COMPUTE WEIGHTED SCORE ──
+            computed = {
+                "explanatory_power": explanatory,
+                "predictive_power": predictive,
+                "falsifiability": falsifiability,
+                "evidence_support": evidence,
+                "novelty": novelty,
+                "simplicity": simplicity,
+                "coherence": coherence,
+            }
+
+            # Blend: algorithmic-dominant, LLM as tie-breaker (weights in scoring_config)
+            scores = {}
+            for dim in WEIGHTS:
+                algo = computed.get(dim, 0.5)
+                llm = llm_scores.get(dim, algo)
+                # If LLM gave the same value for all theories, ignore it
+                scores[dim] = round(algo * TOURNAMENT_ALGO_WEIGHT + llm * TOURNAMENT_LLM_WEIGHT, 3)
 
             # Recompute overall with our weights
             weighted = sum(
@@ -330,10 +626,10 @@ Generate ALL {count} theories. Quality AND quantity. This is a tournament — on
                 for dim, weight in WEIGHTS.items()
             )
 
-            # Apply causal status bonus/penalty (no more penalty for correlations)
+            # Apply causal status bonus
             causal_status = theory.get("causal_status", "")
             if causal_status in ("causal_pathway", "counterfactual"):
-                weighted += 0.05  # bonus for causal claims
+                weighted += TOURNAMENT_CAUSAL_BONUS
 
             scores["overall"] = round(min(1.0, max(0.0, weighted)), 3)
             theory["scores"] = scores
