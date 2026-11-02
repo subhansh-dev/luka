@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-neural_memory.py — RUMI Neural Memory Core
+neural_memory.py — Luka Neural Memory Core
 Brain-Inspired Persistent Memory System
 
 Architecture inspired by human brain memory mechanisms:
@@ -129,7 +129,7 @@ def _should_prune(entry: dict) -> bool:
 
 class NeuralStore:
     """
-    Brain-inspired persistent memory store for RUMI.
+    Brain-inspired persistent memory store for Luka.
 
     Structure mirrors the brain's memory architecture:
     - Each memory is a "neuron assembly" with synaptic strength

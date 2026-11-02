@@ -1,7 +1,7 @@
 """
 autonomous_planner.py — Long-Horizon Autonomous Planning Engine
 MCTS-inspired planning with plan creation, evaluation, replanning,
-and multi-step execution tracking for Rumi's autonomous goal pursuit.
+and multi-step execution tracking for Luka's autonomous goal pursuit.
 """
 import json
 import time

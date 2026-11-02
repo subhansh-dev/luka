@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-episodic_memory.py — RUMI Episodic Memory System
+episodic_memory.py — Luka Episodic Memory System
 ====================================================
 
 Timestamped event memory that tracks what happened, when, and in what context.
@@ -41,7 +41,7 @@ MAX_EPISODES = 200
 
 class EpisodicMemory:
     """
-    Episodic memory system for RUMI.
+    Episodic memory system for Luka.
 
     Stores timestamped events with:
     - Temporal context (when, duration, episode)

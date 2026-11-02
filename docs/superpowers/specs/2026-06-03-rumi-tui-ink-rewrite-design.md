@@ -1,4 +1,4 @@
-# RUMI TUI Rewrite — Ink/React + Python Gateway
+# Luka TUI Rewrite — Ink/React + Python Gateway
 
 **Date:** 2026-06-03
 **Status:** Approved
@@ -6,7 +6,7 @@
 
 ## Goal
 
-Rewrite RUMI's terminal UI to match Hermes Agent's TUI quality — alternate-screen rendering, non-blocking input, modal overlays, collapsible sections, mouse support, and streaming tool trails — while staying terminal-native.
+Rewrite Luka's terminal UI to match Hermes Agent's TUI quality — alternate-screen rendering, non-blocking input, modal overlays, collapsible sections, mouse support, and streaming tool trails — while staying terminal-native.
 
 ## Architecture
 
@@ -26,9 +26,9 @@ Rewrite RUMI's terminal UI to match Hermes Agent's TUI quality — alternate-scr
 ```
 
 - `ui-tui/` — React Ink TypeScript frontend
-- `rumi_gateway/` — Python JSON-RPC server wrapping existing `main.py` / `RumiLive` logic
-- `ui.py` stays as classic CLI fallback (`rumi` without `--tui`)
-- Launch: `rumi --tui` spawns `node ui-tui/dist/entry.js`, gateway runs in-process
+- `luka_gateway/` — Python JSON-RPC server wrapping existing `main.py` / `RumiLive` logic
+- `ui.py` stays as classic CLI fallback (`luka` without `--tui`)
+- Launch: `luka --tui` spawns `node ui-tui/dist/entry.js`, gateway runs in-process
 
 ### Why React Ink
 
@@ -42,12 +42,12 @@ Rewrite RUMI's terminal UI to match Hermes Agent's TUI quality — alternate-scr
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ ▸ RUMI v3.0 · Gemini 2.5 Flash · 17 domains · 48 modules │  Collapsible banner
+│ ▸ Luka v3.0 · Gemini 2.5 Flash · 17 domains · 48 modules │  Collapsible banner
 ├──────────────────────────────────────────────────────────┤
 │                                                          │
 │  User: What are the gaps in quantum error correction?    │  Transcript
 │                                                          │
-│  ╭─ RUMI ──────────────────────────────────────────╮    │
+│  ╭─ Luka ──────────────────────────────────────────╮    │
 │  │ Based on my analysis of 23 recent papers...      │    │
 │  │ ...                                              │    │
 │  ╰─────────────────────────────────────────────────╯    │
@@ -203,7 +203,7 @@ System: `/help`, `/clear`, `/status`, `/stats`, `/timeline`, `/science`, `/domai
 ## File Structure
 
 ```
-rumi/
+luka/
 ├── ui-tui/                    # NEW — React Ink TUI
 │   ├── package.json
 │   ├── tsconfig.json
@@ -232,7 +232,7 @@ rumi/
 │   └── dist/
 │       └── entry.js           # Built bundle
 │
-├── rumi_gateway/              # NEW — Python JSON-RPC server
+├── luka_gateway/              # NEW — Python JSON-RPC server
 │   ├── __init__.py
 │   ├── server.py              # JSON-RPC server (stdin/stdout)
 │   ├── session.py             # Session management (wraps RumiLive)
@@ -240,13 +240,13 @@ rumi/
 │
 ├── ui.py                      # UNCHANGED — classic CLI fallback
 ├── main.py                    # MODIFIED — add --tui flag to launch ui-tui
-├── rumi_launcher.py           # MODIFIED — pass --tui through
+├── luka_launcher.py           # MODIFIED — pass --tui through
 └── requirements.txt           # UNCHANGED (gateway uses existing deps)
 ```
 
 ## Implementation Order
 
-1. **Gateway skeleton** — `rumi_gateway/server.py` with JSON-RPC over stdin/stdout, basic `session.create` / `chat.send` / `assistant.stream` flow
+1. **Gateway skeleton** — `luka_gateway/server.py` with JSON-RPC over stdin/stdout, basic `session.create` / `chat.send` / `assistant.stream` flow
 2. **Ink app scaffold** — `ui-tui/` with App, StatusBar, InputArea, Transcript rendering
 3. **Streaming** — Wire `assistant.stream` events to live transcript rendering
 4. **Tool trail** — `tool.start` / `tool.complete` events render as tree
@@ -261,7 +261,7 @@ rumi/
 
 ## Verification
 
-1. `rumi --tui` launches the Ink TUI in alternate-screen mode
+1. `luka --tui` launches the Ink TUI in alternate-screen mode
 2. Streaming responses appear token-by-token
 3. Tool calls render with tree drawing and timing
 4. Ctrl+K opens command palette overlay
@@ -270,4 +270,4 @@ rumi/
 7. `/discover <topic>` shows pipeline progress panel
 8. Status bar shows model, tokens, cost, uptime in real-time
 9. Quitting restores previous terminal state (no scrollback clutter)
-10. `rumi` (without --tui) still launches classic Rich CLI
+10. `luka` (without --tui) still launches classic Rich CLI

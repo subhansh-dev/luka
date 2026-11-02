@@ -11,19 +11,14 @@ interface PaletteItem {
 
 const PALETTE_ITEMS: PaletteItem[] = [
   { key: 'discover', label: 'Run Discovery Pipeline', command: '/discover ' },
-  { key: 'search', label: 'Search Papers', command: '/search ' },
+  { key: 'cause', label: 'Cause Mode (Newton Step)', command: '/cause ' },
   { key: 'hypothesize', label: 'Generate Hypotheses', command: '/hypothesize ' },
-  { key: 'experiment', label: 'Design Experiment', command: '/experiment' },
-  { key: 'review', label: 'Peer Review', command: '/review' },
   { key: 'graph', label: 'Knowledge Graph', command: '/graph' },
-  { key: 'domains', label: 'List Domains', command: '/domains' },
-  { key: 'status', label: 'System Status', command: '/status' },
-  { key: 'timeline', label: 'Session Timeline', command: '/timeline' },
-  { key: 'clear', label: 'Clear Screen', command: '/clear' },
   { key: 'think', label: 'Toggle Think Mode', command: '/think' },
   { key: 'dive', label: 'Toggle Deep Dive', command: '/dive' },
+  { key: 'status', label: 'System Status', command: '/status' },
+  { key: 'clear', label: 'Clear Screen', command: '/clear' },
   { key: 'dashboard', label: 'Discovery Dashboard', command: '/dashboard' },
-  { key: 'personality', label: 'Switch Personality', command: '/personality' },
 ];
 
 interface CommandPaletteProps {

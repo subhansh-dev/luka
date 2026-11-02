@@ -1,5 +1,5 @@
 """
-global_workspace.py — RUMI Global Workspace (Thalamus)
+global_workspace.py — Luka Global Workspace (Thalamus)
 ========================================================
 
 The central integration hub inspired by Bernard Baars' Global Workspace Theory.
@@ -9,7 +9,7 @@ Dual-path architecture:
   - Hot Path: asyncio event bus, attention scoring, real-time broadcast (<5ms)
   - Cold Path: event persistence, pattern detection, consolidation (background)
 
-This is the thalamus of RUMI — the hub where information competes for
+This is the thalamus of Luka — the hub where information competes for
 attention and winning events get broadcast to all modules simultaneously.
 """
 
@@ -369,7 +369,7 @@ class PatternDetector:
 
 class GlobalWorkspace:
     """
-    The central integration hub — RUMI's thalamus.
+    The central integration hub — Luka's thalamus.
 
     Hot Path: event bus + attention + broadcast (<5ms)
     Cold Path: event store + pattern detection + consolidation (background)

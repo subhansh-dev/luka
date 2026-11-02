@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-procedural_memory.py — RUMI Procedural Memory System
+procedural_memory.py — Luka Procedural Memory System
 =======================================================
 Stores successful multi-step tool executions as reusable procedures.
 When a similar task comes up, retrieves and suggests the best procedure.

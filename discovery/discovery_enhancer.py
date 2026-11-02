@@ -9,7 +9,7 @@ Runs AFTER the existing discovery_pipeline_v2 to add:
 5. Literature contradiction scoring (support vs reject)
 6. Discovery tournament (evolutionary selection)
 
-This APPENDS to RUMI's existing pipeline without modifying it.
+This APPENDS to Luka's existing pipeline without modifying it.
 """
 
 import json

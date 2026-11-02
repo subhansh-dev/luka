@@ -2,7 +2,7 @@
 """
 download_agents.py — Download agency-agents markdown files from GitHub
 Fetches specialized AI agent personality definitions from
-https://github.com/msitarzewski/agency-agents into rumi/agents/
+https://github.com/msitarzewski/agency-agents into luka/agents/
 """
 import os
 import sys
@@ -70,7 +70,7 @@ def download_agents(force=False):
         url = f"{BASE_URL}/{category}/{remote_name}"
         try:
             print(f"  Downloading {category}/{local_name}...", end=" ", flush=True)
-            req = urllib.request.Request(url, headers={"User-Agent": "Rumi-Agent-Downloader/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "Luka-Agent-Downloader/1.0"})
             with urllib.request.urlopen(req, timeout=30) as resp:
                 content = resp.read().decode("utf-8")
             with open(local_path, "w", encoding="utf-8") as f:

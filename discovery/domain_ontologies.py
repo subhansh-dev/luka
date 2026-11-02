@@ -12,7 +12,7 @@ Each domain has:
 - observables: what can be measured
 - anomalies: known unsolved problems
 
-This is what makes RUMI sound like a scientist, not a chatbot.
+This is what makes Luka sound like a scientist, not a chatbot.
 """
 
 DOMAIN_ONTOLOGIES = {

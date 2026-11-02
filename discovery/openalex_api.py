@@ -24,7 +24,7 @@ def _rate_limit():
 def _fetch(url: str) -> dict | None:
     _rate_limit()
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "RUMI/1.0 (mailto:research@rumi.ai)"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Luka/1.0 (mailto:research@luka.ai)"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             return json.loads(resp.read().decode())
     except Exception:

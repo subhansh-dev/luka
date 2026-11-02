@@ -1,5 +1,5 @@
 """
-hypothesis_engine.py — Research Hypothesis Generation for RUMI Scientist AI
+hypothesis_engine.py — Research Hypothesis Generation for Luka Scientist AI
 
 Generates, tracks, and evaluates scientific research hypotheses.
 Supports hypothesis refinement, experiment suggestion, and confidence tracking.

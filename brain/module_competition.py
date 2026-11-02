@@ -1,5 +1,5 @@
 """
-module_competition.py — RUMI Module Competition System
+module_competition.py — Luka Module Competition System
 =========================================================
 
 Implements bottom-up competitive processing between brain modules,

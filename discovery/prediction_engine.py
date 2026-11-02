@@ -57,11 +57,11 @@ class PredictionEngine:
         if not self.llm_call:
             return {"predictions": [], "prediction_chains": [], "coverage_score": 0.0}
 
-        mech_text = self._format_mechanisms(mechanisms[:5] if isinstance(mechanisms, list) else
-                                            mechanisms.get("mechanisms", [])[:5])
-        hv_text = self._format_hidden_variables(hidden_variables[:5] if isinstance(hidden_variables, list) else
-                                                 hidden_variables.get("hidden_variables", [])[:5])
-        anomaly_text = self._format_anomalies(anomalies[:4] if anomalies else [])
+        mech_text = self._format_mechanisms(mechanisms[:3] if isinstance(mechanisms, list) else
+                                            mechanisms.get("mechanisms", [])[:3])
+        hv_text = self._format_hidden_variables(hidden_variables[:3] if isinstance(hidden_variables, list) else
+                                                 hidden_variables.get("hidden_variables", [])[:3])
+        anomaly_text = self._format_anomalies(anomalies[:3] if anomalies else [])
 
         prompt = f"""You are a rigorous scientist. Your job is to generate TESTABLE PREDICTIONS
 with QUANTITATIVE content. Every prediction MUST include numbers.
@@ -124,11 +124,11 @@ Output JSON:
 Generate 5-8 predictions total. Quality over quantity."""
 
         try:
-            raw = self.llm_call(prompt, max_tokens=8192)
+            raw = self.llm_call(prompt, max_tokens=4096)
             if not raw:
                 try:
                     from discovery.llm_client import call_json
-                    raw = call_json(prompt, max_tokens=8192, provider="auto")
+                    raw = call_json(prompt, max_tokens=4096, provider="auto")
                 except Exception:
                     pass
             if raw:
@@ -254,11 +254,11 @@ Generate 5-8 predictions total. Quality over quantity."""
             return "No mechanisms proposed."
         text = ""
         for i, m in enumerate(mechanisms, 1):
-            text += f"\n{i}. {str(m.get('name', '?'))} ({str(m.get('type', '?'))})\n"
-            text += f"   {str(m.get('description', ''))[:200]}\n"
+            text += f"\n{i}. {str(m.get('name', '?'))[:60]} ({str(m.get('type', '?'))})\n"
+            text += f"   {str(m.get('description', ''))[:120]}\n"
             steps = m.get("steps", [])
-            for s in steps[:4]:
-                text += f"   → {str(s)}\n"
+            for s in steps[:2]:
+                text += f"   → {str(s)[:100]}\n"
         return text
 
     def _format_hidden_variables(self, hvs: list) -> str:
@@ -266,8 +266,8 @@ Generate 5-8 predictions total. Quality over quantity."""
             return "No hidden variables."
         text = ""
         for i, hv in enumerate(hvs, 1):
-            text += f"\n{i}. {str(hv.get('name', '?'))} ({str(hv.get('type', '?'))})\n"
-            text += f"   {str(hv.get('description', ''))[:200]}\n"
+            text += f"\n{i}. {str(hv.get('name', '?'))[:60]} ({str(hv.get('type', '?'))})\n"
+            text += f"   {str(hv.get('description', ''))[:120]}\n"
         return text
 
     def _format_anomalies(self, anomalies: list) -> str:

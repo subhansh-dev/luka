@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Add PubChem and OpenFDA lookups to RUMI's Discovery Engine so drug entities in the knowledge graph are enriched with real targets, properties, and side effects.
+**Goal:** Add PubChem and OpenFDA lookups to Luka's Discovery Engine so drug entities in the knowledge graph are enriched with real targets, properties, and side effects.
 
 **Architecture:** Two new standalone modules (`pubchem.py`, `openfda.py`) that call free REST APIs. The existing pipeline is modified to call these after entity extraction. A new `/enrich` command enriches existing graphs.
 
@@ -203,7 +203,7 @@ Expected: Side effects list and mechanism of action printed.
 ### Task 3: Modify main.py — Add enrichment to pipeline + /enrich handler
 
 **Files:**
-- Modify: `C:\Users\Admin\Desktop\rumi\main.py`
+- Modify: `C:\Users\Admin\Desktop\luka\main.py`
 
 **Step 1: Add enrichment method to RumiLive class.**
 
@@ -301,7 +301,7 @@ elif command == "enrich":
 ### Task 4: Modify ui.py — Add /enrich command
 
 **Files:**
-- Modify: `C:\Users\Admin\Desktop\rumi\ui.py`
+- Modify: `C:\Users\Admin\Desktop\luka\ui.py`
 
 **Step 1: Add `/enrich` to SLASH_COMMANDS list:**
 

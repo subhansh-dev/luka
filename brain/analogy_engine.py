@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-analogy_engine.py — RUMI Analogical Reasoning Engine
+analogy_engine.py — Luka Analogical Reasoning Engine
 =======================================================
 
 Implements Gentner's Structure Mapping Theory for fluid intelligence.

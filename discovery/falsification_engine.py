@@ -2,7 +2,7 @@
 falsification_engine.py — Actively try to KILL theories.
 
 Scientists spend more time trying to destroy theories than create them.
-RUMI should do the same.
+Luka should do the same.
 
 This module:
 1. Checks theories against known observational constraints (DESI, Planck, ACT, etc.)

@@ -1,21 +1,33 @@
-"""ESA Sky API wrapper — European Space Agency data.
-"""
-
-import json
+"""ESA Sky API wrapper - upgraded with astroquery."""
 import time
-
-def search_esa_sky(query: str) -> list[dict]:
-    """Search ESA Sky."""
-    return [{"mission": "Gaia", "product": "Star Catalog", "query": query}]
-
-def enrich_entities(graph, entity_types: set[str] = {"star", "galaxy", "celestial_body"}) -> int:
-    """Enrich with ESA Sky data."""
-    enriched = 0
-    for eid, ent in list(graph.entities.items()):
-        if ent["type"] not in entity_types:
-            continue
-        data = search_esa_sky(ent["name"])
-        if data:
-            graph.entities[eid].setdefault("esa", {})["data"] = data
-            enriched += 1
-    return enriched
+_HAS_ASTROQUERY = False
+try:
+    from astroquery.esasky import ESASky
+    _HAS_ASTROQUERY = True
+except ImportError:
+    pass
+_LAST = 0.0
+def _rl():
+    global _LAST; now=time.time()
+    if now-_LAST<2: time.sleep(2-(now-_LAST))
+    _LAST=time.time()
+def search_esa_sky(target_name):
+    _rl()
+    if not _HAS_ASTROQUERY: return []
+    try:
+        result = ESASky.query_object_catalogs(target_name)
+        if not result: return []
+        all_results = []
+        for catalog_name, table in result.items():
+            for row in table[:10]:
+                d = {"catalog": catalog_name}
+                for col in table.colnames:
+                    val = row[col]
+                    d[col] = val.item() if hasattr(val, "item") else val
+                all_results.append(d)
+        return all_results
+    except Exception as e:
+        print(f"  [ESASky] {e}", flush=True)
+        return []
+def is_available():
+    return _HAS_ASTROQUERY

@@ -18,6 +18,14 @@ from pathlib import Path
 from datetime import datetime
 from collections import deque
 
+def _reset_terminal_bg():
+    """Reset terminal background color on exit."""
+    try:
+        sys.stdout.write("\033[0m")
+        sys.stdout.flush()
+    except Exception:
+        pass
+
 # -- Terminal setup --
 if sys.platform == "win32":
     try:
@@ -1782,7 +1790,7 @@ class RumiUI:
             tl = text.lower().strip()
 
             # Skip internal noise
-            if any(skip in tl for skip in ["[rumi]", "[episodic]", "[selfawareness]",
+            if any(skip in tl for skip in ["[luka]", "[episodic]", "[selfawareness]",
                                             "[coordinator]", "[dreaming]", "[vectormemory]",
                                             "[telegram]", "non-data parts", "[focus]"]):
                 return
@@ -1801,8 +1809,8 @@ class RumiUI:
                 self.show_thinking()
 
             # Luka response — role glyph + markdown
-            elif tl.startswith("rumi:") or tl.startswith("ai:"):
-                prefix_len = 5 if tl.startswith("rumi:") else 3
+            elif tl.startswith("luka:") or tl.startswith("ai:"):
+                prefix_len = 5 if tl.startswith("luka:") else 3
                 content = text[prefix_len:].strip()
                 # Strip thinking/reasoning headers
                 content = _re.sub(r'\*\*Thinking(?:\s*\(.*?\))?\*\*\s*', '', content).strip()

@@ -1,5 +1,5 @@
 """
-ai_pipeline.py — AI Pipeline for Rumi
+ai_pipeline.py — AI Pipeline for Luka
 
 Multi-step AI workflows: summarization, translation, sentiment analysis,
 entity extraction, and document processing.
@@ -45,7 +45,7 @@ GEMINI_MODEL = "gemini-2.5-flash"
 
 def _generate(prompt: str, model: str = GEMINI_MODEL) -> str:
     """Central generation call — uses unified LLM client."""
-    from rumi_llm import generate
+    from luka_llm import generate
     return generate(model, prompt)
 
 

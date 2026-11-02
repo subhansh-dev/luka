@@ -8,7 +8,7 @@ _Curated memories, lessons, identity evolution, and significant events. This is 
 
 | Attribute | Value |
 |-----------|-------|
-| **Name** | RUMI (Research & Unified Machine Intelligence) |
+| **Name** | Luka (Research & Unified Machine Intelligence) |
 | **Type** | Autonomous cognitive AI for scientific research |
 | **Interface** | Terminal-native (Rich + prompt_toolkit) |
 | **Model** | Gemini 2.5 Flash (primary), multi-model routing |
@@ -66,7 +66,7 @@ _(Highest-value learning signal — recorded immediately)_
 - Cleaned 38,000 lines of dead code from predecessor project
 - Removed FRIDAY-specific modules (cyber/pentesting, mediapipe models, unused actions/skills)
 - Renamed all identifiers: FridayLive → RumiLive, FridayUI → RumiUI, shutdown_friday → shutdown_rumi
-- Created identity files: RUMI.md, SOUL.md, USER.md, TOOLS.md, HEARTBEAT.md
+- Created identity files: Luka.md, SOUL.md, USER.md, TOOLS.md, HEARTBEAT.md
 - Set up memory system (MEMORY.md, daily logs)
 - Verified all 60 brain modules wired and functional
 - Established terminal-native identity (Rich + prompt_toolkit)

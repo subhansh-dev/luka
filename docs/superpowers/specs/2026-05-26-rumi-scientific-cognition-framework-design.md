@@ -1,7 +1,7 @@
-# RUMI Scientific Cognition Framework
+# Luka Scientific Cognition Framework
 
 ## Objective
-Transform RUMI from a literature aggregation system into a modular autonomous scientific cognition framework that generates plausible, testable, novel scientific hypotheses.
+Transform Luka from a literature aggregation system into a modular autonomous scientific cognition framework that generates plausible, testable, novel scientific hypotheses.
 
 ## Architecture
 

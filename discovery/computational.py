@@ -1,5 +1,5 @@
 """
-discovery/computational.py — Real Computational Modeling for RUMI
+discovery/computational.py — Real Computational Modeling for Luka
 
 Replaces invented numbers with actual calculations:
   - Atmospheric chemistry equilibrium constants

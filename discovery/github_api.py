@@ -23,7 +23,7 @@ def _rate_limit():
 def _fetch(url: str) -> dict | list | None:
     _rate_limit()
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "RUMI/1.0", "Accept": "application/vnd.github.v3+json"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Luka/1.0", "Accept": "application/vnd.github.v3+json"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             return json.loads(resp.read().decode())
     except Exception:
@@ -56,7 +56,7 @@ def get_repo_topics(repo_name: str) -> list[str]:
     url = f"{GITHUB_BASE}/repos/{repo_name}/topics"
     _rate_limit()
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "RUMI/1.0", "Accept": "application/vnd.github.mercy-preview+json"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Luka/1.0", "Accept": "application/vnd.github.mercy-preview+json"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode())
             return data.get("names", [])

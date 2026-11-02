@@ -1,5 +1,5 @@
 """
-paper_search.py — Academic Paper Search for RUMI Scientist AI
+paper_search.py — Academic Paper Search for Luka Scientist AI
 
 Searches arXiv and Semantic Scholar APIs for academic papers.
 Supports keyword search, author search, paper retrieval, and citation tracking.
@@ -34,7 +34,7 @@ def search_arxiv(query: str, max_results: int = 10) -> list[dict]:
     url = f"{ARXIV_BASE}?{params}"
     
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "RUMI/2.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Luka/2.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             xml_data = resp.read().decode("utf-8")
     except Exception as e:
@@ -108,7 +108,7 @@ def search_semantic_scholar(query: str, max_results: int = 10) -> list[dict]:
     url = f"{base}?{params}"
 
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "RUMI/2.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Luka/2.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
     except Exception as e:
@@ -142,7 +142,7 @@ def get_paper_details(paper_id: str) -> dict:
     })
     
     try:
-        req = urllib.request.Request(f"{url}?{params}", headers={"User-Agent": "RUMI/2.0"})
+        req = urllib.request.Request(f"{url}?{params}", headers={"User-Agent": "Luka/2.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         return {

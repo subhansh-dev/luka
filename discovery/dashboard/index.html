@@ -3,32 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luka — Space Discovery Dashboard</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Luka — Space Discovery Dashboard v2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.6/dist/vis-network.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
   :root {
     --bg-void: #000000;
-    --bg-surface: rgba(255,255,255,0.03);
+    --bg-surface: rgba(0,0,0,0.7);
     --bg-card: rgba(255,255,255,0.04);
-    --bg-card-hover: rgba(255,255,255,0.07);
-    --border: rgba(255,255,255,0.06);
-    --border-bright: rgba(255,255,255,0.12);
-    --text-primary: #e8e8e8;
-    --text-secondary: #777;
-    --text-dim: #444;
+    --bg-card-hover: rgba(255,255,255,0.08);
+    --glass: rgba(255,255,255,0.03);
+    --glass-border: rgba(255,255,255,0.06);
+    --glass-glow: rgba(0,229,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --border-bright: rgba(255,255,255,0.15);
+    --text-primary: #e8ecf4;
+    --text-secondary: #8892a8;
+    --text-dim: #4a5568;
     --accent: #00e5ff;
-    --accent-glow: rgba(0,229,255,0.15);
-    --accent-dim: rgba(0,229,255,0.4);
+    --accent-glow: rgba(0,229,255,0.12);
+    --accent-dim: rgba(0,229,255,0.35);
+    --accent-bright: #40f0ff;
     --danger: #ff4466;
-    --danger-glow: rgba(255,68,102,0.15);
+    --danger-glow: rgba(255,68,102,0.12);
     --warn: #ffaa00;
-    --warn-glow: rgba(255,170,0,0.15);
+    --warn-glow: rgba(255,170,0,0.12);
     --blue: #4488ff;
-    --blue-glow: rgba(68,136,255,0.15);
+    --blue-glow: rgba(68,136,255,0.12);
     --purple: #aa66ff;
-    --purple-glow: rgba(170,102,255,0.15);
+    --purple-glow: rgba(170,102,255,0.12);
+    --green: #00ff88;
     --mono: 'JetBrains Mono', monospace;
     --sans: 'Inter', -apple-system, sans-serif;
   }
@@ -43,14 +51,70 @@
     font-size: 13px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+
+  /* ── Animated Aurora Background ─────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(0,229,255,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(170,102,255,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(0,255,136,0.02) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 60%, rgba(68,136,255,0.03) 0%, transparent 40%);
+    animation: aurora 25s ease-in-out infinite alternate;
+    z-index: 0;
+    pointer-events: none;
+  }
+  @keyframes aurora {
+    0% { transform: translate(0,0) rotate(0deg); }
+    33% { transform: translate(-30px, 20px) rotate(2deg); }
+    66% { transform: translate(20px, -30px) rotate(-1deg); }
+    100% { transform: translate(-10px, 10px) rotate(1deg); }
+  }
+
+  /* ── Floating Particles ─────────────────────────── */
+  .particles {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: float-up linear infinite;
+  }
+  @keyframes float-up {
+    0% { opacity: 0; transform: translateY(100vh) scale(0); }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+  }
+
+  /* ── Glass Mixin ────────────────────────────────── */
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 4px 30px rgba(0,0,0,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
   /* ── Layout ─────────────────────────────────────── */
   .app {
     display: grid;
-    grid-template-rows: 48px 1fr;
-    grid-template-columns: 220px 1fr;
+    grid-template-rows: 52px 1fr;
+    grid-template-columns: 240px 1fr;
     height: 100vh;
+    position: relative;
+    z-index: 1;
   }
 
   /* ── Header ─────────────────────────────────────── */
@@ -59,10 +123,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(20px);
+    padding: 0 24px;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(30px) saturate(1.8);
+    -webkit-backdrop-filter: blur(30px) saturate(1.8);
+    border-bottom: 1px solid rgba(0,229,255,0.08);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 1px 0 rgba(0,229,255,0.03);
   }
 
   .header-left {
@@ -74,9 +140,13 @@
   .logo {
     font-family: var(--mono);
     font-weight: 700;
-    font-size: 15px;
-    color: var(--accent);
-    letter-spacing: 2px;
+    font-size: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--purple), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 3px;
+    filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));
   }
 
   .logo-dot {
@@ -122,12 +192,15 @@
 
   /* ── Sidebar ────────────────────────────────────── */
   .sidebar {
-    background: var(--bg-surface);
-    border-right: 1px solid var(--border);
-    padding: 12px 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border-right: 1px solid rgba(0,229,255,0.06);
+    padding: 16px 0;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: rgba(0,229,255,0.15) transparent;
+    box-shadow: 4px 0 30px rgba(0,0,0,0.3);
   }
 
   .sidebar-section {
@@ -166,9 +239,11 @@
   }
 
   .nav-item.active {
-    background: var(--accent-glow);
+    background: rgba(0,229,255,0.1);
     color: var(--accent);
     font-weight: 500;
+    box-shadow: 0 0 15px rgba(0,229,255,0.08), inset 0 0 10px rgba(0,229,255,0.03);
+    border: 1px solid rgba(0,229,255,0.15);
   }
 
   .nav-icon {
@@ -247,33 +322,52 @@
   }
 
   .metric-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 18px;
     position: relative;
     overflow: hidden;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
   }
 
   .metric-card:hover {
-    border-color: var(--border-bright);
-    background: var(--bg-card-hover);
+    border-color: rgba(0,229,255,0.25);
+    background: rgba(255,255,255,0.06);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.3),
+      0 0 20px rgba(0,229,255,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    transform: translateY(-2px);
   }
 
   .metric-card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 2px;
-    background: var(--accent);
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.3s ease;
   }
 
   .metric-card:hover::before { opacity: 1; }
+
+  .metric-card::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(0,229,255,0.04) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .metric-card:hover::after { opacity: 1; }
 
   .metric-label {
     font-family: var(--mono);
@@ -308,35 +402,40 @@
   /* ── Phase Pipeline ─────────────────────────────── */
   .pipeline-strip {
     display: flex;
-    gap: 2px;
+    gap: 3px;
     margin-bottom: 20px;
-    padding: 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    padding: 14px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
     overflow-x: auto;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
   }
 
   .phase-block {
     flex: 1;
     min-width: 70px;
-    padding: 8px 6px;
+    padding: 10px 6px;
     text-align: center;
-    border-radius: 4px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
   }
 
   .phase-block:hover {
-    border-color: var(--border-bright);
-    background: var(--bg-card-hover);
+    border-color: rgba(0,229,255,0.2);
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 0 12px rgba(0,229,255,0.06);
   }
 
   .phase-block.done {
-    border-color: var(--accent-dim);
-    background: var(--accent-glow);
+    border-color: rgba(0,229,255,0.3);
+    background: rgba(0,229,255,0.08);
+    box-shadow: 0 0 15px rgba(0,229,255,0.08), inset 0 0 10px rgba(0,229,255,0.03);
   }
 
   .phase-block.error {
@@ -385,14 +484,17 @@
   }
 
   .score-gauge {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,229,255,0.1);
+    border-radius: 16px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 20px rgba(0,229,255,0.04);
   }
 
   .gauge-ring {
@@ -441,26 +543,32 @@
   .theory-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
   }
 
   .theory-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    transition: all 0.2s ease;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 18px;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
     cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
 
   .theory-card:hover {
-    border-color: var(--border-bright);
-    background: var(--bg-card-hover);
+    border-color: rgba(0,229,255,0.2);
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 15px rgba(0,229,255,0.06);
+    transform: translateY(-2px);
   }
 
   .theory-card.winner {
-    border-color: var(--accent-dim);
+    border-color: rgba(0,229,255,0.3);
     border-left: 3px solid var(--accent);
+    box-shadow: 0 0 20px rgba(0,229,255,0.1), 0 4px 20px rgba(0,0,0,0.2);
   }
 
   .theory-header {
@@ -505,15 +613,20 @@
   }
 
   .finding-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    transition: all 0.2s ease;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
   }
 
   .finding-card:hover {
-    border-color: var(--border-bright);
+    border-color: rgba(0,229,255,0.2);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.25), 0 0 12px rgba(0,229,255,0.05);
+    transform: translateY(-2px);
   }
 
   .finding-type {
@@ -546,9 +659,16 @@
   /* ── Graph Container ────────────────────────────── */
   #graph-view {
     height: calc(100vh - 120px);
-    border-radius: 8px;
+    border-radius: 16px;
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(0,229,255,0.1);
+    background: rgba(0,0,0,0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+      0 8px 40px rgba(0,0,0,0.5),
+      inset 0 0 60px rgba(0,229,255,0.01),
+      0 0 30px rgba(0,229,255,0.02);
   }
 
   /* ── Papers ─────────────────────────────────────── */
@@ -569,17 +689,22 @@
   .paper-search:focus { border-color: var(--accent-dim); }
 
   .paper-item {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px 14px;
-    margin-bottom: 6px;
-    transition: all 0.15s ease;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
   }
 
   .paper-item:hover {
-    border-color: var(--border-bright);
-    background: var(--bg-card-hover);
+    border-color: rgba(0,229,255,0.2);
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25), 0 0 10px rgba(0,229,255,0.04);
+    transform: translateY(-1px);
   }
 
   .paper-title {
@@ -658,6 +783,7 @@
 </style>
 </head>
 <body>
+<div class="particles" id="particles"></div>
 <div class="app">
 
   <!-- Header -->
@@ -720,6 +846,25 @@
     </div>
 
     <div class="sidebar-section">
+      <div class="sidebar-label">Analysis</div>
+      <div class="nav-item" data-view="scoring">
+        <span class="nav-icon">★</span> Scoring
+      </div>
+      <div class="nav-item" data-view="adversarial">
+        <span class="nav-icon">⚔</span> Adversarial
+      </div>
+      <div class="nav-item" data-view="peer-review">
+        <span class="nav-icon">📋</span> Peer Review
+      </div>
+      <div class="nav-item" data-view="derivations">
+        <span class="nav-icon">∑</span> Derivations
+      </div>
+      <div class="nav-item" data-view="refinement">
+        <span class="nav-icon">⬡</span> Refinement
+      </div>
+    </div>
+
+    <div class="sidebar-section">
       <div class="sidebar-label">Run History</div>
       <div class="run-list" id="run-history">
         <div style="padding:8px 12px;font-family:var(--mono);font-size:10px;color:var(--text-dim);">No runs yet</div>
@@ -732,6 +877,10 @@
 
     <!-- Overview -->
     <div class="view active" id="view-overview">
+      <div id="loading-indicator" style="text-align:center;padding:60px;color:var(--text-dim);font-family:var(--mono);">
+        <div style="font-size:24px;margin-bottom:12px;">◌</div>
+        <div>Loading discovery data...</div>
+      </div>
       <div class="overview-grid" id="metrics-grid">
         <!-- Populated by JS -->
       </div>
@@ -824,6 +973,42 @@
       <div class="finding-grid" id="contradictions-grid"></div>
     </div>
 
+    <!-- Analysis Views -->
+    <div class="view" id="view-scoring">
+      <div class="section-header">
+        <span class="section-title">Discovery Scoring</span>
+      </div>
+      <div id="scoring-content" style="padding:16px;"></div>
+    </div>
+
+    <div class="view" id="view-adversarial">
+      <div class="section-header">
+        <span class="section-title">Adversarial Test Results</span>
+      </div>
+      <div id="adversarial-content" style="padding:16px;"></div>
+    </div>
+
+    <div class="view" id="view-peer-review">
+      <div class="section-header">
+        <span class="section-title">Peer Review</span>
+      </div>
+      <div id="peer-review-content" style="padding:16px;"></div>
+    </div>
+
+    <div class="view" id="view-derivations">
+      <div class="section-header">
+        <span class="section-title">Derivation Engine</span>
+      </div>
+      <div id="derivations-content" style="padding:16px;"></div>
+    </div>
+
+    <div class="view" id="view-refinement">
+      <div class="section-header">
+        <span class="section-title">Refinement Pipeline</span>
+      </div>
+      <div id="refinement-content" style="padding:16px;"></div>
+    </div>
+
   </div>
 </div>
 
@@ -845,31 +1030,71 @@ const COLORS = {
 
 let currentData = null;
 let network = null;
+const API_BASE = window.DASHBOARD_API || '';
+
+async function apiFetch(path, timeout) {
+  timeout = timeout || 15000;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    const r = await fetch(`${API_BASE}${path}`, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) {
+    console.warn('API fetch failed:', path, e.message);
+    return null;
+  }
+}
 
 async function loadAllData() {
-  // Try v2 reports first, then v1
-  const reports = await loadV2Reports();
-  const kg = await loadJSON('../../data/knowledge_graph.json') || await loadJSON('../../discovery/graph/knowledge_graph.json');
-  const hyps = await loadJSON('../../discovery/hypotheses/active.json');
-  const contras = await loadJSON('../../discovery/contradictions/active.json');
+  console.log('Loading dashboard data...');
+
+  // Load reports first (small, fast)
+  const reports = await apiFetch('/api/reports', 10000) || [];
+  console.log('Reports loaded:', reports.length);
+
+  // Use latest report from reports array as fallback
+  let latest = null;
+  try {
+    latest = await apiFetch('/api/latest', 30000);
+  } catch(e) {
+    console.warn('Latest report too large, using summary');
+  }
+
+  // Load graph (large, optional)
+  let kg = { entities: {}, relationships: [] };
+  try {
+    kg = await apiFetch('/api/graph', 30000) || kg;
+  } catch(e) {
+    console.warn('Graph load failed');
+  }
+
+  const health = await apiFetch('/api/health', 5000) || {};
+  const status = await apiFetch('/api/status', 5000) || {};
 
   currentData = {
     reports,
-    latestReport: reports.length ? reports[reports.length - 1] : null,
-    kg: kg || { entities: {}, relationships: [], papers: {} },
-    hypotheses: hyps || [],
-    contradictions: contras || [],
+    latestReport: latest || (reports.length ? reports[reports.length - 1] : null),
+    kg: kg,
+    health,
+    status,
+    hypotheses: [],
+    contradictions: [],
   };
 
+  console.log('Data loaded, rendering...');
   renderAll();
+  // Hide loading indicator
+  const loader = document.getElementById('loading-indicator');
+  if (loader) loader.style.display = 'none';
+  console.log('Render complete');
 }
 
 async function loadV2Reports() {
-  // Scan data/ for discovery_v2_*.json files
+  // Legacy: scan data/ for discovery_v2_*.json files
   try {
-    // We can't list a directory from the browser, so try sequential timestamps
     const reports = [];
-    // Try to load the index of reports (generated by RUMI)
     const idx = await loadJSON('../../data/reports_index.json');
     if (idx && Array.isArray(idx)) {
       for (const path of idx.slice(-20)) {
@@ -877,9 +1102,7 @@ async function loadV2Reports() {
         if (r) reports.push(r);
       }
     }
-    // Also try the latest report directly
     if (!reports.length) {
-      // Try common patterns
       const now = Math.floor(Date.now() / 1000);
       for (let i = 0; i < 50; i++) {
         const t = now - i * 3600;
@@ -915,17 +1138,16 @@ async function loadJSON(url) {
 // ══════════════════════════════════════════════════════
 
 function renderAll() {
-  renderOverview();
-  renderPipeline();
-  renderTheories();
-  renderGaps();
-  renderAnomalies();
-  renderPredictions();
-  renderGraph();
-  renderPapers();
-  renderContradictions();
-  renderRunHistory();
-  updateNavBadges();
+  const renders = [
+    renderOverview, renderPipeline, renderTheories, renderGaps,
+    renderAnomalies, renderPredictions, renderGraph, renderPapers,
+    renderContradictions, renderScoring, renderAdversarial,
+    renderPeerReview, renderDerivations, renderRefinement,
+    renderRunHistory, updateNavBadges
+  ];
+  for (const fn of renders) {
+    try { fn(); } catch(e) { console.warn('Render failed:', fn.name, e); }
+  }
 }
 
 function renderOverview() {
@@ -1170,27 +1392,70 @@ function renderGraph() {
   const nodes = [];
   const edges = [];
 
+  const GLOW_COLORS = {
+    drug:{bg:'#00ff88',border:'#00ff88',glow:'rgba(0,255,136,0.4)'},
+    disease:{bg:'#ff4466',border:'#ff4466',glow:'rgba(255,68,102,0.4)'},
+    gene:{bg:'#4488ff',border:'#4488ff',glow:'rgba(68,136,255,0.4)'},
+    protein:{bg:'#aa66ff',border:'#aa66ff',glow:'rgba(170,102,255,0.4)'},
+    mechanism:{bg:'#ff8844',border:'#ff8844',glow:'rgba(255,136,68,0.4)'},
+    pathway:{bg:'#ffcc00',border:'#ffcc00',glow:'rgba(255,204,0,0.4)'},
+    phenomenon:{bg:'#ff6688',border:'#ff6688',glow:'rgba(255,102,136,0.4)'},
+    concept:{bg:'#00e5ff',border:'#00e5ff',glow:'rgba(0,229,255,0.4)'},
+    method:{bg:'#4488ff',border:'#4488ff',glow:'rgba(68,136,255,0.4)'},
+    finding:{bg:'#00ff88',border:'#00ff88',glow:'rgba(0,255,136,0.4)'},
+    theory:{bg:'#aa66ff',border:'#aa66ff',glow:'rgba(170,102,255,0.4)'},
+    star:{bg:'#ffcc00',border:'#ffcc00',glow:'rgba(255,204,0,0.4)'},
+    galaxy:{bg:'#9b59b6',border:'#9b59b6',glow:'rgba(155,89,182,0.4)'},
+    celestial_body:{bg:'#e056fd',border:'#e056fd',glow:'rgba(224,86,253,0.4)'},
+    exoplanet:{bg:'#fdcb6e',border:'#fdcb6e',glow:'rgba(253,203,110,0.4)'},
+    molecule_gas:{bg:'#a29bfe',border:'#a29bfe',glow:'rgba(162,155,254,0.4)'},
+  };
+
+  const defaultColor = {bg:'#00e5ff',border:'#00e5ff',glow:'rgba(0,229,255,0.3)'};
+
   for (const [id, e] of Object.entries(ents)) {
+    const c = GLOW_COLORS[e.type] || defaultColor;
+    const papers = (e.papers || []).length;
     nodes.push({
       id,
       label: e.name,
-      title: `${e.type}: ${e.name}\nPapers: ${(e.papers || []).length}`,
-      color: COLORS[e.type] || '#94a3b8',
+      title: `<div style="font-family:JetBrains Mono;font-size:12px;padding:8px;">
+        <div style="color:${c.border};font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px;">${e.type}</div>
+        <div style="color:#e8ecf4;font-size:14px;font-weight:600;margin:4px 0;">${e.name}</div>
+        <div style="color:#8892a8;font-size:10px;">${papers} papers</div>
+      </div>`,
+      color: {
+        background: c.bg,
+        border: c.border,
+        highlight: { background: c.bg, border: '#ffffff' },
+        hover: { background: c.bg, border: '#ffffff' }
+      },
       shape: 'dot',
-      size: 16 + Math.min((e.papers || []).length * 2, 24),
-      font: { color: '#888', size: 10 },
+      size: 14 + Math.min(papers * 3, 30),
+      font: { color: '#aabbcc', size: 10, face: 'JetBrains Mono' },
+      shadow: { enabled: true, color: c.glow, size: 15, x: 0, y: 0 },
+      borderWidth: 2,
+      borderWidthSelected: 3,
     });
   }
 
   for (const r of rels) {
+    const conf = r.confidence || 0.5;
     edges.push({
       from: r.source,
       to: r.target,
       label: r.relation,
-      title: `Confidence: ${r.confidence}`,
-      width: (r.confidence || 0.5) * 2,
-      color: { color: '#333', highlight: '#00d4aa' },
-      font: { size: 8, color: '#555' },
+      title: `Confidence: ${conf}`,
+      width: conf * 2.5,
+      color: {
+        color: `rgba(0,229,255,${0.1 + conf * 0.3})`,
+        highlight: '#00e5ff',
+        hover: '#40f0ff',
+        opacity: 0.6
+      },
+      font: { size: 8, color: 'rgba(136,146,168,0.6)', face: 'JetBrains Mono', strokeWidth: 0 },
+      smooth: { type: 'continuous', roundness: 0.15 },
+      shadow: { enabled: true, color: 'rgba(0,229,255,0.15)', size: 5 },
     });
   }
 
@@ -1201,13 +1466,43 @@ function renderGraph() {
   }, {
     physics: {
       solver: 'forceAtlas2Based',
-      stabilization: { iterations: 200 },
-      forceAtlas2Based: { gravitationalConstant: -40, springLength: 120 }
+      stabilization: { iterations: 300, updateInterval: 25 },
+      forceAtlas2Based: {
+        gravitationalConstant: -50,
+        springLength: 150,
+        springConstant: 0.04,
+        damping: 0.5,
+        avoidOverlap: 0.5
+      },
+      maxVelocity: 30,
+      minVelocity: 0.5,
     },
-    interaction: { hover: true, tooltipDelay: 100, zoomView: true },
-    nodes: { borderWidth: 1, font: { color: '#888', size: 10 } },
-    edges: { smooth: { type: 'continuous' } },
-    background: '#000000',
+    interaction: {
+      hover: true,
+      tooltipDelay: 100,
+      zoomView: true,
+      dragView: true,
+      navigationButtons: true,
+      keyboard: { enabled: true },
+    },
+    nodes: {
+      borderWidth: 2,
+      font: { color: '#aabbcc', size: 10, face: 'JetBrains Mono' },
+      scaling: { min: 14, max: 40 },
+    },
+    edges: {
+      smooth: { type: 'continuous', roundness: 0.15 },
+      font: { size: 8, color: 'rgba(136,146,168,0.5)', face: 'JetBrains Mono', strokeWidth: 0 },
+    },
+    background: 'rgba(5,5,16,0.0)',
+  });
+
+  // Add glow effect on hover
+  network.on('hoverNode', function(params) {
+    container.style.boxShadow = '0 0 40px rgba(0,229,255,0.15), inset 0 0 30px rgba(0,229,255,0.03)';
+  });
+  network.on('blurNode', function(params) {
+    container.style.boxShadow = '0 8px 40px rgba(0,0,0,0.4), inset 0 0 60px rgba(0,229,255,0.02)';
   });
 }
 
@@ -1256,6 +1551,307 @@ function renderContradictions() {
       <div class="finding-score">Severity: ${sev.toUpperCase()}</div>
     </div>`;
   }).join('');
+}
+
+// ── Analysis Renderers (Full Detail) ──
+
+function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function trunc(s, n) { s = String(s||''); return s.length > n ? s.slice(0,n) + '...' : s; }
+function barColor(v, t1, t2) { return v >= t1 ? '#4ade80' : v >= t2 ? '#fbbf24' : '#f87171'; }
+function card(title, content, color) {
+  return `<div style="background:var(--bg-card);border:1px solid var(--border);${color?'border-left:3px solid '+color+';':''}border-radius:6px;padding:14px;margin-bottom:10px;">
+    ${title ? `<div style="font-weight:600;margin-bottom:6px;${color?'color:'+color:''}">${title}</div>` : ''}
+    ${content}
+  </div>`;
+}
+function analysisCard(value, label, color) {
+  return `<div style="background:rgba(255,255,255,0.03);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;text-align:center;">
+    <div style="font-size:28px;font-weight:700;color:${color||'var(--accent)'}">${value}</div>
+    <div style="color:var(--text-secondary);font-size:11px;margin-top:2px;">${label}</div>
+  </div>`;
+}
+function scoreBar(label, value, max) {
+  max = max || 100;
+  const pct = Math.min(100, (value/max)*100);
+  const c = barColor(pct, 70, 40);
+  return `<div style="margin-bottom:5px;">
+    <div style="display:flex;justify-content:space-between;font-size:11px;"><span>${label}</span><span style="color:${c}">${value}</span></div>
+    <div style="background:var(--bg-surface);height:5px;border-radius:3px;overflow:hidden;"><div style="background:${c};height:100%;width:${pct}%;border-radius:3px;"></div></div>
+  </div>`;
+}
+
+function renderScoring() {
+  const r = currentData.latestReport;
+  if (!r) return;
+  const sc = (r.phases || {}).discovery_scoring || {};
+  const el = document.getElementById('scoring-content');
+  if (!el) return;
+
+  const scores = sc.scores || {};
+  const weighted = sc.weighted_scores || {};
+  const weights = sc.weights_used || {};
+  const strengths = sc.strengths || [];
+  const weaknesses = sc.weaknesses || [];
+  const gradeColor = g => ({A:'#4ade80',B:'#60a5fa',C:'#fbbf24',D:'#fb923c',F:'#f87171'}[g]||'#f87171');
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
+      ${analysisCard(sc.discovery_score||0, 'Discovery Score', gradeColor(sc.grade))}
+      ${analysisCard(sc.grade||'F', 'Grade', gradeColor(sc.grade))}
+      ${sc.unified_score ? analysisCard(sc.unified_score, 'Unified Score', 'var(--accent)') : ''}
+      ${sc.unified_grade ? analysisCard(sc.unified_grade, 'Unified Grade', gradeColor(sc.unified_grade)) : ''}
+      ${sc.refinement_score ? analysisCard(sc.refinement_score, 'Refinement Score', 'var(--warn)') : ''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div>
+        <h4 style="color:var(--accent);margin-bottom:10px;">Dimension Scores</h4>
+        ${Object.entries(scores).map(([k,v]) => scoreBar(k.replace(/_/g,' '), typeof v==='number'?v:0)).join('')}
+        ${Object.keys(weighted).length ? `<h4 style="color:var(--accent);margin:16px 0 10px;">Weighted Scores</h4>
+        ${Object.entries(weighted).map(([k,v]) => scoreBar(k.replace(/_/g,' '), typeof v==='number'?Math.round(v*100):0)).join('')}` : ''}
+        ${Object.keys(weights).length ? `<h4 style="color:var(--text-dim);margin:16px 0 10px;font-size:11px;">Weights</h4>
+        ${Object.entries(weights).map(([k,v]) => `<div style="font-size:11px;color:var(--text-dim);margin-bottom:2px;">${k.replace(/_/g,' ')}: ${v}</div>`).join('')}` : ''}
+      </div>
+      <div>
+        <h4 style="color:#4ade80;margin-bottom:10px;">Strengths</h4>
+        ${strengths.map(s => `<div style="color:#4ade80;font-size:12px;margin-bottom:4px;">+ ${esc(s)}</div>`).join('') || '<div style="color:var(--text-dim);font-size:12px;">None identified</div>'}
+        <h4 style="color:#f87171;margin:16px 0 10px;">Weaknesses</h4>
+        ${weaknesses.map(w => `<div style="color:#f87171;font-size:12px;margin-bottom:4px;">- ${esc(w)}</div>`).join('') || '<div style="color:var(--text-dim);font-size:12px;">None identified</div>'}
+      </div>
+    </div>
+    ${sc.summary ? `<div style="margin-top:20px;padding:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-secondary);line-height:1.6;">${esc(sc.summary)}</div>` : ''}
+  `;
+}
+
+function renderAdversarial() {
+  const r = currentData.latestReport;
+  if (!r) return;
+  const adv = (r.phases || {}).adversarial_test || {};
+  const el = document.getElementById('adversarial-content');
+  if (!el) return;
+
+  const summary = adv.survival_summary || {};
+  const categories = [
+    {key:'hidden_variable_tests', label:'Hidden Variables'},
+    {key:'mechanism_tests', label:'Mechanisms'},
+    {key:'theory_tests', label:'Theories'},
+  ];
+  const allTests = categories.flatMap(c => (adv[c.key]||[]).map(t => ({...t, _cat: c.label})));
+
+  if (!allTests.length) {
+    el.innerHTML = '<div class="empty-state" style="height:200px;"><span class="empty-icon">⚔</span><span>No adversarial test results</span></div>';
+    return;
+  }
+
+  const vc = v => ({survived:'#4ade80',weakened:'#fbbf24',killed:'#f87171'}[v]||'#f87171');
+  const vi = v => ({survived:'✓',weakened:'⚠',killed:'✗'}[v]||'?');
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+      ${['hidden_variables','mechanisms','theories'].map(cat => {
+        const s = summary[cat] || {};
+        return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">${cat.replace(/_/g,' ')}</div>
+          <div><span style="color:#4ade80;font-size:20px;font-weight:700;">${s.survived||0}</span><span style="color:var(--text-dim);"> survived</span></div>
+          <div><span style="color:#fbbf24;font-size:20px;font-weight:700;">${s.weakened||0}</span><span style="color:var(--text-dim);"> weakened</span></div>
+          <div><span style="color:#f87171;font-size:20px;font-weight:700;">${s.killed||0}</span><span style="color:var(--text-dim);"> killed</span></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${allTests.map(t => card(
+        `${vi(t.verdict)} ${esc(t.name||'?')} <span style="float:right;color:${vc(t.verdict)};font-size:12px;">${(t.verdict||'?').toUpperCase()} (${(t.attack_score||0).toFixed(2)})</span>`,
+        `<div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">Category: ${esc(t._cat)} | Type: ${esc(t.item_type||'?')}</div>
+        ${t.existing_theory ? `<div style="font-size:11px;margin-top:8px;"><strong style="color:var(--accent);">Existing Theory:</strong> <span style="color:var(--text-secondary);">${esc(t.existing_theory)}</span></div>` : ''}
+        ${t.existing_theory_strength ? `<div style="font-size:11px;color:var(--text-dim);">Strength: <strong>${esc(t.existing_theory_strength)}</strong></div>` : ''}
+        ${t.can_remove_variables !== undefined ? `<div style="font-size:11px;margin-top:6px;"><strong style="color:#fbbf24;">Can Remove Variables:</strong> ${t.can_remove_variables ? 'YES' : 'NO'}</div>` : ''}
+        ${t.removable_variables && t.removable_variables.length ? `<div style="font-size:11px;color:#f87171;margin-top:4px;">Removable: ${t.removable_variables.map(v=>'<code style="background:var(--bg-surface);padding:1px 4px;border-radius:3px;">'+esc(v)+'</code>').join(', ')}</div>` : ''}
+        ${t.essential_variables && t.essential_variables.length ? `<div style="font-size:11px;color:#4ade80;margin-top:4px;">Essential: ${t.essential_variables.map(v=>'<code style="background:var(--bg-surface);padding:1px 4px;border-radius:3px;">'+esc(v)+'</code>').join(', ')}</div>` : ''}
+        ${t.removal_reason ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:4px;"><strong>Removal Reason:</strong> ${esc(t.removal_reason)}</div>` : ''}
+        ${t.falsification ? `<div style="font-size:11px;margin-top:8px;"><strong style="color:#f87171;">Falsification:</strong> <span style="color:var(--text-secondary);">${esc(t.falsification)}</span></div>` : ''}
+        ${t.falsification_quality ? `<div style="font-size:11px;color:var(--text-dim);">Falsification Quality: <strong>${esc(t.falsification_quality)}</strong></div>` : ''}
+        ${t.reasoning ? `<div style="font-size:11px;color:var(--text-dim);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">${esc(t.reasoning)}</div>` : ''}`,
+        vc(t.verdict)
+      )).join('')}
+    </div>
+  `;
+}
+
+function renderPeerReview() {
+  const r = currentData.latestReport;
+  if (!r) return;
+  const pr = (r.phases || {}).peer_review || {};
+  const el = document.getElementById('peer-review-content');
+  if (!el) return;
+
+  if (!pr || Object.keys(pr).length === 0) {
+    el.innerHTML = '<div class="empty-state" style="height:200px;"><span class="empty-icon">📋</span><span>No peer review results</span></div>';
+    return;
+  }
+
+  const dims = ['novelty','methodology','significance','clarity','limitations','reproducibility'];
+  const recColor = x => ({accept:'#4ade80',minor_revision:'#60a5fa',major_revision:'#fbbf24',reject:'#f87171'}[x]||'#f87171');
+  const sc = pr.overall_score;
+
+  el.innerHTML = `
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:56px;font-weight:700;color:${barColor((sc||0)*10, 70, 40)}">${sc||'?'}</div>
+      <div style="color:var(--text-secondary);font-size:13px;">Overall Score /10</div>
+      <div style="margin-top:8px;display:inline-block;padding:4px 16px;border-radius:4px;background:${recColor(pr.recommendation)}22;color:${recColor(pr.recommendation)};font-weight:600;font-size:13px;">
+        ${(pr.recommendation||'?').replace(/_/g,' ').toUpperCase()}
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;">
+      ${dims.map(d => {
+        const val = pr[d];
+        const score = typeof val === 'object' ? val.score : val;
+        const comment = typeof val === 'object' ? val.comment : '';
+        const color = score >= 7 ? '#4ade80' : score >= 5 ? '#fbbf24' : '#f87171';
+        return card(
+          `<span style="text-transform:uppercase;font-size:12px;color:var(--text-secondary);">${d}</span> <span style="float:right;font-size:20px;font-weight:700;color:${color}">${score||'?'}</span>`,
+          comment ? `<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">${esc(comment)}</div>` : '<div style="color:var(--text-dim);font-size:11px;">No comment</div>',
+          color
+        );
+      }).join('')}
+    </div>
+    ${pr.major_issues && pr.major_issues.length ? `<h4 style="color:#f87171;margin:20px 0 10px;">Major Issues</h4>
+    ${pr.major_issues.map(i => card('', `<div style="font-size:12px;color:#f87171;">${esc(i)}</div>`, '#f87171')).join('')}` : ''}
+    ${pr.limitations_detail ? `<h4 style="color:var(--accent);margin:20px 0 10px;">Limitations Detail</h4>
+    <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">${esc(pr.limitations_detail)}</div>` : ''}
+  `;
+}
+
+function renderDerivations() {
+  const r = currentData.latestReport;
+  if (!r) return;
+  const de = (r.phases || {}).derivation_engine || {};
+  const el = document.getElementById('derivations-content');
+  if (!el) return;
+
+  if (!de || Object.keys(de).length === 0) {
+    el.innerHTML = '<div class="empty-state" style="height:200px;"><span class="empty-icon">∑</span><span>No derivation results</span></div>';
+    return;
+  }
+
+  const details = de.details || {};
+  const summaryKeys = Object.entries(de).filter(([k]) => k !== 'details');
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px;">
+      ${summaryKeys.map(([k,v]) => analysisCard(
+        typeof v === 'boolean' ? (v ? '✓' : '✗') : (typeof v === 'number' ? v : esc(String(v))),
+        k.replace(/_/g,' '),
+        typeof v === 'boolean' ? (v ? '#4ade80' : '#f87171') : 'var(--accent)'
+      )).join('')}
+    </div>
+    ${Object.entries(details).map(([section, data]) => {
+      if (Array.isArray(data)) {
+        return `<h4 style="color:var(--accent);margin:16px 0 10px;">${section.replace(/_/g,' ')}</h4>
+        ${data.map((item, i) => {
+          if (typeof item === 'object') {
+            return card(`Computation ${i+1}`, Object.entries(item).filter(([k])=>k!=='sympy').map(([k,v]) =>
+              `<div style="font-size:12px;margin-bottom:3px;"><span style="color:var(--text-dim);">${esc(k)}:</span> <span style="color:var(--text-primary);font-family:var(--mono);">${esc(typeof v==='object'?JSON.stringify(v):String(v))}</span></div>`
+            ).join(''));
+          }
+          return card('', `<div style="font-size:12px;">${esc(String(item))}</div>`);
+        }).join('')}`;
+      } else if (typeof data === 'object') {
+        return `<h4 style="color:var(--accent);margin:16px 0 10px;">${section.replace(/_/g,' ')}</h4>
+        ${card('', Object.entries(data).map(([k,v]) =>
+          `<div style="font-size:12px;margin-bottom:4px;"><span style="color:var(--text-dim);">${esc(k.replace(/_/g,' '))}:</span> <span style="color:var(--text-primary);font-family:var(--mono);">${esc(typeof v==='object'?JSON.stringify(v):String(v))}</span></div>`
+        ).join(''))}`;
+      }
+      return '';
+    }).join('')}
+  `;
+}
+
+function renderRefinement() {
+  const r = currentData.latestReport;
+  if (!r) return;
+  const ref = r.refinement || {};
+  const el = document.getElementById('refinement-content');
+  if (!el) return;
+
+  if (!ref || Object.keys(ref).length === 0) {
+    el.innerHTML = '<div class="empty-state" style="height:200px;"><span class="empty-icon">⬡</span><span>No refinement results</span></div>';
+    return;
+  }
+
+  const scoring = ref.scoring || {};
+  const courtroom = ref.courtroom || {};
+  const classification = ref.classification || {};
+  const uncertainty = ref.uncertainty || {};
+  const audit = ref.audit || {};
+  const reviews = ref.reviews || {};
+  const competition = ref.competition || {};
+
+  var html = '';
+
+  // Summary cards
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;">';
+  html += analysisCard(scoring.overall_score||'?', 'Refinement Score', barColor(scoring.overall_score, 70, 40));
+  html += analysisCard(scoring.grade||'?', 'Grade', barColor(scoring.overall_score, 70, 40));
+  html += analysisCard(classification.classification||'?', 'Classification', 'var(--accent)');
+  html += analysisCard(courtroom.verdict||'?', 'Courtroom Verdict', courtroom.survived?'#4ade80':'#f87171');
+  html += '</div>';
+
+  // Scoring dimensions
+  if (scoring.scores) {
+    html += '<h4 style="color:var(--accent);margin-bottom:10px;">Refinement Dimensions</h4>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:20px;">';
+    for (var k in scoring.scores) {
+      html += scoreBar(k.replace(/_/g,' '), scoring.scores[k]);
+    }
+    html += '</div>';
+  }
+
+  // Failure conditions
+  if (scoring.failure_conditions && scoring.failure_conditions.length) {
+    html += '<h4 style="color:#f87171;margin-bottom:10px;">Failure Conditions</h4>';
+    scoring.failure_conditions.forEach(function(f) {
+      html += card('', '<div style="font-size:12px;color:#f87171;">'+esc(f)+'</div>', '#f87171');
+    });
+  }
+
+  // Classification reasoning
+  if (classification.reasoning) {
+    html += '<h4 style="color:var(--accent);margin:16px 0 10px;">Classification Reasoning</h4>';
+    html += '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;">'+esc(classification.reasoning)+'</div>';
+  }
+
+  // Courtroom
+  if (courtroom.prosecution) {
+    html += '<h4 style="color:#f87171;margin:24px 0 10px;">Prosecution</h4>';
+    html += '<div style="font-size:12px;color:#f87171;">'+esc(courtroom.prosecution.fatal_flaw||'')+'</div>';
+  }
+  if (courtroom.defense) {
+    html += '<h4 style="color:#4ade80;margin:16px 0 10px;">Defense</h4>';
+    html += '<div style="font-size:12px;color:#4ade80;">'+esc(courtroom.defense.argument||'')+'</div>';
+  }
+  if (courtroom.judge) {
+    html += '<h4 style="color:var(--accent);margin:16px 0 10px;">Judge</h4>';
+    html += '<div style="font-size:12px;">Ruling: '+esc(courtroom.judge.ruling||'?')+'</div>';
+    if (courtroom.judge.reasoning) {
+      html += '<div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">'+esc(courtroom.judge.reasoning)+'</div>';
+    }
+  }
+
+  // Competition
+  if (competition.hypotheses && competition.hypotheses.length) {
+    html += '<h4 style="color:var(--accent);margin:20px 0 10px;">Competition Hypotheses</h4>';
+    competition.hypotheses.forEach(function(h, i) {
+      html += card((i+1)+'. '+esc(h.name||h.title||'?'),
+        '<div style="font-size:12px;color:var(--text-secondary);">'+esc(typeof h==='object'?h.description||JSON.stringify(h):String(h))+'</div>');
+    });
+  }
+
+  // Reviews
+  if (reviews.reviews && reviews.reviews.length) {
+    html += '<h4 style="color:var(--accent);margin:20px 0 10px;">Expert Reviews ('+reviews.reviews.length+')</h4>';
+    html += '<div style="font-size:12px;color:var(--text-dim);">Fatal: '+reviews.fatal_count+' | Survived: '+reviews.survived+'</div>';
+  }
+
+  el.innerHTML = html;
 }
 
 function renderRunHistory() {
@@ -1324,9 +1920,39 @@ document.getElementById('paper-search').addEventListener('input', (e) => {
 });
 
 // ══════════════════════════════════════════════════════
+//  Particle System
+// ══════════════════════════════════════════════════════
+
+function initParticles() {
+  const container = document.getElementById('particles');
+  if (!container) return;
+  const count = 40;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 1 + Math.random() * 3;
+    const x = Math.random() * 100;
+    const duration = 8 + Math.random() * 20;
+    const delay = Math.random() * duration;
+    const hue = Math.random() > 0.5 ? 180 : 270; // cyan or purple
+    p.style.cssText = `
+      left: ${x}%;
+      width: ${size}px;
+      height: ${size}px;
+      background: hsl(${hue}, 100%, 70%);
+      box-shadow: 0 0 ${size * 3}px hsl(${hue}, 100%, 50%);
+      animation-duration: ${duration}s;
+      animation-delay: -${delay}s;
+    `;
+    container.appendChild(p);
+  }
+}
+
+// ══════════════════════════════════════════════════════
 //  Init
 // ══════════════════════════════════════════════════════
 
+initParticles();
 loadAllData();
 </script>
 </body>

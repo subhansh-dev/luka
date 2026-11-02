@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-skills/ — RUMI Cognitive & Utility Skills
+skills/ — Luka Cognitive & Utility Skills
 ============================================
 
 Core Skills:

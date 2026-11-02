@@ -9,14 +9,15 @@ interface StreamingProps {
 }
 
 const THINKING_STEPS = [
-  'Searching literature',
-  'Extracting entities',
-  'Building graph',
-  'Detecting anomalies',
-  'Generating hypotheses',
+  'searching literature',
+  'extracting entities',
+  'building knowledge graph',
+  'detecting anomalies',
+  'generating mechanisms',
+  'evaluating theories',
 ];
 
-const SPINNER = ['|', '/', '-', '\\'];
+const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 export const Streaming: React.FC<StreamingProps> = ({ content, isActive }) => {
   const [stepIdx, setStepIdx] = useState(0);
@@ -25,8 +26,8 @@ export const Streaming: React.FC<StreamingProps> = ({ content, isActive }) => {
   useEffect(() => {
     if (!isActive) return;
     const interval = setInterval(() => {
-      setSpinIdx(prev => (prev + 1) % SPINNER.length);
-    }, 150);
+      setSpinIdx(prev => (prev + 1) % SPINNER_FRAMES.length);
+    }, 80);
     return () => clearInterval(interval);
   }, [isActive]);
 
@@ -34,7 +35,7 @@ export const Streaming: React.FC<StreamingProps> = ({ content, isActive }) => {
     if (!isActive) return;
     const interval = setInterval(() => {
       setStepIdx(prev => (prev + 1) % THINKING_STEPS.length);
-    }, 2000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [isActive]);
 
@@ -42,23 +43,16 @@ export const Streaming: React.FC<StreamingProps> = ({ content, isActive }) => {
 
   if (isActive && !content) {
     return (
-      <Box flexDirection="column" paddingLeft={1}>
-        <Text color={theme.accent.cyan} bold>{'[THINKING]'}</Text>
-        <Text color={theme.txt.muted}>{'  '}{SPINNER[spinIdx]}{' Thinking...'}</Text>
-        {THINKING_STEPS.slice(0, stepIdx + 1).map((step, i) => (
-          <Text key={i} color={theme.txt.secondary}>
-            {i === stepIdx ? `  ${SPINNER[spinIdx]} ${step}...` : `  + ${step}`}
-          </Text>
-        ))}
+      <Box flexDirection="row" paddingLeft={1}>
+        <Text color={theme.accent.cyan}>{SPINNER_FRAMES[spinIdx]} </Text>
+        <Text color={theme.txt.secondary}>{THINKING_STEPS[stepIdx]}...</Text>
       </Box>
     );
   }
 
   return (
-    <Box flexDirection="column" marginBottom={1} paddingLeft={1}>
-      <Text color={theme.txt.primary} wrap="wrap">
-        {content}
-      </Text>
+    <Box flexDirection="column" paddingLeft={1}>
+      <Text color={theme.txt.primary} wrap="wrap">{content}</Text>
     </Box>
   );
 };

@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Turn RUMI into an autonomous drug discovery AI that searches PubMed, extracts entities, builds a knowledge graph, and generates novel hypotheses.
+**Goal:** Turn Luka into an autonomous drug discovery AI that searches PubMed, extracts entities, builds a knowledge graph, and generates novel hypotheses.
 
-**Architecture:** Agentic workflow — RUMI drives discovery via session tools (Gemini for extraction/reasoning). Python utility modules handle PubMed API, graph persistence, and output formatting. Static HTML dashboard for visual exploration.
+**Architecture:** Agentic workflow — Luka drives discovery via session tools (Gemini for extraction/reasoning). Python utility modules handle PubMed API, graph persistence, and output formatting. Static HTML dashboard for visual exploration.
 
 **Tech Stack:** Python 3.11, urllib (Entrez API), json, pathlib, webbrowser, vis-network (CDN for dashboard)
 
@@ -22,7 +22,7 @@
 | `ui.py` | 6 new slash command handlers |
 | `main.py` | DiscoveryEngine orchestration + Intake Protocol |
 | `SOUL.md` | Discovery Intake Protocol section |
-| `RUMI.md` | Updated capabilities table |
+| `Luka.md` | Updated capabilities table |
 
 ---
 
@@ -51,9 +51,9 @@ def _get_email() -> str:
         cfg = json.loads(
             (Path(__file__).resolve().parent.parent / "config" / "api_keys.json").read_text(encoding="utf-8-sig")
         )
-        return cfg.get("ncbi_email", "rumi@research.ai")
+        return cfg.get("ncbi_email", "luka@research.ai")
     except Exception:
-        return "rumi@research.ai"
+        return "luka@research.ai"
 
 
 def search(query: str, max_results: int = 20, retstart: int = 0) -> list[str]:
@@ -492,7 +492,7 @@ The dashboard is a single self-contained HTML file (~150 lines) that:
 - Uses vis-network CDN for interactive knowledge graph visualization
 - Has tabs: Graph | Hypotheses | Papers | Stats
 - Reads JSON files via fetch
-- Dark theme matching RUMI's terminal aesthetic
+- Dark theme matching Luka's terminal aesthetic
 
 Key content (write to `discovery/dashboard/index.html`):
 
@@ -501,7 +501,7 @@ Key content (write to `discovery/dashboard/index.html`):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>RUMI Discovery Dashboard</title>
+<title>Luka Discovery Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.6/dist/vis-network.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -617,11 +617,11 @@ loadGraph(); loadHypotheses(); loadPapers(); loadStats();
 
 ---
 
-### Task 7: SOUL.md & RUMI.md Updates
+### Task 7: SOUL.md & Luka.md Updates
 
 **Files:**
 - Modify: `SOUL.md`
-- Modify: `RUMI.md`
+- Modify: `Luka.md`
 
 - [ ] **Step 1: Add Discovery Intake Protocol to SOUL.md** after the "Scientist AI Protocols" section:
 
@@ -635,7 +635,7 @@ Before running `/discover`, clarify the user's intent:
 4. **Build on existing?** — "Fresh start or build on previous discoveries?"
 ```
 
-- [ ] **Step 2: Add Discovery Engine row to RUMI.md capabilities table:**
+- [ ] **Step 2: Add Discovery Engine row to Luka.md capabilities table:**
 
 ```markdown
 | **Discovery Engine** | Autonomous drug discovery: PubMed search, entity extraction, knowledge graph, pattern mining, hypothesis generation, web dashboard |

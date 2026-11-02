@@ -1,4 +1,4 @@
-﻿# RUMI Discovery Engine — Design Document
+﻿# Luka Discovery Engine — Design Document
 
 **Date:** 2026-05-25
 **Status:** Approved design, pre-implementation
@@ -7,17 +7,17 @@
 
 ## Overview
 
-RUMI becomes a genuine autonomous scientific discovery AI — starting with drug discovery literature mining, scaling to drug repurposing and de novo molecule generation. Unlike the previous "12-phase pipeline" which generated a paper *plan*, the Discovery Engine produces **real, testable hypotheses** from real research papers.
+Luka becomes a genuine autonomous scientific discovery AI — starting with drug discovery literature mining, scaling to drug repurposing and de novo molecule generation. Unlike the previous "12-phase pipeline" which generated a paper *plan*, the Discovery Engine produces **real, testable hypotheses** from real research papers.
 
-**Vision:** Type /discover find repurposing targets for Metformin → RUMI searches PubMed, extracts entities, builds a knowledge graph, mines overlooked connections, and returns 3-5 novel hypotheses with evidence chains — all autonomously.
+**Vision:** Type /discover find repurposing targets for Metformin → Luka searches PubMed, extracts entities, builds a knowledge graph, mines overlooked connections, and returns 3-5 novel hypotheses with evidence chains — all autonomously.
 
 ---
 
 ## Architecture
 
-### Approach: Agentic Workflow (RUMI-driven, minimal infrastructure)
+### Approach: Agentic Workflow (Luka-driven, minimal infrastructure)
 
-No separate server. RUMI drives everything from her session using:
+No separate server. Luka drives everything from her session using:
 - web_search / webfetch → query PubMed Entrez API
 - Gemini (her own model) → entity extraction, reasoning, hypothesis generation
 - Local JSON files → persistent knowledge graph across sessions
@@ -67,7 +67,7 @@ User: "/discover <topic>"
 
 ## Discovery Intake Protocol
 
-Before running any pipeline, RUMI asks targeted clarifying questions (one at a time, multiple choice preferred):
+Before running any pipeline, Luka asks targeted clarifying questions (one at a time, multiple choice preferred):
 
 | Question | Purpose | Example options |
 |---|---|---|
@@ -99,7 +99,8 @@ drug, disease, gene, protein, mechanism, pathway, 	issue, symptom, side_effect
 
 ### Relation Types
 
-	reats, causes, ctivates, inhibits, inds, expressed_in, egulates, ssociated_with, contraindicates, metabolized_by
+	reats, causes, ctivates, inhibits, inds, expressed_in, 
+egulates, ssociated_with, contraindicates, metabolized_by
 
 ### Confidence Levels
 
@@ -156,7 +157,7 @@ Tabs:
 ## File Structure
 
 `
-rumi/
+luka/
   discovery/
     sessions/                    # One JSON per /discover command
       2026-05-25_metformin.json
@@ -172,7 +173,7 @@ rumi/
   ui.py                          # Add /discover, /search, /hypothesize, /graph, /dashboard, /discoveries
   main.py                        # Discovery orchestration methods
   SOUL.md                        # Updated with Discovery Intake Protocol
-  RUMI.md                        # Updated capabilities
+  Luka.md                        # Updated capabilities
 `
 
 ---
@@ -209,7 +210,7 @@ rumi/
 | ui.py | Add 6 new slash command handlers |
 | main.py | Add discovery orchestration methods |
 | SOUL.md | Add Discovery Intake Protocol to Scientist AI Protocols section |
-| RUMI.md | Add Discovery Engine to capabilities table |
+| Luka.md | Add Discovery Engine to capabilities table |
 | config/api_keys.json | Add 
 cbi_email for PubMed API access |
 

@@ -1,5 +1,5 @@
 """
-browser_control.py — RUMI Browser Action Module
+browser_control.py — Luka Browser Action Module
 ====================================================
 Supported browsers : chrome, edge, firefox, opera, operagx, brave, vivaldi, safari (macOS)
 Supported platforms : Windows · macOS · Linux
@@ -498,10 +498,10 @@ class _BrowserSession:
             try:
                 self._context = await engine_obj.launch_persistent_context(profile, **kwargs)
             except Exception as e:
-                print(f"[Browser] Firefox real profile failed ({e}), using RUMI profile")
-                rumi = str(Path.home() / ".rumi_profiles" / "firefox_rumi")
-                Path(rumi).mkdir(parents=True, exist_ok=True)
-                self._context = await engine_obj.launch_persistent_context(rumi, **kwargs)
+                print(f"[Browser] Firefox real profile failed ({e}), using Luka profile")
+                luka = str(Path.home() / ".rumi_profiles" / "firefox_rumi")
+                Path(luka).mkdir(parents=True, exist_ok=True)
+                self._context = await engine_obj.launch_persistent_context(luka, **kwargs)
 
             await asyncio.sleep(0.5)
             self._page = await self._context.new_page()
@@ -572,13 +572,13 @@ class _BrowserSession:
 
         rumi_profile = str(Path.home() / ".rumi_profiles" / self.browser_name)
         Path(rumi_profile).mkdir(parents=True, exist_ok=True)
-        print(f"[Browser] Retrying with RUMI profile: {rumi_profile}")
+        print(f"[Browser] Retrying with Luka profile: {rumi_profile}")
 
         try:
             self._context = await engine_obj.launch_persistent_context(rumi_profile, **kwargs)
             await asyncio.sleep(0.5)
             self._page = await self._context.new_page()
-            print(f"[Browser] [OK] Launched [{label}] with RUMI profile")
+            print(f"[Browser] [OK] Launched [{label}] with Luka profile")
         except Exception as e2:
             raise RuntimeError(f"Could not launch {self.browser_name}: {e2}") from e2
 

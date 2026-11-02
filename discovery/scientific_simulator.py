@@ -1,7 +1,7 @@
 """
 scientific_simulator.py — Actually RUN the math, don't just describe it.
 
-When RUMI proposes a mechanism like "G(z) = G0(1 + αz)", this module
+When Luka proposes a mechanism like "G(z) = G0(1 + αz)", this module
 actually COMPUTES the consequences using SymPy, SciPy, and NumPy.
 
 For physics: solve differential equations, compute observables
@@ -131,10 +131,17 @@ class ScientificSimulator:
         all_text = []
         for m in mechanisms:
             if isinstance(m, dict):
-                all_text.append(m.get("description", ""))
-                all_text.append(m.get("mathematical_model", ""))
+                desc = m.get("description", "")
+                if isinstance(desc, str):
+                    all_text.append(desc)
+                math_model = m.get("mathematical_model", "")
+                if isinstance(math_model, str):
+                    all_text.append(math_model)
                 for step in m.get("steps", []):
-                    all_text.append(step)
+                    if isinstance(step, str):
+                        all_text.append(step)
+                    elif isinstance(step, dict):
+                        all_text.append(str(step.get("text", step.get("description", ""))))
                 for param in m.get("key_parameters", []):
                     if isinstance(param, dict):
                         name = param.get("name", "")
@@ -148,10 +155,16 @@ class ScientificSimulator:
 
         for hv in hidden_variables:
             if isinstance(hv, dict):
-                all_text.append(hv.get("description", ""))
-                all_text.append(hv.get("mathematical_formalism", ""))
+                desc = hv.get("description", "")
+                if isinstance(desc, str):
+                    all_text.append(desc)
+                math_form = hv.get("mathematical_formalism", "")
+                if isinstance(math_form, str):
+                    all_text.append(math_form)
 
         for text in all_text:
+            if not isinstance(text, str):
+                text = str(text)
             for pattern in EQ_PATTERNS:
                 matches = re.findall(pattern, text)
                 for var, expr in matches:
@@ -276,6 +289,8 @@ class ScientificSimulator:
             if not isinstance(hv, dict):
                 continue
             coupling = hv.get("coupling_constants", "")
+            if isinstance(coupling, dict):
+                coupling = str(coupling)
             if coupling:
                 import re
                 nums = re.findall(r'[\d.]+(?:e[+-]?\d+)?', coupling)
@@ -300,8 +315,10 @@ class ScientificSimulator:
         for p in predictions:
             if not isinstance(p, dict):
                 continue
-            statement = p.get("statement", "")
             import re
+            statement = p.get("statement", "")
+            if not isinstance(statement, str):
+                statement = str(statement)
             # Extract numbers with units
             numbers = re.findall(r'(\d+\.?\d*)\s*([a-zA-Z/%]+)', statement)
             for num, unit in numbers:
@@ -343,7 +360,15 @@ class ScientificSimulator:
             if not isinstance(m, dict):
                 continue
             name = m.get("name", "")
-            desc = m.get("description", "") + " " + m.get("mathematical_model", "")
+            desc = m.get("description", "")
+            if not isinstance(desc, str):
+                desc = str(desc)
+            math_model = m.get("mathematical_model", "")
+            if not isinstance(math_model, str):
+                math_model = str(math_model)
+            desc = desc + " " + math_model
+            if not isinstance(desc, str):
+                desc = str(desc)
 
             # Hubble tension specific: compute ΔH₀ for given parameters
             if "gravitational" in desc.lower() and "constant" in desc.lower():
@@ -419,7 +444,10 @@ class ScientificSimulator:
             if not isinstance(p, dict):
                 continue
             import re
-            nums = re.findall(r'(\d+\.?\d*(?:e[+-]?\d+)?)', p.get("statement", ""))
+            statement = p.get("statement", "")
+            if not isinstance(statement, str):
+                statement = str(statement)
+            nums = re.findall(r'(\d+\.?\d*(?:e[+-]?\d+)?)', statement)
             for n in nums:
                 try:
                     values.append(float(n))

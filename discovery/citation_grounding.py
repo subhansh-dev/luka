@@ -356,11 +356,22 @@ def traverse_citation_network(papers: list, hop_depth: int = 2,
     Returns:
         Enriched paper list with citation_network metadata
     """
-    from discovery.semantic_scholar import get_references
+    from discovery.semantic_scholar import get_references, search_papers
 
     seen_titles = {p.get("title", "").lower().strip()[:60] for p in papers}
     all_papers = list(papers)
     citation_frequency = {}  # title -> how many times referenced
+
+    # Enrich papers with paperId if missing — lookup by title
+    for p in papers:
+        if not p.get("paperId") and p.get("title"):
+            try:
+                results = search_papers(p["title"], limit=1)
+                if results and results[0].get("paperId"):
+                    p["paperId"] = results[0]["paperId"]
+                    p["citation_count"] = results[0].get("citation_count", 0)
+            except Exception:
+                pass
 
     # Sort initial papers by citation count (prefer well-cited papers)
     scored_papers = sorted(

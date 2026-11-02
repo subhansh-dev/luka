@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-verification.py — RUMI Action Verification Layer
+verification.py — Luka Action Verification Layer
 Captures screenshots, verifies window focus, and uses Gemini Vision
 to confirm actions actually succeeded before reporting success.
 """

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-working_memory.py — RUMI Working Memory Buffer
+working_memory.py — Luka Working Memory Buffer
 =================================================
 Structured scratchpad for active task context. Short-term, task-scoped,
 auto-cleared between tasks. Inspired by Baddeley's Working Memory model.

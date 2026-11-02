@@ -1,5 +1,5 @@
 """
-data_analysis.py — Real Data Fetching & Statistical Analysis for RUMI
+data_analysis.py — Real Data Fetching & Statistical Analysis for Luka
 
 Fetches actual datasets from public APIs and runs statistical analysis
 to validate or challenge theories. Not LLM-generated — real computations.
@@ -33,7 +33,7 @@ class DataAnalyzer:
                 "query=select+pl_name,hostname,sy_dist,pl_rade,pl_bmasse,pl_orbper,disc_year,disc_facility"
                 f"+from+ps+where+default_flag=1+order+by+disc_year+desc&format=json&max_rows={limit}"
             )
-            req = urllib.request.Request(url, headers={"User-Agent": "RUMI/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "Luka/1.0"})
             with urllib.request.urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
             self.datasets["nasa_exoplanets"] = {
@@ -49,7 +49,7 @@ class DataAnalyzer:
         """Fetch Near-Earth Object data from NASA NEO API."""
         try:
             url = f"https://api.nasa.gov/neo/rest/v1/feed?api_key=DEMO_KEY&detailed=true"
-            req = urllib.request.Request(url, headers={"User-Agent": "RUMI/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "Luka/1.0"})
             with urllib.request.urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
             neos = []
@@ -70,7 +70,7 @@ class DataAnalyzer:
     def fetch_from_url(self, url: str, name: str = "custom") -> dict:
         """Fetch data from a generic URL (JSON or CSV)."""
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "RUMI/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "Luka/1.0"})
             with urllib.request.urlopen(req, timeout=30) as resp:
                 raw = resp.read().decode()
             # Try JSON first

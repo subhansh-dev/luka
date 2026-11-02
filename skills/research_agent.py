@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-research_agent.py — Rumi Autonomous Research Agent
+research_agent.py — Luka Autonomous Research Agent
 =====================================================
 
 Deep autonomous research that synthesizes knowledge from multiple sources,

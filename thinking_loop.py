@@ -1,9 +1,9 @@
 """
-thinking_loop.py — RUMI Multi-Pass Reasoning Module
+thinking_loop.py — Luka Multi-Pass Reasoning Module
 ======================================================
 Inspired by OpenMythos / Recurrent-Depth Transformer architecture.
 
-Instead of responding immediately to complex requests, RUMI runs the input
+Instead of responding immediately to complex requests, Luka runs the input
 through multiple reasoning passes — each refining the understanding, breaking
 down sub-tasks, and planning the execution before the main session acts.
 
@@ -79,7 +79,7 @@ def _get_api_key_and_model() -> tuple:
 
 
 def _generate(prompt: str, system: str = "") -> str:
-    from rumi_llm import generate
+    from luka_llm import generate
     _, model = _get_api_key_and_model()
     return generate(model, prompt, system=system, max_tokens=1024).strip()
 
@@ -156,7 +156,7 @@ def _count_loops(text: str) -> int:
 
 # ── System prompts for each reasoning pass ───────────────────────────────────
 
-_PASS_1_SYSTEM = """You are RUMI's internal reasoning engine — Pass 1: UNDERSTANDING.
+_PASS_1_SYSTEM = """You are Luka's internal reasoning engine — Pass 1: UNDERSTANDING.
 Your job: deeply understand what information or context is needed. Be concise. Output structured thinking, not a response to the user.
 Format:
 GOAL: [core objective]
@@ -164,7 +164,7 @@ IMPLICIT: [unstated requirements]
 AMBIGUITIES: [anything unclear]
 NEEDS: [what's needed to accomplish this]"""
 
-_PASS_2_SYSTEM = """You are RUMI's internal reasoning engine — Pass 2: PLANNING.
+_PASS_2_SYSTEM = """You are Luka's internal reasoning engine — Pass 2: PLANNING.
 
 - Identify which tools/actions each step needs
 - Identify dependencies between steps
@@ -175,9 +175,9 @@ _PASS_2_SYSTEM = """You are RUMI's internal reasoning engine — Pass 2: PLANNIN
 - For expert domain help, use agency_agent (code_reviewer, security_engineer, etc.)
 
 Available tools: open_app, web_search, browser_control, file_controller,
-computer_settings, computer_control, send_message, reminder, youtube_video,
+computer_settings, send_message, reminder, youtube_video,
 weather_report, dev_agent, code_helper,
-screen_process, desktop_control, security_tools, agency_agent, web_research,
+security_tools, agency_agent, web_research,
 ai_pipeline, data_analysis
 
 Format:
@@ -187,7 +187,7 @@ STEPS:
 RISKS: [potential issues]
 ORDER: [critical dependencies]"""
 
-_PASS_3_SYSTEM = """You are RUMI's internal reasoning engine — Pass 3: REFINEMENT.
+_PASS_3_SYSTEM = """You are Luka's internal reasoning engine — Pass 3: REFINEMENT.
 
 You have the understanding and plan from previous passes. Now refine and finalize.
 
@@ -354,7 +354,7 @@ if __name__ == "__main__":
         "Hey what's the weather in London",
         "Research the top 5 AI frameworks in 2025, compare them and save a detailed report to my desktop",
         "Open Spotify",
-        "Find flights from Mumbai to Tokyo next Rumi, and also check the weather there and send me a summary on Telegram",
+        "Find flights from Mumbai to Tokyo next Luka, and also check the weather there and send me a summary on Telegram",
     ]
 
     for inp in test_inputs:

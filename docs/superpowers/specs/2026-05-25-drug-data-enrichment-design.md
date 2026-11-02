@@ -8,7 +8,7 @@
 
 ## Overview
 
-Enhance RUMI's Discovery Engine with real drug database lookups. When RUMI extracts a drug entity from PubMed papers, she queries PubChem (compound properties, targets) and OpenFDA (side effects, labeling) to enrich the knowledge graph. This turns simple "drug X treats disease Y" observations into mechanistically-grounded hypotheses backed by known targets, side effect profiles, and molecular properties.
+Enhance Luka's Discovery Engine with real drug database lookups. When Luka extracts a drug entity from PubMed papers, she queries PubChem (compound properties, targets) and OpenFDA (side effects, labeling) to enrich the knowledge graph. This turns simple "drug X treats disease Y" observations into mechanistically-grounded hypotheses backed by known targets, side effect profiles, and molecular properties.
 
 ---
 
@@ -102,7 +102,7 @@ Hypothesis generation considers enriched graph
 Scans all existing drug entities in the graph and enriches them with PubChem/OpenFDA data. Progress indicator shows (x/y drugs enriched).
 
 ### Modified: `/discover` — Now auto-enriches during pipeline
-After entity extraction, before hypothesis generation, RUMI enriches each drug entity.
+After entity extraction, before hypothesis generation, Luka enriches each drug entity.
 
 ---
 

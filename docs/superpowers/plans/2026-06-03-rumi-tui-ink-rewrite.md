@@ -1,19 +1,19 @@
-# RUMI TUI Rewrite — Implementation Plan
+# Luka TUI Rewrite — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Rewrite RUMI's terminal UI using React Ink (TypeScript) with a Python JSON-RPC gateway, matching Hermes Agent's TUI quality while staying terminal-native.
+**Goal:** Rewrite Luka's terminal UI using React Ink (TypeScript) with a Python JSON-RPC gateway, matching Hermes Agent's TUI quality while staying terminal-native.
 
-**Architecture:** Client-server over stdin/stdout. A React Ink frontend (`ui-tui/`) renders the UI. A Python gateway (`rumi_gateway/`) wraps the existing `RumiLive` logic and communicates via JSON-RPC 2.0. The existing `ui.py` stays as classic CLI fallback.
+**Architecture:** Client-server over stdin/stdout. A React Ink frontend (`ui-tui/`) renders the UI. A Python gateway (`luka_gateway/`) wraps the existing `RumiLive` logic and communicates via JSON-RPC 2.0. The existing `ui.py` stays as classic CLI fallback.
 
-**Tech Stack:** TypeScript, React Ink 4, Python 3.11+, asyncio, existing RUMI brain modules
+**Tech Stack:** TypeScript, React Ink 4, Python 3.11+, asyncio, existing Luka brain modules
 
 ---
 
 ## File Structure
 
 ```
-rumi/
+luka/
 ├── ui-tui/                          # NEW — React Ink TUI
 │   ├── package.json
 │   ├── tsconfig.json
@@ -41,7 +41,7 @@ rumi/
 │   └── dist/
 │       └── entry.js                 # Built bundle
 │
-├── rumi_gateway/                    # NEW — Python JSON-RPC server
+├── luka_gateway/                    # NEW — Python JSON-RPC server
 │   ├── __init__.py
 │   ├── server.py                    # JSON-RPC over stdin/stdout
 │   ├── adapter.py                   # GatewayUI — adapts RumiLive to JSON-RPC
@@ -49,7 +49,7 @@ rumi/
 │
 ├── ui.py                            # UNCHANGED — classic CLI
 ├── main.py                          # MODIFIED — add --tui launch
-└── rumi_launcher.py                 # MODIFIED — pass --tui flag
+└── luka_launcher.py                 # MODIFIED — pass --tui flag
 ```
 
 ---
@@ -57,21 +57,21 @@ rumi/
 ## Task 1: Gateway Protocol Types (Python)
 
 **Files:**
-- Create: `rumi_gateway/__init__.py`
-- Create: `rumi_gateway/protocol.py`
+- Create: `luka_gateway/__init__.py`
+- Create: `luka_gateway/protocol.py`
 
 - [ ] **Step 1: Create package init**
 
 ```python
-# rumi_gateway/__init__.py
-"""RUMI JSON-RPC Gateway — bridges Ink TUI to RumiLive."""
+# luka_gateway/__init__.py
+"""Luka JSON-RPC Gateway — bridges Ink TUI to RumiLive."""
 ```
 
 - [ ] **Step 2: Write protocol message types**
 
 ```python
-# rumi_gateway/protocol.py
-"""JSON-RPC 2.0 message types for RUMI gateway."""
+# luka_gateway/protocol.py
+"""JSON-RPC 2.0 message types for Luka gateway."""
 from __future__ import annotations
 import json
 import sys
@@ -143,13 +143,13 @@ def log_error(message: str) -> None:
 
 - [ ] **Step 3: Verify imports work**
 
-Run: `cd C:\Users\Admin\Desktop\rumi && python -c "from rumi_gateway.protocol import JsonRpcRequest, JsonRpcEvent, send_message; print('OK')"`
+Run: `cd C:\Users\Admin\Desktop\luka && python -c "from luka_gateway.protocol import JsonRpcRequest, JsonRpcEvent, send_message; print('OK')"`
 Expected: `OK`
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add rumi_gateway/
+git add luka_gateway/
 git commit -m "feat(gateway): add JSON-RPC protocol types"
 ```
 
@@ -158,12 +158,12 @@ git commit -m "feat(gateway): add JSON-RPC protocol types"
 ## Task 2: Gateway Server (Python)
 
 **Files:**
-- Create: `rumi_gateway/server.py`
+- Create: `luka_gateway/server.py`
 
 - [ ] **Step 1: Write the JSON-RPC server**
 
 ```python
-# rumi_gateway/server.py
+# luka_gateway/server.py
 """JSON-RPC server reading from stdin, dispatching to RumiLive."""
 from __future__ import annotations
 import asyncio
@@ -177,7 +177,7 @@ _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from rumi_gateway.protocol import (
+from luka_gateway.protocol import (
     JsonRpcRequest, JsonRpcResponse, JsonRpcEvent,
     send_message, log_error,
 )
@@ -292,7 +292,7 @@ class GatewayServer:
         send_message(JsonRpcResponse(
             id=req.id,
             result={
-                "session_id": f"rumi-{int(time.time())}",
+                "session_id": f"luka-{int(time.time())}",
                 "model": "gemini-2.5-flash",
                 "personality": "professional",
             },
@@ -410,7 +410,7 @@ class GatewayAdapter:
         tl = text.lower().strip()
 
         # Skip internal noise
-        if any(skip in tl for skip in ["[rumi]", "[episodic]", "[selfawareness]",
+        if any(skip in tl for skip in ["[luka]", "[episodic]", "[selfawareness]",
                                         "[coordinator]", "[dreaming]", "[vectormemory]",
                                         "[telegram]", "non-data parts", "[focus]"]):
             return
@@ -420,9 +420,9 @@ class GatewayAdapter:
             content = text[4:].strip()
             self._server.emit("user.message", {"content": content})
 
-        # RUMI response
-        elif tl.startswith("rumi:") or tl.startswith("ai:"):
-            prefix_len = 5 if tl.startswith("rumi:") else 3
+        # Luka response
+        elif tl.startswith("luka:") or tl.startswith("ai:"):
+            prefix_len = 5 if tl.startswith("luka:") else 3
             content = text[prefix_len:].strip()
             content = re.sub(r'\*\*Thinking(?:\s*\(.*?\))?\*\*\s*', '', content).strip()
             content = re.sub(r'\*\*Reasoning\*\*\s*', '', content).strip()
@@ -564,13 +564,13 @@ class _StubActivityFeed:
 
 - [ ] **Step 2: Verify the module loads**
 
-Run: `cd C:\Users\Admin\Desktop\rumi && python -c "from rumi_gateway.server import GatewayServer, GatewayAdapter; print('OK')"`
+Run: `cd C:\Users\Admin\Desktop\luka && python -c "from luka_gateway.server import GatewayServer, GatewayAdapter; print('OK')"`
 Expected: `OK`
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add rumi_gateway/server.py
+git add luka_gateway/server.py
 git commit -m "feat(gateway): JSON-RPC server with GatewayAdapter for RumiLive"
 ```
 
@@ -588,9 +588,9 @@ git commit -m "feat(gateway): JSON-RPC server with GatewayAdapter for RumiLive"
 
 ```json
 {
-  "name": "rumi-tui",
+  "name": "luka-tui",
   "version": "3.0.0",
-  "description": "RUMI Terminal UI — React Ink, Hermes Agent style",
+  "description": "Luka Terminal UI — React Ink, Hermes Agent style",
   "main": "dist/entry.js",
   "scripts": {
     "build": "tsc && node esbuild.config.mjs",
@@ -678,7 +678,7 @@ export const theme = {
 export type Theme = typeof theme;
 ```
 
-- [ ] **Step 4: Create entry.tsx (minimal, just renders "RUMI TUI")**
+- [ ] **Step 4: Create entry.tsx (minimal, just renders "Luka TUI")**
 
 ```typescript
 // ui-tui/src/entry.tsx
@@ -689,7 +689,7 @@ const App: React.FC = () => {
   return (
     <Box flexDirection="column" padding={1}>
       <Text color={theme.accent.blue} bold>
-        RUMI TUI v3.0
+        Luka TUI v3.0
       </Text>
       <Text color={theme.txt.secondary}>
         Hermes Agent Style — Coming soon
@@ -705,7 +705,7 @@ render(<App />);
 
 - [ ] **Step 5: Install dependencies and verify build**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npm install && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npm install && npx tsc --noEmit`
 Expected: Compiles with no errors (may have warnings, that's fine)
 
 - [ ] **Step 6: Commit**
@@ -920,7 +920,7 @@ export class GatewayClient {
 
 - [ ] **Step 3: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 4: Commit**
@@ -1056,7 +1056,7 @@ const TranscriptLine: React.FC<{ entry: TranscriptEntry }> = ({ entry }) => {
       return (
         <Box flexDirection="column" marginBottom={1} paddingLeft={1}>
           <Text color={theme.accent.blue}>
-            {'╭─ RUMI ' + '─'.repeat(Math.max(0, 50)) + '╮'}
+            {'╭─ Luka ' + '─'.repeat(Math.max(0, 50)) + '╮'}
           </Text>
           <Text color={theme.txt.primary} wrap="wrap">
             {'│ '}{entry.content}
@@ -1106,7 +1106,7 @@ export const Streaming: React.FC<StreamingProps> = ({ content, isActive }) => {
   return (
     <Box flexDirection="column" marginBottom={1} paddingLeft={1}>
       <Text color={theme.accent.blue}>
-        {'╭─ RUMI ' + '─'.repeat(50) + '╮'}
+        {'╭─ Luka ' + '─'.repeat(50) + '╮'}
       </Text>
       <Text color={theme.txt.primary} wrap="wrap">
         {'│ '}{content}
@@ -1124,7 +1124,7 @@ export const Streaming: React.FC<StreamingProps> = ({ content, isActive }) => {
 
 - [ ] **Step 4: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 5: Commit**
@@ -1201,7 +1201,7 @@ const ToolLine: React.FC<{ tool: ToolCall }> = ({ tool }) => {
 
 - [ ] **Step 2: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 3: Commit**
@@ -1301,7 +1301,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
 
 - [ ] **Step 2: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 3: Commit**
@@ -1361,7 +1361,7 @@ export const Banner: React.FC<BannerProps> = ({
   return (
     <Box flexDirection="column" paddingX={1} paddingBottom={1}>
       <Box>
-        <Text color={theme.accent.blue} bold>{'RUMI'}</Text>
+        <Text color={theme.accent.blue} bold>{'Luka'}</Text>
         <Text color={theme.txt.muted}>{` v${version} · `}</Text>
         <Text color={theme.txt.secondary}>{model}</Text>
         <Text color={theme.txt.muted}>{` · ${domains} domains · ${modules} modules`}</Text>
@@ -1393,7 +1393,7 @@ export const Banner: React.FC<BannerProps> = ({
 
 - [ ] **Step 2: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 3: Commit**
@@ -1542,7 +1542,7 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSubmit, isBusy }) => {
           value={value}
           onChange={handleChange}
           onSubmit={handleSubmit}
-          placeholder={isBusy ? 'queuing...' : 'ask RUMI anything...'}
+          placeholder={isBusy ? 'queuing...' : 'ask Luka anything...'}
           focusColor={theme.txt.primary}
         />
       </Box>
@@ -1553,7 +1553,7 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSubmit, isBusy }) => {
 
 - [ ] **Step 3: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 4: Commit**
@@ -1662,7 +1662,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
 - [ ] **Step 2: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 3: Commit**
@@ -1737,7 +1737,7 @@ export const DiscoveryPanel: React.FC<DiscoveryPanelProps> = ({
 
 - [ ] **Step 2: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 3: Commit**
@@ -1848,7 +1848,7 @@ export const SessionSwitcher: React.FC<SessionSwitcherProps> = ({
 
 - [ ] **Step 2: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 3: Commit**
@@ -2164,7 +2164,7 @@ render(<App />);
 
 - [ ] **Step 4: Verify TypeScript compiles**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npx tsc --noEmit`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npx tsc --noEmit`
 Expected: No errors
 
 - [ ] **Step 5: Commit**
@@ -2203,12 +2203,12 @@ await build({
 
 - [ ] **Step 2: Install deps and build**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && npm install && npm run build`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && npm install && npm run build`
 Expected: `dist/entry.js` created, no errors
 
 - [ ] **Step 3: Verify the bundle runs**
 
-Run: `cd C:\Users\Admin\Desktop\rumi\ui-tui && echo '{"jsonrpc":"2.0","method":"gateway.ready","params":{"version":"3.0"}}' | node dist/entry.js`
+Run: `cd C:\Users\Admin\Desktop\luka\ui-tui && echo '{"jsonrpc":"2.0","method":"gateway.ready","params":{"version":"3.0"}}' | node dist/entry.js`
 Expected: React Ink renders (may error without gateway, but should not crash on import)
 
 - [ ] **Step 4: Commit**
@@ -2223,16 +2223,16 @@ git commit -m "feat(ui-tui): esbuild bundle, project builds successfully"
 ## Task 15: Integration with main.py
 
 **Files:**
-- Modify: `rumi_launcher.py`
+- Modify: `luka_launcher.py`
 - Modify: `main.py` (add --tui flag detection)
 
-- [ ] **Step 1: Check rumi_launcher.py**
+- [ ] **Step 1: Check luka_launcher.py**
 
 ```python
-# rumi_launcher.py — read current content first
+# luka_launcher.py — read current content first
 ```
 
-Run: `cd C:\Users\Admin\Desktop\rumi && python rumi_launcher.py --help 2>&1 || true`
+Run: `cd C:\Users\Admin\Desktop\luka && python luka_launcher.py --help 2>&1 || true`
 This tells us what the launcher currently does.
 
 - [ ] **Step 2: Add --tui flag to launcher**
@@ -2247,7 +2247,7 @@ import subprocess
 if '--tui' in sys.argv:
     ui_tui_path = Path(__file__).parent / 'ui-tui' / 'dist' / 'entry.js'
     if ui_tui_path.exists():
-        gateway_path = Path(__file__).parent / 'rumi_gateway' / 'server.py'
+        gateway_path = Path(__file__).parent / 'luka_gateway' / 'server.py'
         # Launch gateway as stdin/stdout pipe
         proc = subprocess.Popen(
             [sys.executable, str(gateway_path)],
@@ -2260,15 +2260,15 @@ if '--tui' in sys.argv:
         proc.wait()
         sys.exit(0)
     else:
-        print("[RUMI] ui-tui not built. Run: cd ui-tui && npm run build")
-        print("[RUMI] Falling back to classic CLI.")
+        print("[Luka] ui-tui not built. Run: cd ui-tui && npm run build")
+        print("[Luka] Falling back to classic CLI.")
 ```
 
 - [ ] **Step 3: Add gateway entry point**
 
 ```python
-# rumi_gateway/__main__.py
-from rumi_gateway.server import GatewayServer
+# luka_gateway/__main__.py
+from luka_gateway.server import GatewayServer
 
 if __name__ == '__main__':
     server = GatewayServer()
@@ -2277,13 +2277,13 @@ if __name__ == '__main__':
 
 - [ ] **Step 4: Test the integration**
 
-Run: `cd C:\Users\Admin\Desktop\rumi && python rumi_launcher.py --tui`
+Run: `cd C:\Users\Admin\Desktop\luka && python luka_launcher.py --tui`
 Expected: Ink TUI renders in alternate screen, gateway connects, banner shows
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add rumi_launcher.py rumi_gateway/__main__.py
+git add luka_launcher.py luka_gateway/__main__.py
 git commit -m "feat: wire --tui flag to launch Ink TUI via gateway"
 ```
 
@@ -2307,7 +2307,7 @@ Show the current face rotating every 2.5s in the StatusBar when state is THINKIN
 
 - [ ] **Step 2: Test alternate-screen mode**
 
-Run: `cd C:\Users\Admin\Desktop\rumi && python rumi_launcher.py --tui`
+Run: `cd C:\Users\Admin\Desktop\luka && python luka_launcher.py --tui`
 Press Ctrl+C to quit. Verify terminal restores previous state (no scrollback clutter).
 
 - [ ] **Step 3: Test all keybindings**
@@ -2323,14 +2323,14 @@ Press Ctrl+C to quit. Verify terminal restores previous state (no scrollback clu
 
 ```bash
 git add -A
-git commit -m "feat: RUMI TUI v3.0 — Ink/React rewrite complete"
+git commit -m "feat: Luka TUI v3.0 — Ink/React rewrite complete"
 ```
 
 ---
 
 ## Verification Checklist
 
-1. `rumi --tui` launches Ink TUI in alternate-screen
+1. `luka --tui` launches Ink TUI in alternate-screen
 2. Streaming responses appear token-by-token with box-drawing
 3. Tool calls render as `├─ ✓ name (2.1s)` tree
 4. Ctrl+K opens command palette modal
@@ -2339,6 +2339,6 @@ git commit -m "feat: RUMI TUI v3.0 — Ink/React rewrite complete"
 7. `/discover <topic>` shows pipeline progress panel
 8. Status bar shows `● ready │ Gemini 2.5 │ 12.4K tok │ 00:14:22 │ think`
 9. Quitting restores previous terminal state
-10. `rumi` (no flag) still launches classic Rich CLI
+10. `luka` (no flag) still launches classic Rich CLI
 11. Kaomoji faces rotate during thinking
 12. Slash autocomplete shows floating list

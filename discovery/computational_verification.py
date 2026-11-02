@@ -1,7 +1,7 @@
 """
 computational_verification.py — Actually VERIFY hypotheses computationally.
 
-Current RUMI reports say "Computations run: 0". This fixes that.
+Current Luka reports say "Computations run: 0". This fixes that.
 
 Every hypothesis should attempt computational verification:
 1. Graph-based: network analysis, centrality, community detection, path analysis

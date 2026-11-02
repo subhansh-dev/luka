@@ -35,7 +35,9 @@ class ModelConfig:
 class Provider(Enum):
     GROQ = "groq"
     GEMINI = "gemini"
-    OPENAI = "openai" 
+    OPENAI = "openai"
+    NVIDIA = "nvidia"
+    CEREBRAS = "cerebras"
 
 
 SECURITY_KEYWORDS = [
@@ -81,11 +83,11 @@ class ModelRouter:
         self._primary_provider = self._get_primary_provider()
 
     def _get_primary_provider(self) -> Provider:
-        provider_str = self.config.get("primary_provider", "groq").lower()
+        provider_str = self.config.get("primary_provider", "cerebras").lower()
         try:
             return Provider(provider_str)
         except ValueError:
-            return Provider.GROQ
+            return Provider.CEREBRAS
 
     def _load_config(self) -> dict:
         try:
@@ -102,6 +104,10 @@ class ModelRouter:
             return "GROQ LLAMA 3.3 70B"
         if self._primary_provider == Provider.OPENAI:
             return "OPENAI GPT-4"
+        if self._primary_provider == Provider.NVIDIA:
+            return "NVIDIA NEMOTRON 3 ULTRA 550B"
+        if self._primary_provider == Provider.CEREBRAS:
+            return "CEREBRAS GPT-OSS 120B"
         return "GEMINI 2.5 FLASH" 
 
     def classify(self, request: str) -> TaskType:
@@ -162,6 +168,42 @@ class ModelRouter:
                 TaskType.GENERAL: ModelConfig(
                     provider="openai",
                     model_id=routing.get("quick", "gpt-4o-mini"),
+                    task_type=TaskType.GENERAL,
+                ),
+            }
+        elif provider == Provider.CEREBRAS:
+            cerebras_model = "cerebras/gpt-oss-120b"
+            model_map = {
+                TaskType.VOICE: ModelConfig(
+                    provider="cerebras",
+                    model_id=routing.get("voice", cerebras_model),
+                    task_type=TaskType.VOICE,
+                ),
+                TaskType.SECURITY: ModelConfig(
+                    provider="cerebras",
+                    model_id=routing.get("security", cerebras_model),
+                    task_type=TaskType.SECURITY,
+                    extended_thinking=True,
+                ),
+                TaskType.CODE: ModelConfig(
+                    provider="cerebras",
+                    model_id=routing.get("code", cerebras_model),
+                    task_type=TaskType.CODE,
+                ),
+                TaskType.PLANNING: ModelConfig(
+                    provider="cerebras",
+                    model_id=routing.get("planning", cerebras_model),
+                    task_type=TaskType.PLANNING,
+                    extended_thinking=True,
+                ),
+                TaskType.QUICK: ModelConfig(
+                    provider="cerebras",
+                    model_id=routing.get("quick", cerebras_model),
+                    task_type=TaskType.QUICK,
+                ),
+                TaskType.GENERAL: ModelConfig(
+                    provider="cerebras",
+                    model_id=routing.get("quick", cerebras_model),
                     task_type=TaskType.GENERAL,
                 ),
             }
@@ -226,8 +268,26 @@ class ModelRouter:
     def get_openai_key(self) -> Optional[str]:
         return self.config.get("openai_api_key")
 
+    def has_nvidia_key(self) -> bool:
+        return bool(self.config.get("nvidia_api_key"))
+
+    def get_nvidia_key(self) -> Optional[str]:
+        return self.config.get("nvidia_api_key")
+
+    def has_cerebras_key(self) -> bool:
+        return bool(self.config.get("cerebras_api_key"))
+
+    def get_cerebras_key(self) -> Optional[str]:
+        return self.config.get("cerebras_api_key")
+
     def is_openai_primary(self) -> bool:
         return self._primary_provider == Provider.OPENAI
+
+    def is_nvidia_primary(self) -> bool:
+        return self._primary_provider == Provider.NVIDIA
+
+    def is_cerebras_primary(self) -> bool:
+        return self._primary_provider == Provider.CEREBRAS
 
 
 _router_instance: Optional[ModelRouter] = None

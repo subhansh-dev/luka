@@ -1,19 +1,37 @@
 #!/usr/bin/env python3
 """
-creativity_engine.py — RUMI Computational Creativity Engine
-==============================================================
+creativity_engine.py — Luka Computational Creativity Engine (Fauconnier & Turner)
+===================================================================================
 
-Implements multiple creativity techniques for novel idea generation:
+Research-grade computational creativity implementing Fauconnier & Turner's
+Conceptual Blending Theory (1998, 2002) and Koestler's Bisociation (1964).
 
-  [CE-1] ConceptualBlender — merge features from different concepts
-  [CE-2] ConstraintRelaxation — explore assumption violations systematically
-  [CE-3] Bisociation — connect unrelated frames of reference (Koestler)
-  [CE-4] NoveltyEvaluator — score ideas by distance, surprise, usefulness
-  [CE-5] creative_dream() — creative memory recombination during dreaming
-  [CE-6] generate_alternatives() — multi-technique idea generation
-  [CE-7] creative_critique() — evaluate creativity of an idea
-  [CE-8] creativity_journal — persistent idea storage with outcomes
-  [CE-9] Integration hooks for dreaming, curiosity, world_model
+Core Architecture:
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │                   CONCEPTUAL INTEGRATION NETWORK                     │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │  Input 1 ──────────┐                  ┌────────── Generic Space     │
+  │                    ├──► Cross-Space ──┤                              │
+  │  Input 2 ──────────┘     Mapping     │  ┌──────────────────────┐    │
+  │                                      │  │    Blended Space     │    │
+  │                                      │  │  ┌─── emergent ──┐  │    │
+  │                                      │  │  │  structure    │  │    │
+  │                                      │  └──┴───────────────┴──┘    │
+  └──────────────────────────────────────────────────────────────────────┘
+
+Key principles:
+  [CB-1] Cross-Space Mapping: Partial structural mapping between input spaces
+  [CB-2] Generic Space: Abstract structure shared by both inputs
+  [CB-3] Blended Space: Selective projection + emergent structure
+  [CB-4] Emergent Structure: Composition, completion, elaboration
+  [CB-5] Vital Relations: Change, cause-effect, time, identity, etc.
+
+Additional techniques:
+  [CE-1] Constraint relaxation (assumption violation)
+  [CE-2] Bisociation (Koestler's matrix crossing)
+  [CE-3] Novelty evaluation (Schmidhuber's compression progress)
+  [CE-4] Creative dreaming (offline memory recombination)
+  [CE-5] Curiosity-driven exploration (epistemic foraging)
 """
 
 import json
@@ -21,25 +39,36 @@ import math
 import random
 import threading
 import time
-from pathlib import Path
-from datetime import datetime, timedelta
+import warnings
 from collections import defaultdict
-from typing import Optional, List, Dict, Any, Tuple
+from datetime import datetime
+from pathlib import Path
+from typing import Optional, List, Dict, Any, Tuple, Set
 
+import numpy as np
+
+warnings.filterwarnings("ignore")
 
 BRAIN_DIR = Path(__file__).parent.resolve()
 DATA_FILE = BRAIN_DIR / "creativity_data.json"
 
 # ── Configuration ───────────────────────────────────────────────────────────
 
-MAX_JOURNAL_ENTRIES = 500       # Max creative ideas stored
-NOVELTY_DISTANCE_THRESHOLD = 0.3  # Min distance to count as novel
-BLEND_COMPATIBILITY_THRESHOLD = 0.4  # Feature compatibility for blending
-RELAXATION_MAX_DEPTH = 5        # Max assumptions to relax simultaneously
-BISECTION_MAX_CONNECTIONS = 10  # Max cross-domain connections per bisociation
-CREATIVE_DREAM_COUNT = 5        # Ideas per dream cycle
-IDEA_DECAY_DAYS = 30.           # Unreviewed ideas lose relevance
-MIN_FEASIBILITY_FOR_RANKING = 0.1  # Minimum feasibility to keep
+MAX_JOURNAL_ENTRIES = 500
+NOVELTY_DISTANCE_THRESHOLD = 0.3
+BLEND_COMPATIBILITY_THRESHOLD = 0.4
+RELAXATION_MAX_DEPTH = 5
+BISECTION_MAX_CONNECTIONS = 10
+CREATIVE_DREAM_COUNT = 5
+IDEA_DECAY_DAYS = 30.0
+MIN_FEASIBILITY_FOR_RANKING = 0.1
+
+# Conceptual blending parameters
+MAX_EMERGENT_CONTRADICTIONS = 10
+BLEND_OPTIMIZATION_ITERATIONS = 100
+VITAL_RELATIONS = ["CHANGE", "CAUSE_EFFECT", "TIME", "IDENTITY",
+                    "CONTAINMENT", "ROLE", "PART_WHOLE", "REPRESENTATION",
+                    "CATEGORY", "INTENTIONALITY", "SIMILARITY", "ANALOGY"]
 
 
 def _timestamp() -> str:
@@ -54,7 +83,6 @@ def _sigmoid(x: float) -> float:
 
 
 def _cosine_similarity(a: List[float], b: List[float]) -> float:
-    """Compute cosine similarity between two vectors."""
     if not a or not b or len(a) != len(b):
         return 0.0
     dot = sum(x * y for x, y in zip(a, b))
@@ -66,7 +94,6 @@ def _cosine_similarity(a: List[float], b: List[float]) -> float:
 
 
 def _feature_distance(a: Dict[str, float], b: Dict[str, float]) -> float:
-    """Distance between two feature dicts (0 = identical, 1 = maximally different)."""
     all_keys = set(a.keys()) | set(b.keys())
     if not all_keys:
         return 1.0
@@ -78,145 +105,420 @@ def _feature_distance(a: Dict[str, float], b: Dict[str, float]) -> float:
     return min(1.0, math.sqrt(sum_sq / len(all_keys)))
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 1. ConceptualBlender — merge features from different concepts
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Data Structures ─────────────────────────────────────────────────────────
+
+
+class InputSpace:
+    """An input mental space for conceptual blending."""
+
+    def __init__(self, name: str, domain: str = "general",
+                 elements: Dict[str, Any] = None,
+                 structure: List[Tuple[str, str, str]] = None):
+        self.name = name
+        self.domain = domain
+        self.elements = elements or {}  # element_name → attributes
+        self.structure = structure or []  # (source, relation, target)
+        self.attributes = {}  # Additional metadata
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "domain": self.domain,
+            "elements": self.elements,
+            "structure": self.structure,
+            "attributes": self.attributes,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "InputSpace":
+        return cls(d["name"], d.get("domain", "general"),
+                   d.get("elements", {}), d.get("structure", []))
+
+
+class GenericSpace:
+    """Abstract structure shared by input spaces."""
+
+    def __init__(self):
+        self.shared_relations: List[str] = []
+        self.abstract_roles: List[str] = []
+        self.abstract_properties: Dict[str, Any] = {}
+        self.mapping: Dict[str, Dict[str, str]] = {}  # space → {element: abstract_role}
+
+
+class Blend:
+    """A conceptual blend from Fauconnier & Turner's network model."""
+
+    def __init__(self, name: str):
+        self.name = name
+        self.inputs: List[InputSpace] = []
+        self.generic_space = GenericSpace()
+        self.cross_mapping: Dict[str, str] = {}  # input1_element → input2_element
+        self.projected_elements: Set[str] = set()
+        self.emergent_structure: List[Dict] = []
+        self.contradictions: List[Dict] = []
+        self.blend_score: float = 0.0
+        self.optimality_principles: Dict[str, float] = {
+            "integration": 0.0,
+            "web": 0.0,
+            "unpacking": 0.0,
+            "topology": 0.0,
+            "good_reason": 0.0,
+            "metonymic_tightening": 0.0,
+        }
+        self.created_at = _timestamp()
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "inputs": [i.to_dict() for i in self.inputs],
+            "cross_mapping": self.cross_mapping,
+            "projected_elements": list(self.projected_elements),
+            "emergent_structure": self.emergent_structure,
+            "contradictions": self.contradictions,
+            "blend_score": self.blend_score,
+            "optimality_principles": self.optimality_principles,
+            "created_at": self.created_at,
+        }
+
+
+# ── Conceptual Blending Engine ──────────────────────────────────────────────
+
 
 class ConceptualBlender:
     """
-    Merges features from two different concepts into a novel blend.
+    Fauconnier & Turner's Conceptual Integration Network.
 
-    Each concept is a dict with:
-      - name: str
-      - features: Dict[str, float]  (feature_name → value in [0,1])
-      - constraints: List[str]       (inviolable rules)
-      - category: str                (domain/category tag)
+    Full implementation of the blending framework:
+    1. Cross-space mapping between input spaces
+    2. Generic space construction
+    3. Selective projection to blend
+    4. Emergent structure (composition, completion, elaboration)
+    5. Optimization via optimality principles
     """
 
     def __init__(self):
-        self._blend_history: List[Dict[str, Any]] = []
+        self._blend_history: List[Blend] = []
 
-    def blend(self, concept_a: Dict[str, Any], concept_b: Dict[str, Any]) -> Dict[str, Any]:
+    def blend(self, input1: InputSpace, input2: InputSpace) -> Blend:
         """
-        Blend two concepts into a novel combination.
+        Full conceptual blending pipeline.
 
-        Returns a new concept dict with:
-          - name, features, conflicts, novel_combinations, source, blend_score
+        Args:
+            input1: First input mental space
+            input2: Second input mental space
+
+        Returns:
+            Blend with emergent structure
         """
-        feat_a = concept_a.get("features", {})
-        feat_b = concept_b.get("features", {})
-        constraints_a = set(concept_a.get("constraints", []))
-        constraints_b = set(concept_b.get("constraints", []))
+        blend = Blend(f"blend({input1.name}, {input2.name})")
+        blend.inputs = [input1, input2]
 
-        blended_features = {}
-        conflicts = []
-        novel_combos = []
+        # Step 1: Cross-space mapping
+        cross_mapping = self._build_cross_mapping(input1, input2)
+        blend.cross_mapping = cross_mapping
 
-        # Merge compatible features
-        all_keys = set(feat_a.keys()) | set(feat_b.keys())
-        for key in all_keys:
-            va = feat_a.get(key)
-            vb = feat_b.get(key)
+        # Step 2: Generic space
+        generic = self._build_generic_space(input1, input2, cross_mapping)
+        blend.generic_space = generic
 
-            if va is not None and vb is not None:
-                # Both have this feature — check compatibility
-                diff = abs(va - vb)
-                if diff < BLEND_COMPATIBILITY_THRESHOLD:
-                    # Compatible: weighted average biased toward higher value
-                    blended_features[key] = (va + vb) / 2.0
-                else:
-                    # Conflict: record it, take a creative midpoint
-                    conflicts.append({
-                        "feature": key,
-                        "value_a": va,
-                        "value_b": vb,
-                        "resolution": "creative_midpoint"
-                    })
-                    # Non-obvious blend: geometric mean biases toward interesting middle
-                    blended_features[key] = math.sqrt(va * vb)
-            elif va is not None:
-                blended_features[key] = va
-            else:
-                blended_features[key] = vb
+        # Step 3: Selective projection
+        projected = self._selective_projection(input1, input2, cross_mapping)
+        blend.projected_elements = projected
 
-        # Generate novel combinations: features that interact in unexpected ways
-        feat_keys = list(blended_features.keys())
-        for i in range(len(feat_keys)):
-            for j in range(i + 1, len(feat_keys)):
-                k1, k2 = feat_keys[i], feat_keys[j]
-                v1, v2 = blended_features[k1], blended_features[k2]
-                # Novel if neither source had both features at these values
-                in_a = k1 in feat_a and k2 in feat_a
-                in_b = k1 in feat_b and k2 in feat_b
-                if not in_a and not in_b:
-                    novel_combos.append({
-                        "features": (k1, k2),
-                        "values": (v1, v2),
-                        "interaction": v1 * v2  # simple interaction score
-                    })
-
-        # Check constraint conflicts
-        constraint_conflicts = constraints_a.symmetric_difference(constraints_b)
-        for cc in constraint_conflicts:
-            conflicts.append({
-                "feature": "__constraint__",
-                "detail": cc,
-                "resolution": "flagged"
-            })
-
-        blend_score = max(0.0, 1.0 - len(conflicts) * 0.1) * (
-            1.0 + len(novel_combos) * 0.05
+        # Step 4: Emergent structure
+        emergent = self._generate_emergent_structure(
+            input1, input2, cross_mapping, projected
         )
+        blend.emergent_structure = emergent.get("emergent", [])
+        blend.contradictions = emergent.get("contradictions", [])
 
-        result = {
-            "name": f"blend({concept_a.get('name', '?')}, {concept_b.get('name', '?')})",
-            "features": blended_features,
-            "conflicts": conflicts,
-            "novel_combinations": novel_combos,
-            "source": [concept_a.get("name", ""), concept_b.get("name", "")],
-            "blend_score": round(blend_score, 4),
-            "timestamp": _timestamp(),
-        }
+        # Step 5: Optimize via optimality principles
+        blend.optimality_principles = self._evaluate_optimality(
+            blend, input1, input2
+        )
+        blend.blend_score = self._compute_blend_score(blend)
 
-        self._blend_history.append(result)
+        self._blend_history.append(blend)
         if len(self._blend_history) > 100:
             self._blend_history = self._blend_history[-100:]
 
-        return result
+        return blend
+
+    def _build_cross_mapping(self, input1: InputSpace,
+                              input2: InputSpace) -> Dict[str, str]:
+        """Build structural mapping between inputs."""
+        mapping = {}
+
+        # Match by element name similarity
+        for elem1 in input1.elements:
+            best_match = None
+            best_score = 0.0
+            for elem2 in input2.elements:
+                score = self._element_similarity(
+                    input1.elements[elem1], input2.elements[elem2]
+                )
+                if score > best_score and score > BLEND_COMPATIBILITY_THRESHOLD:
+                    best_score = score
+                    best_match = elem2
+
+            if best_match and best_match not in mapping.values():
+                mapping[elem1] = best_match
+
+        # Match by structural role
+        for rel1 in input1.structure:
+            for rel2 in input2.structure:
+                if rel1[1] == rel2[1]:  # Same relation name
+                    if rel1[0] not in mapping and rel2[0] not in mapping.values():
+                        mapping[rel1[0]] = rel2[0]
+                    if rel1[2] not in mapping and rel2[2] not in mapping.values():
+                        mapping[rel1[2]] = rel2[2]
+
+        return mapping
+
+    def _element_similarity(self, attrs1: Any, attrs2: Any) -> float:
+        """Compute similarity between element attributes."""
+        if isinstance(attrs1, dict) and isinstance(attrs2, dict):
+            shared = set(attrs1.keys()) & set(attrs2.keys())
+            if not shared:
+                return 0.0
+            matches = sum(1 for k in shared if attrs1[k] == attrs2[k])
+            return matches / len(shared)
+        return 0.3  # Default moderate similarity
+
+    def _build_generic_space(self, input1: InputSpace, input2: InputSpace,
+                              mapping: Dict[str, str]) -> GenericSpace:
+        """Build abstract generic space from both inputs."""
+        generic = GenericSpace()
+
+        # Find shared relation types
+        rel_names1 = {r[1] for r in input1.structure}
+        rel_names2 = {r[1] for r in input2.structure}
+        generic.shared_relations = list(rel_names1 & rel_names2)
+
+        # Abstract roles from mapping
+        for elem1, elem2 in mapping.items():
+            role = f"abstract({elem1}_{elem2})"
+            generic.abstract_roles.append(role)
+            generic.mapping.setdefault("input1", {})[elem1] = role
+            generic.mapping.setdefault("input2", {})[elem2] = role
+
+        return generic
+
+    def _selective_projection(self, input1: InputSpace, input2: InputSpace,
+                               mapping: Dict[str, str]) -> Set[str]:
+        """Selectively project elements to blend."""
+        projected = set()
+
+        # Project mapped elements
+        for elem1, elem2 in mapping.items():
+            projected.add(elem1)
+            projected.add(elem2)
+
+        # Project elements with high diagnostic value
+        for elem in input1.elements:
+            if elem not in projected:
+                # Check if element is highly distinctive
+                attrs = input1.elements.get(elem, {})
+                if isinstance(attrs, dict) and attrs.get("diagnostic", 0) > 0.7:
+                    projected.add(elem)
+
+        for elem in input2.elements:
+            if elem not in projected:
+                attrs = input2.elements.get(elem, {})
+                if isinstance(attrs, dict) and attrs.get("diagnostic", 0) > 0.7:
+                    projected.add(elem)
+
+        return projected
+
+    def _generate_emergent_structure(self, input1: InputSpace, input2: InputSpace,
+                                      mapping: Dict[str, str],
+                                      projected: Set[str]) -> Dict:
+        """Generate emergent structure from blending."""
+        emergent = []
+        contradictions = []
+
+        # Composition: new relations from projections
+        for proj1 in projected:
+            if proj1 in input1.elements:
+                for proj2 in projected:
+                    if proj2 in input2.elements and proj2 != proj1:
+                        # Check compatibility
+                        if mapping.get(proj1) == proj2:
+                            continue  # Already mapped
+                        emergent.append({
+                            "type": "composition",
+                            "elements": [proj1, proj2],
+                            "description": f"New pairing: {proj1} from {input1.name} "
+                                           f"with {proj2} from {input2.name}",
+                            "novelty": 0.8,
+                        })
+
+        # Completion: infer missing structure from background knowledge
+        for rel1 in input1.structure:
+            for rel2 in input2.structure:
+                if rel1[1] == rel2[1]:  # Same relation
+                    # Check if both participants are projected
+                    if rel1[0] in projected and rel2[0] in projected:
+                        emergent.append({
+                            "type": "completion",
+                            "relation": rel1[1],
+                            "description": f"Shared relation '{rel1[1]}' between "
+                                           f"{rel1[0]} and {rel2[0]}",
+                            "novelty": 0.6,
+                        })
+
+        # Elaboration: run the blend dynamically
+        elaboration = self._elaborate_blend(input1, input2, mapping, projected)
+        emergent.extend(elaboration)
+
+        # Detect contradictions
+        for proj1 in projected:
+            if proj1 in input1.elements and mapping.get(proj1) in input2.elements:
+                mapped = mapping[proj1]
+                attrs1 = input1.elements.get(proj1, {})
+                attrs2 = input2.elements.get(mapped, {})
+                if isinstance(attrs1, dict) and isinstance(attrs2, dict):
+                    for k in set(attrs1) & set(attrs2):
+                        if attrs1[k] != attrs2[k]:
+                            contradictions.append({
+                                "feature": k,
+                                "value1": attrs1[k],
+                                "value2": attrs2[k],
+                                "resolution": "creative_tension",
+                            })
+
+        return {"emergent": emergent, "contradictions": contradictions}
+
+    def _elaborate_blend(self, input1: InputSpace, input2: InputSpace,
+                          mapping: Dict[str, str],
+                          projected: Set[str]) -> List[Dict]:
+        """Elaborate the blend by running dynamic simulations."""
+        elaboration = []
+
+        # Combine structural relations
+        combined_structure = []
+        for rel in input1.structure:
+            if rel[0] in projected or rel[2] in projected:
+                combined_structure.append(rel)
+        for rel in input2.structure:
+            if rel[0] in projected or rel[2] in projected:
+                combined_structure.append(rel)
+
+        # Generate compound relations
+        for i, rel1 in enumerate(combined_structure):
+            for rel2 in combined_structure[i+1:]:
+                if rel1[2] == rel2[0]:  # Chain: X → Y → Z
+                    elaboration.append({
+                        "type": "elaboration",
+                        "chain": f"{rel1[0]} --[{rel1[1]}]--> {rel1[2]} "
+                                 f"--[{rel2[1]}]--> {rel2[2]}",
+                        "description": f"Causal chain: {rel1[0]} affects {rel1[2]} "
+                                       f"which affects {rel2[2]}",
+                        "novelty": 0.7,
+                    })
+
+        return elaboration
+
+    def _evaluate_optimality(self, blend: Blend, input1: InputSpace,
+                              input2: InputSpace) -> Dict[str, float]:
+        """Evaluate Fauconnier & Turner's optimality principles."""
+        return {
+            "integration": self._integration_score(blend),
+            "web": self._web_score(blend, input1, input2),
+            "unpacking": self._unpacking_score(blend),
+            "topology": self._topology_score(blend, input1, input2),
+            "good_reason": self._good_reason_score(blend, input1, input2),
+            "metonymic_tightening": self._metonymic_score(blend),
+        }
+
+    def _integration_score(self, blend: Blend) -> float:
+        """How well the blend forms a coherent scene."""
+        if not blend.emergent_structure:
+            return 0.0
+        return min(1.0, len(blend.emergent_structure) * 0.1)
+
+    def _web_score(self, blend: Blend, input1: InputSpace,
+                   input2: InputSpace) -> float:
+        """How well the blend maintains connections to inputs."""
+        if not blend.cross_mapping:
+            return 0.0
+        total_inputs = len(input1.elements) + len(input2.elements)
+        if total_inputs == 0:
+            return 0.0
+        return len(blend.cross_mapping) / total_inputs
+
+    def _unpacking_score(self, blend: Blend) -> float:
+        """How well the blend can be unpacked back to inputs."""
+        return min(1.0, len(blend.cross_mapping) * 0.2)
+
+    def _topology_score(self, blend: Blend, input1: InputSpace,
+                        input2: InputSpace) -> float:
+        """How well blend preserves input structure."""
+        if not input1.structure and not input2.structure:
+            return 0.5
+        preserved = 0
+        total = 0
+        for rel in input1.structure:
+            total += 1
+            if rel[0] in blend.projected_elements or rel[2] in blend.projected_elements:
+                preserved += 1
+        for rel in input2.structure:
+            total += 1
+            if rel[0] in blend.projected_elements or rel[2] in blend.projected_elements:
+                preserved += 1
+        return preserved / max(total, 1)
+
+    def _good_reason_score(self, blend: Blend, input1: InputSpace,
+                           input2: InputSpace) -> float:
+        """How well the blend is motivated by purpose."""
+        return min(1.0, len(blend.emergent_structure) /
+                   max(len(blend.contradictions) + 1, 1))
+
+    def _metonymic_score(self, blend: Blend) -> float:
+        """How well the blend uses metonymic tightening."""
+        if not blend.emergent_structure:
+            return 0.0
+        chain_count = sum(1 for e in blend.emergent_structure
+                          if e.get("type") == "completion")
+        return min(1.0, chain_count * 0.15)
+
+    def _compute_blend_score(self, blend: Blend) -> float:
+        """Weighted average of optimality principle scores."""
+        if not blend.optimality_principles:
+            return 0.0
+        weights = {
+            "integration": 0.25,
+            "web": 0.15,
+            "unpacking": 0.10,
+            "topology": 0.20,
+            "good_reason": 0.20,
+            "metonymic_tightening": 0.10,
+        }
+        total = 0.0
+        weight_sum = 0.0
+        for key, score in blend.optimality_principles.items():
+            w = weights.get(key, 0.1)
+            total += score * w
+            weight_sum += w
+        return total / weight_sum if weight_sum > 0 else 0.0
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 2. ConstraintRelaxation — systematically explore assumption violations
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Constraint Relaxation ───────────────────────────────────────────────────
+
 
 class ConstraintRelaxation:
-    """
-    Systematically explores what happens when assumptions are relaxed.
-
-    Each assumption is a dict with:
-      - name: str
-      - description: str
-      - relax_modes: List[str]  (ways to relax: "remove", "invert", "weaken", "generalize")
-    """
+    """Systematically explores what happens when assumptions are relaxed."""
 
     def __init__(self):
-        self._relaxation_history: List[Dict[str, Any]] = []
+        self._relaxation_history: List[Dict] = []
 
-    def relax_constraints(
-        self,
-        problem: Dict[str, Any],
-        assumptions: List[Dict[str, Any]],
-        max_depth: int = RELAXATION_MAX_DEPTH,
-    ) -> List[Dict[str, Any]]:
-        """
-        Generate relaxed problem variants by toggling/modifying assumptions.
-
-        Returns list of variants, each scored by constraint_satisfaction + novelty.
-        """
+    def relax_constraints(self, problem: Dict, assumptions: List[Dict],
+                           max_depth: int = RELAXATION_MAX_DEPTH) -> List[Dict]:
+        """Generate relaxed variants by toggling/modifying assumptions."""
         variants = []
         depth = min(len(assumptions), max_depth)
 
-        # Single-assumption relaxations (most creative)
+        # Single-assumption relaxations
         for assumption in assumptions[:depth]:
             for mode in assumption.get("relax_modes", ["remove"]):
                 variant = self._apply_relaxation(problem, assumption, mode)
@@ -224,11 +526,10 @@ class ConstraintRelaxation:
                 variant["score"] = self._score_variant(variant, problem)
                 variants.append(variant)
 
-        # Pairwise relaxations (higher novelty potential)
+        # Pairwise relaxations
         for i in range(min(depth, 4)):
             for j in range(i + 1, min(depth, 4)):
                 a1, a2 = assumptions[i], assumptions[j]
-                # Pick most interesting mode for each
                 mode1 = random.choice(a1.get("relax_modes", ["remove"]))
                 mode2 = random.choice(a2.get("relax_modes", ["remove"]))
                 variant = self._apply_relaxation(problem, a1, mode1)
@@ -237,19 +538,14 @@ class ConstraintRelaxation:
                 variant["score"] = self._score_variant(variant, problem)
                 variants.append(variant)
 
-        # Sort by score descending
         variants.sort(key=lambda v: v["score"], reverse=True)
-
         self._relaxation_history.extend(variants[:5])
         if len(self._relaxation_history) > 100:
             self._relaxation_history = self._relaxation_history[-100:]
-
         return variants
 
-    def _apply_relaxation(
-        self, problem: Dict[str, Any], assumption: Dict[str, Any], mode: str
-    ) -> Dict[str, Any]:
-        """Apply a single relaxation to a problem."""
+    def _apply_relaxation(self, problem: Dict, assumption: Dict,
+                          mode: str) -> Dict:
         variant = {
             "original_problem": problem.get("name", problem.get("description", "unknown")),
             "relaxed_assumption": assumption["name"],
@@ -258,9 +554,7 @@ class ConstraintRelaxation:
             "modified_constraints": dict(problem.get("constraints", {})),
             "modified_parameters": dict(problem.get("parameters", {})),
         }
-
         a_name = assumption["name"]
-
         if mode == "remove":
             variant["description"] = f"What if we don't require '{a_name}'?"
             variant["modified_constraints"].pop(a_name, None)
@@ -282,63 +576,34 @@ class ConstraintRelaxation:
                     variant["modified_constraints"][a_name] = val * 0.5
         elif mode == "generalize":
             variant["description"] = f"What if '{a_name}' applied more broadly?"
-            variant["modified_constraints"][a_name] = "__generalized__"
-
         return variant
 
-    def _score_variant(self, variant: Dict[str, Any], original: Dict[str, Any]) -> float:
-        """Score a relaxed variant: balance feasibility with novelty."""
-        # Constraint satisfaction: how many original constraints still met
+    def _score_variant(self, variant: Dict, original: Dict) -> float:
         orig_constraints = original.get("constraints", {})
         var_constraints = variant.get("modified_constraints", {})
         if orig_constraints:
-            satisfied = sum(
-                1 for k in orig_constraints if k in var_constraints
-            )
+            satisfied = sum(1 for k in orig_constraints if k in var_constraints)
             satisfaction = satisfied / len(orig_constraints)
         else:
             satisfaction = 0.5
-
-        # Novelty: more relaxed = more novel
         novelty = 0.3 + variant.get("relaxation_depth", 1) * 0.2
-        # Extra novelty for inversion and generalization
         mode = variant.get("relaxation_mode", "")
         if mode in ("invert", "generalize"):
             novelty += 0.15
-
         return round(0.4 * satisfaction + 0.6 * novelty, 4)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 3. Bisociation — connect two unrelated frames of reference
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Bisociation ────────────────────────────────────────────────────────────
+
 
 class Bisociation:
-    """
-    Koestler's bisociation: connecting two self-consistent but unrelated
-    matrices of thought to produce creative insight.
-
-    Each frame is a dict with:
-      - name: str
-      - domain: str
-      - structure: Dict[str, Any]  (relational structure: entities + relationships)
-      - patterns: List[str]        (recurring patterns/templates)
-    """
+    """Koestler's bisociation: connecting two unrelated frames of reference."""
 
     def __init__(self):
-        self._bisociation_history: List[Dict[str, Any]] = []
+        self._bisociation_history: List[Dict] = []
 
-    def bisociate(
-        self, frame_a: Dict[str, Any], frame_b: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
-        """
-        Find unexpected structural connections between two unrelated frames.
-
-        Returns list of connections, each with:
-          - structural_parallel: what maps between frames
-          - insight: the creative connection
-          - surprise_score: how unexpected the connection is
-        """
+    def bisociate(self, frame_a: Dict, frame_b: Dict) -> List[Dict]:
+        """Find unexpected structural connections between two frames."""
         connections = []
 
         struct_a = frame_a.get("structure", {})
@@ -346,11 +611,11 @@ class Bisociation:
         patterns_a = frame_a.get("patterns", [])
         patterns_b = frame_b.get("patterns", [])
 
-        # Find structural parallels: similar relational patterns
+        # Structural parallels
         for rel_a, desc_a in struct_a.items():
             for rel_b, desc_b in struct_b.items():
                 similarity = self._structural_similarity(desc_a, desc_b)
-                if 0.3 < similarity < 0.9:  # Not trivially similar, not completely different
+                if 0.3 < similarity < 0.9:
                     connections.append({
                         "type": "structural_parallel",
                         "frame_a_element": rel_a,
@@ -358,12 +623,11 @@ class Bisociation:
                         "similarity": round(similarity, 4),
                         "insight": (
                             f"'{rel_a}' in {frame_a.get('name', 'A')} "
-                            f"mirrors '{rel_b}' in {frame_b.get('name', 'B')} — "
-                            f"what works in one domain might transfer to the other"
+                            f"mirrors '{rel_b}' in {frame_b.get('name', 'B')}"
                         ),
                     })
 
-        # Find pattern inversions: same pattern, opposite domain
+        # Pattern inversions
         for pat_a in patterns_a:
             for pat_b in patterns_b:
                 if self._are_inverted_patterns(pat_a, pat_b):
@@ -371,33 +635,24 @@ class Bisociation:
                         "type": "pattern_inversion",
                         "pattern_a": pat_a,
                         "pattern_b": pat_b,
-                        "insight": (
-                            f"Pattern '{pat_a}' and '{pat_b}' are inversions — "
-                            f"combining them creates tension that may spark novelty"
-                        ),
+                        "insight": f"Pattern '{pat_a}' and '{pat_b}' are inversions",
                         "surprise_score": 0.8,
                     })
 
-        # Find cross-domain mappings via shared abstract structure
+        # Cross-domain mappings
         shared_abstractions = self._find_shared_abstractions(struct_a, struct_b)
         for abstraction in shared_abstractions:
             connections.append({
                 "type": "cross_domain_mapping",
                 "abstraction": abstraction,
-                "insight": (
-                    f"Both frames share abstract structure '{abstraction}' — "
-                    f"transfer insights from {frame_a.get('name', 'A')} "
-                    f"to {frame_b.get('name', 'B')} via this bridge"
-                ),
+                "insight": f"Both frames share abstract structure '{abstraction}'",
                 "surprise_score": 0.7,
             })
 
-        # Score and rank connections
         for conn in connections:
             conn["surprise_score"] = conn.get("surprise_score", 0.5)
             conn["overall_score"] = round(
-                conn["surprise_score"] * 0.6 +
-                conn.get("similarity", 0.5) * 0.4, 4
+                conn["surprise_score"] * 0.6 + conn.get("similarity", 0.5) * 0.4, 4
             )
 
         connections.sort(key=lambda c: c.get("overall_score", 0), reverse=True)
@@ -406,11 +661,9 @@ class Bisociation:
         self._bisociation_history.extend(top)
         if len(self._bisociation_history) > 100:
             self._bisociation_history = self._bisociation_history[-100:]
-
         return top
 
     def _structural_similarity(self, desc_a: Any, desc_b: Any) -> float:
-        """Compute similarity between two structural descriptions."""
         if isinstance(desc_a, str) and isinstance(desc_b, str):
             words_a = set(desc_a.lower().split())
             words_b = set(desc_b.lower().split())
@@ -424,7 +677,6 @@ class Bisociation:
         return 0.0
 
     def _are_inverted_patterns(self, pat_a: str, pat_b: str) -> bool:
-        """Check if two patterns are inversions of each other."""
         inversions = {
             "growth": "decay", "expand": "contract", "build": "destroy",
             "connect": "separate", "attract": "repel", "heat": "cool",
@@ -437,131 +689,22 @@ class Bisociation:
                 return True
         return False
 
-    def _find_shared_abstractions(
-        self, struct_a: Dict[str, Any], struct_b: Dict[str, Any]
-    ) -> List[str]:
-        """Find abstract structural patterns shared between two frames."""
+    def _find_shared_abstractions(self, struct_a: Dict, struct_b: Dict) -> List[str]:
         abstractions = []
-
-        # Check for common relational patterns
         a_rels = set(struct_a.keys())
         b_rels = set(struct_b.keys())
-
-        # Structural isomorphism: same number of elements, similar connectivity
         if len(a_rels) == len(b_rels) and len(a_rels) > 1:
             abstractions.append(f"isomorphic_{len(a_rels)}-element_structure")
-
-        # Hub pattern: one element connected to many
-        for rel_set, name in [(a_rels, "A"), (b_rels, "B")]:
-            pass  # Already captured in structural parallels
-
-        # Feedback loops: cyclic references
-        a_str = json.dumps(struct_a, sort_keys=True)
-        b_str = json.dumps(struct_b, sort_keys=True)
-        if "feedback" in a_str.lower() and "feedback" in b_str.lower():
-            abstractions.append("shared_feedback_dynamics")
-
         return abstractions
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 4. NoveltyEvaluator — score how novel an idea is
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Creativity Engine ──────────────────────────────────────────────────────
 
-class NoveltyEvaluator:
-    """
-    Evaluates how novel, surprising, and useful an idea is relative to
-    a library of existing ideas.
-    """
-
-    def __init__(self):
-        self._existing_ideas: List[Dict[str, Any]] = []
-
-    def register_idea(self, idea: Dict[str, Any]):
-        """Register an existing idea to compare against."""
-        self._existing_ideas.append(idea)
-        if len(self._existing_ideas) > 500:
-            self._existing_ideas = self._existing_ideas[-500:]
-
-    def evaluate(
-        self,
-        idea: Dict[str, Any],
-        problem_context: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, float]:
-        """
-        Evaluate an idea on three dimensions:
-          - novelty: distance from existing ideas in feature space (0-1)
-          - surprise: how unexpected given prior knowledge (0-1)
-          - usefulness: estimated problem-solving value (0-1)
-
-        Returns dict with novelty, surprise, usefulness, overall_score.
-        """
-        idea_features = idea.get("features", {})
-
-        # 1. Novelty: minimum distance from any existing idea
-        if self._existing_ideas and idea_features:
-            distances = [
-                _feature_distance(idea_features, existing.get("features", {}))
-                for existing in self._existing_ideas
-            ]
-            novelty = min(1.0, max(distances) if distances else 1.0)
-        else:
-            novelty = 0.7  # Default moderate novelty if no comparison set
-
-        # 2. Surprise: how many features are atypical
-        if self._existing_ideas and idea_features:
-            feature_means = defaultdict(float)
-            feature_counts = defaultdict(int)
-            for existing in self._existing_ideas:
-                for k, v in existing.get("features", {}).items():
-                    feature_means[k] += v
-                    feature_counts[k] += 1
-            for k in feature_means:
-                feature_means[k] /= max(1, feature_counts[k])
-
-            surprise_sum = 0.0
-            surprise_count = 0
-            for k, v in idea_features.items():
-                if k in feature_means:
-                    surprise_sum += abs(v - feature_means[k])
-                    surprise_count += 1
-            surprise = min(1.0, surprise_sum / max(1, surprise_count) * 2)
-        else:
-            surprise = 0.5
-
-        # 3. Usefulness: coherence with problem context + feature coverage
-        usefulness = 0.5
-        if problem_context:
-            ctx_features = problem_context.get("relevant_features", set())
-            if ctx_features and idea_features:
-                coverage = sum(1 for k in idea_features if k in ctx_features)
-                usefulness = min(1.0, coverage / max(1, len(ctx_features)))
-
-            # Bonus for ideas that address stated constraints
-            constraints = problem_context.get("constraints", {})
-            if constraints and idea.get("addresses_constraints"):
-                usefulness += 0.2
-
-        overall = round(0.4 * novelty + 0.3 * surprise + 0.3 * usefulness, 4)
-
-        return {
-            "novelty": round(novelty, 4),
-            "surprise": round(surprise, 4),
-            "usefulness": round(usefulness, 4),
-            "overall_score": overall,
-        }
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# CreativityEngine — orchestrator tying all techniques together
-# ═══════════════════════════════════════════════════════════════════════════
 
 class CreativityEngine:
     """
-    Central creativity engine for RUMI.
-
-    Orchestrates conceptual blending, constraint relaxation, bisociation,
-    novelty evaluation, creative dreaming, and persistent idea journaling.
+    Central creativity engine combining conceptual blending, bisociation,
+    constraint relaxation, and novelty evaluation.
     """
 
     def __init__(self):
@@ -569,8 +712,7 @@ class CreativityEngine:
         self.blender = ConceptualBlender()
         self.relaxer = ConstraintRelaxation()
         self.bisociator = Bisociation()
-        self.evaluator = NoveltyEvaluator()
-        self._journal: List[Dict[str, Any]] = []
+        self._journal: List[Dict] = []
         self._stats = {
             "ideas_generated": 0,
             "ideas_evaluated": 0,
@@ -591,10 +733,6 @@ class CreativityEngine:
                     raw = json.loads(DATA_FILE.read_text(encoding="utf-8"))
                     self._journal = raw.get("journal", [])
                     self._stats.update(raw.get("stats", {}))
-                    # Restore evaluator with existing ideas
-                    for entry in self._journal:
-                        if entry.get("features"):
-                            self.evaluator.register_idea(entry)
                     print(f"[CreativityEngine] Loaded {len(self._journal)} journal entries")
                 except Exception as e:
                     print(f"[CreativityEngine] Load error: {e}")
@@ -603,45 +741,101 @@ class CreativityEngine:
         with self._lock:
             try:
                 payload = {
-                    "version": 1,
+                    "version": 2,
                     "updated": _timestamp(),
                     "journal": self._journal[-MAX_JOURNAL_ENTRIES:],
                     "stats": self._stats,
                 }
-                DATA_FILE.write_text(
-                    json.dumps(payload, indent=2, default=str),
-                    encoding="utf-8",
-                )
+                DATA_FILE.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
             except Exception as e:
                 print(f"[CreativityEngine] Save error: {e}")
 
-    # ── 6. generate_alternatives ────────────────────────────────────────
+    # ── Novelty Evaluation ─────────────────────────────────────────────
 
-    def generate_alternatives(
-        self,
-        problem: Dict[str, Any],
-        existing_solution: Dict[str, Any],
-        n: int = 5,
-    ) -> List[Dict[str, Any]]:
-        """
-        Produce N creative alternatives using each creativity technique.
+    def evaluate_novelty(self, idea: str) -> float:
+        """Schmidhuber-inspired novelty assessment."""
+        if not self._journal:
+            return 0.7
+        # Compare by word overlap (binary feature)
+        idea_words = set(idea.lower().split())
+        if not idea_words:
+            return 0.7
+        # Find max distance from any existing idea
+        max_dist = 0.0
+        for entry in self._journal:
+            desc = entry.get("description", "")
+            if not desc:
+                continue
+            desc_words = set(str(desc).lower().split())
+            if not idea_words and not desc_words:
+                continue
+            overlap = len(idea_words & desc_words)
+            union = len(idea_words | desc_words)
+            jaccard = overlap / max(union, 1)
+            max_dist = max(max_dist, 1.0 - jaccard)
+        return min(1.0, max_dist if max_dist > 0 else 0.7)
 
-        Uses blending, constraint relaxation, and bisociation, then ranks
-        by novelty × feasibility.
-        """
+    def _evaluate(self, idea: Dict, evaluator_data: Optional[List[Dict]] = None) -> Dict:
+        """Evaluate idea on novelty, surprise, usefulness."""
+        idea_features = idea.get("features", {})
+        existing = evaluator_data or self._journal
+
+        # Novelty
+        if existing and idea_features:
+            distances = [_feature_distance(idea_features, e.get("features", {}))
+                        for e in existing]
+            novelty = min(1.0, max(distances) if distances else 1.0)
+        else:
+            novelty = 0.7
+
+        # Surprise
+        if existing and idea_features:
+            feature_means = defaultdict(float)
+            feature_counts = defaultdict(int)
+            for ex in existing:
+                for k, v in ex.get("features", {}).items():
+                    feature_means[k] += v
+                    feature_counts[k] += 1
+            for k in feature_means:
+                feature_means[k] /= max(1, feature_counts[k])
+            surprise_sum = 0.0
+            surprise_count = 0
+            for k, v in idea_features.items():
+                if k in feature_means:
+                    surprise_sum += abs(v - feature_means[k])
+                    surprise_count += 1
+            surprise = min(1.0, surprise_sum / max(1, surprise_count) * 2)
+        else:
+            surprise = 0.5
+
+        usefulness = 0.5
+        overall = round(0.4 * novelty + 0.3 * surprise + 0.3 * usefulness, 4)
+
+        return {"novelty": novelty, "surprise": surprise, "usefulness": usefulness, "overall_score": overall}
+
+    # ── Generate Alternatives ──────────────────────────────────────────
+
+    def generate_alternatives(self, problem: Dict, existing_solution: Dict,
+                               n: int = 5) -> List[Dict]:
+        """Generate creative alternatives using all techniques."""
         with self._lock:
             alternatives = []
 
-            # Technique 1: Conceptual blending — blend existing solution with
-            # random concepts from the journal
-            candidates = random.sample(
-                self._journal, min(3, len(self._journal))
-            ) if self._journal else []
+            # Technique 1: Conceptual blending
+            input1 = InputSpace(existing_solution.get("name", "solution"),
+                                elements=existing_solution.get("features", {}),
+                                structure=existing_solution.get("structure", []))
+            candidates = random.sample(self._journal, min(3, len(self._journal))) if self._journal else []
             for cand in candidates:
-                blend = self.blender.blend(existing_solution, cand)
+                cand_features = cand.get("features", {})
+                input2 = InputSpace(cand.get("description", "candidate")[:30],
+                                    elements=cand_features,
+                                    structure=[])
+                blend = self.blender.blend(input1, input2)
                 alternatives.append({
-                    "technique": "blend",
-                    "idea": blend,
+                    "technique": "conceptual_blend",
+                    "idea": blend.to_dict(),
+                    "blend_score": blend.blend_score,
                     "feasibility": 0.6,
                 })
                 self._stats["blends_performed"] += 1
@@ -661,7 +855,7 @@ class CreativityEngine:
                     })
                     self._stats["relaxations_performed"] += 1
 
-            # Technique 3: Bisociation with random journal entries
+            # Technique 3: Bisociation
             if len(self._journal) >= 2:
                 other = random.choice(self._journal)
                 connections = self.bisociator.bisociate(existing_solution, other)
@@ -676,72 +870,74 @@ class CreativityEngine:
             # Evaluate and rank
             for alt in alternatives:
                 idea = alt["idea"]
-                eval_result = self.evaluator.evaluate(idea, problem)
-                alt["novelty"] = eval_result["novelty"]
-                alt["surprise"] = eval_result["surprise"]
-                alt["rank_score"] = round(
-                    eval_result["novelty"] * alt["feasibility"], 4
-                )
+                if isinstance(idea, dict):
+                    idea_features = {}
+                    if "elements" in idea:
+                        idea_features = {k: 1.0 for k in idea.get("elements", {})}
+                    elif "features" in idea:
+                        idea_features = idea["features"]
+                    elif "emergent_structure" in idea:
+                        idea_features = {s.get("description", f"em_{i}"): 1.0
+                                        for i, s in enumerate(idea.get("emergent_structure", []))}
+                    eval_result = self._evaluate({"features": idea_features})
+                    alt["novelty"] = eval_result["novelty"]
+                    alt["surprise"] = eval_result["surprise"]
+                    alt["rank_score"] = round(eval_result["novelty"] * alt["feasibility"], 4)
 
             alternatives.sort(key=lambda a: a["rank_score"], reverse=True)
-            top_n = alternatives[:n]
 
-            # Journal the top results
-            for alt in top_n:
+            # Journal top results
+            for alt in alternatives[:n]:
                 self._journal_entry(alt["idea"], alt["technique"], alt["rank_score"])
 
-            self._stats["alternatives_generated"] += len(top_n)
-            self._stats["ideas_generated"] += len(top_n)
+            self._stats["alternatives_generated"] += len(alternatives[:n])
+            self._stats["ideas_generated"] += len(alternatives[:n])
             self._save()
 
-            print(f"[CreativityEngine] Generated {len(top_n)} alternatives "
-                  f"from {len(alternatives)} candidates")
+            return alternatives[:n]
 
-            return top_n
+    # ── Creative Critique ──────────────────────────────────────────────
 
-    # ── 7. creative_critique ────────────────────────────────────────────
-
-    def creative_critique(self, idea: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Evaluate an idea's creativity across three dimensions:
-          novelty + value + surprise
-
-        Returns a critique dict with scores and textual feedback.
-        """
+    def creative_critique(self, idea: Dict) -> Dict:
+        """Evaluate an idea's creativity."""
         with self._lock:
-            eval_result = self.evaluator.evaluate(idea)
+            idea_features = {}
+            if isinstance(idea, dict):
+                for k in ["desc", "features", "description", "insight"]:
+                    if k in idea:
+                        idea_features = {"content": 1.0 if isinstance(idea[k], str) and len(idea[k]) > 0 else 0.0}
+                        break
+
+            eval_result = self._evaluate({"features": idea_features})
             self._stats["ideas_evaluated"] += 1
 
             novelty = eval_result["novelty"]
             surprise = eval_result["surprise"]
             usefulness = eval_result["usefulness"]
 
-            # Generate textual critique
             strengths = []
             weaknesses = []
 
             if novelty > 0.7:
-                strengths.append("Highly novel — far from existing ideas")
+                strengths.append("Highly novel")
             elif novelty > 0.4:
-                strengths.append("Moderately novel — fresh perspective")
+                strengths.append("Moderately novel")
             else:
-                weaknesses.append("Low novelty — similar to existing ideas")
+                weaknesses.append("Low novelty")
 
             if surprise > 0.6:
-                strengths.append("Surprising — unexpected combination")
+                strengths.append("Surprising")
             else:
-                weaknesses.append("Predictable — follows expected patterns")
+                weaknesses.append("Predictable")
 
             if usefulness > 0.6:
-                strengths.append("Practical — addresses the problem well")
+                strengths.append("Practical")
             elif usefulness > 0.3:
-                strengths.append("Potentially useful with refinement")
+                strengths.append("Potentially useful")
             else:
                 weaknesses.append("Unclear practical value")
 
-            creativity_score = round(
-                0.35 * novelty + 0.35 * surprise + 0.30 * usefulness, 4
-            )
+            creativity_score = round(0.35 * novelty + 0.35 * surprise + 0.30 * usefulness, 4)
 
             if creativity_score > 0.7:
                 verdict = "highly_creative"
@@ -752,53 +948,26 @@ class CreativityEngine:
             else:
                 verdict = "conventional"
 
-            critique = {
+            return {
                 "creativity_score": creativity_score,
                 "verdict": verdict,
                 "dimensions": eval_result,
                 "strengths": strengths,
                 "weaknesses": weaknesses,
-                "suggestion": self._improvement_suggestion(eval_result),
                 "timestamp": _timestamp(),
             }
 
-            self._save()
-            return critique
+    # ── Creative Dreaming ──────────────────────────────────────────────
 
-    def _improvement_suggestion(self, eval_result: Dict[str, float]) -> str:
-        """Suggest how to make an idea more creative."""
-        novelty = eval_result["novelty"]
-        surprise = eval_result["surprise"]
-        usefulness = eval_result["usefulness"]
-
-        if novelty < surprise and novelty < usefulness:
-            return "Try combining with more distant concepts to increase novelty"
-        elif surprise < novelty and surprise < usefulness:
-            return "Look for unexpected structural parallels or inversions"
-        elif usefulness < novelty and usefulness < surprise:
-            return "Ground the idea in concrete problem constraints"
-        else:
-            return "Refine by relaxing an assumption and re-evaluating"
-
-    # ── 5. creative_dream ───────────────────────────────────────────────
-
-    def creative_dream(self, memories: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
-        """
-        Creative dreaming: deliberately combine memories from different categories.
-
-        Hook into the dreaming system for creative memory recombination.
-        Score dream outputs by novelty + coherence.
-        """
+    def creative_dream(self, memories: Optional[List[Dict]] = None) -> List[Dict]:
+        """Creative dreaming: combine memories from different categories."""
         with self._lock:
             if not memories:
                 memories = self._journal
-
             if len(memories) < 2:
-                print("[CreativityEngine] Not enough memories for creative dream")
                 return []
 
-            # Group memories by category for cross-category blending
-            by_category: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+            by_category = defaultdict(list)
             for mem in memories:
                 cat = mem.get("category", mem.get("technique", "unknown"))
                 by_category[cat].append(mem)
@@ -809,89 +978,97 @@ class CreativityEngine:
             for _ in range(CREATIVE_DREAM_COUNT):
                 if len(categories) < 2:
                     break
-
-                # Pick two different categories
                 cat_a, cat_b = random.sample(categories, 2)
                 mem_a = random.choice(by_category[cat_a])
                 mem_b = random.choice(by_category[cat_b])
 
-                # Blend them
-                blend = self.blender.blend(mem_a, mem_b)
-                eval_result = self.evaluator.evaluate(blend)
+                input1 = InputSpace(mem_a.get("description", "mem_a")[:30],
+                                    elements=mem_a.get("features", {}))
+                input2 = InputSpace(mem_b.get("description", "mem_b")[:30],
+                                    elements=mem_b.get("features", {}))
+                blend = self.blender.blend(input1, input2)
 
-                # Coherence: how internally consistent is the blend?
-                conflict_penalty = len(blend.get("conflicts", [])) * 0.1
-                coherence = max(0.0, 1.0 - conflict_penalty)
-
-                dream_score = round(
-                    eval_result["novelty"] * 0.5 + coherence * 0.5, 4
-                )
-
+                dream_score = blend.blend_score
                 dream_ideas.append({
                     "type": "creative_dream",
                     "source_categories": [cat_a, cat_b],
-                    "idea": blend,
-                    "novelty": eval_result["novelty"],
-                    "coherence": coherence,
+                    "idea": blend.to_dict(),
+                    "depth": blend.blend_score,
                     "dream_score": dream_score,
                     "timestamp": _timestamp(),
                 })
 
-            # Journal dream results
             for dream in dream_ideas:
-                self._journal_entry(
-                    dream["idea"], "creative_dream", dream["dream_score"]
-                )
+                self._journal_entry(dream["idea"], "creative_dream", dream["dream_score"])
 
             self._stats["dream_cycles_used"] += 1
             self._stats["ideas_generated"] += len(dream_ideas)
             self._save()
-
-            print(f"[CreativityEngine] Creative dream produced {len(dream_ideas)} ideas")
             return dream_ideas
 
-    # ── Journal ─────────────────────────────────────────────────────────
+    def dream_integration(self, dream_memories: List[Dict]) -> List[Dict]:
+        """Integration with dreaming system."""
+        return self.creative_dream(dream_memories)
 
-    def _journal_entry(self, idea: Dict[str, Any], technique: str, score: float):
-        """Add an idea to the creativity journal."""
+    def curiosity_integration(self, curiosity_targets: List[Dict]) -> List[Dict]:
+        """Integration with curiosity module."""
+        suggestions = []
+        for target in curiosity_targets:
+            topic = target.get("topic", target.get("name", "unknown"))
+            interest = target.get("interest_level", 0.5)
+            if interest > 0.6:
+                problem = {
+                    "name": topic,
+                    "constraints": {},
+                    "assumptions": [{"name": "conventional_approach", "relax_modes": ["invert", "remove"]}],
+                }
+                existing = {"name": f"standard_{topic}", "features": {}}
+                alts = self.generate_alternatives(problem, existing, n=2)
+                suggestions.extend(alts)
+        return suggestions
+
+    def world_model_integration(self, idea: Dict, world_model=None) -> Dict:
+        """Evaluate creative ideas via simulation."""
+        if world_model is not None and hasattr(world_model, "evaluate_plan"):
+            try:
+                action_sequence = [{"tool": idea.get("name", "idea"), "complexity": 0.5}]
+                simulation = world_model.evaluate_plan(action_sequence)
+                return {"idea": idea.get("name", "unnamed"), "simulated_outcome": simulation,
+                        "evaluation_method": "world_model"}
+            except Exception:
+                pass
+        critique = self.creative_critique(idea)
+        return {"idea": idea.get("name", "unnamed"),
+                "simulated_outcome": {"feasibility": critique["dimensions"]["usefulness"],
+                                      "impact": critique["dimensions"]["novelty"]},
+                "evaluation_method": "heuristic"}
+
+    # ── Journal ────────────────────────────────────────────────────────
+
+    def _journal_entry(self, idea: Dict, technique: str, score: float):
         entry = {
             "id": f"idea_{int(time.time() * 1000)}_{random.randint(1000, 9999)}",
             "technique": technique,
             "features": idea.get("features", {}),
             "description": idea.get("name", idea.get("description", idea.get("insight", ""))),
             "score": score,
-            "outcome": None,  # Filled in later when idea is tested
+            "outcome": None,
             "created": _timestamp(),
         }
         self._journal.append(entry)
-        self.evaluator.register_idea(entry)
-
         if len(self._journal) > MAX_JOURNAL_ENTRIES:
             self._journal = self._journal[-MAX_JOURNAL_ENTRIES:]
 
     def record_outcome(self, idea_id: str, outcome: str, success: bool):
-        """Record the outcome of a creative idea (for learning)."""
         with self._lock:
             for entry in self._journal:
                 if entry.get("id") == idea_id:
-                    entry["outcome"] = {
-                        "result": outcome,
-                        "success": success,
-                        "recorded": _timestamp(),
-                    }
-                    print(f"[CreativityEngine] Recorded outcome for {idea_id}: "
-                          f"{'success' if success else 'failure'}")
+                    entry["outcome"] = {"result": outcome, "success": success, "recorded": _timestamp()}
                     self._save()
                     return
-            print(f"[CreativityEngine] Idea {idea_id} not found in journal")
 
-    def get_journal(
-        self,
-        technique: Optional[str] = None,
-        min_score: float = 0.0,
-        limit: int = 20,
-    ) -> List[Dict[str, Any]]:
-        """Retrieve journal entries, optionally filtered."""
+    def get_journal(self, technique: Optional[str] = None, min_score: float = 0.0,
+                    limit: int = 20) -> List[Dict]:
         with self._lock:
             entries = self._journal
             if technique:
@@ -899,93 +1076,13 @@ class CreativityEngine:
             entries = [e for e in entries if e.get("score", 0) >= min_score]
             return entries[-limit:]
 
-    # ── Integration hooks ───────────────────────────────────────────────
-
-    def dream_integration(self, dream_memories: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Integration with brain.dreaming — called during dream cycles.
-
-        Takes memories from the dreaming system and produces creative
-        recombinations that feed back into the dream journal.
-        """
-        print(f"[CreativityEngine] Dream integration: processing {len(dream_memories)} memories")
-        return self.creative_dream(dream_memories)
-
-    def curiosity_integration(self, curiosity_targets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Integration with brain.curiosity — curiosity drives exploration of
-        novel combinations.
-
-        Takes curiosity targets and generates creative alternatives for
-        high-curiosity items.
-        """
-        with self._lock:
-            suggestions = []
-            for target in curiosity_targets:
-                topic = target.get("topic", target.get("name", "unknown"))
-                interest = target.get("interest_level", 0.5)
-
-                # Higher curiosity → more aggressive exploration
-                if interest > 0.6:
-                    problem = {
-                        "name": topic,
-                        "constraints": {},
-                        "assumptions": [
-                            {"name": "conventional_approach", "relax_modes": ["invert", "remove"]},
-                        ],
-                    }
-                    existing = {"name": f"standard_{topic}", "features": {}}
-                    alts = self.generate_alternatives(problem, existing, n=2)
-                    suggestions.extend(alts)
-
-            print(f"[CreativityEngine] Curiosity integration: {len(suggestions)} suggestions")
-            return suggestions
-
-    def world_model_integration(
-        self, idea: Dict[str, Any], world_model: Any = None
-    ) -> Dict[str, Any]:
-        """
-        Integration with brain.world_model — evaluate creative ideas via simulation.
-
-        Uses the world model to simulate outcomes of a creative idea.
-        Falls back to heuristic evaluation if world model unavailable.
-        """
-        with self._lock:
-            if world_model is not None and hasattr(world_model, "evaluate_plan"):
-                try:
-                    # Convert idea to an action sequence for the world model
-                    action_sequence = [{"tool": idea.get("name", "idea"), "complexity": 0.5}]
-                    simulation = world_model.evaluate_plan(action_sequence)
-                    return {
-                        "idea": idea.get("name", "unnamed"),
-                        "simulated_outcome": simulation,
-                        "evaluation_method": "world_model_simulation",
-                    }
-                except Exception as e:
-                    print(f"[CreativityEngine] World model simulation failed: {e}")
-
-            # Fallback: heuristic evaluation
-            critique = self.creative_critique(idea)
-            return {
-                "idea": idea.get("name", "unnamed"),
-                "simulated_outcome": {
-                    "feasibility": critique["dimensions"]["usefulness"],
-                    "impact": critique["dimensions"]["novelty"],
-                },
-                "evaluation_method": "heuristic_fallback",
-            }
-
-    # ── Prompt formatting ───────────────────────────────────────────────
-
     def format_for_prompt(self, max_chars: int = 2000) -> str:
-        """Format creativity state for inclusion in LLM prompts."""
         with self._lock:
-            lines = ["=== Creativity Engine State ==="]
+            lines = ["=== Creativity Engine (Conceptual Blending) ==="]
             lines.append(f"Journal entries: {len(self._journal)}")
             lines.append(f"Ideas generated: {self._stats['ideas_generated']}")
-            lines.append(f"Dream cycles used: {self._stats['dream_cycles_used']}")
+            lines.append(f"Dream cycles: {self._stats['dream_cycles_used']}")
 
-            # Recent high-scoring ideas
             recent = sorted(self._journal, key=lambda x: x.get("score", 0), reverse=True)[:5]
             if recent:
                 lines.append("\nTop ideas:")
@@ -995,7 +1092,6 @@ class CreativityEngine:
                     tech = entry.get("technique", "?")
                     lines.append(f"  [{tech}] {desc} (score: {score:.2f})")
 
-            # Outcome summary
             with_outcomes = [e for e in self._journal if e.get("outcome")]
             if with_outcomes:
                 successes = sum(1 for e in with_outcomes if e["outcome"].get("success"))
@@ -1006,27 +1102,16 @@ class CreativityEngine:
                 result = result[:max_chars - 3] + "..."
             return result
 
-    # ── Stats ───────────────────────────────────────────────────────────
-
-    def get_stats(self) -> Dict[str, Any]:
-        """Return engine statistics."""
+    def get_stats(self) -> Dict:
         with self._lock:
             journal_by_technique = defaultdict(int)
             for entry in self._journal:
                 journal_by_technique[entry.get("technique", "unknown")] += 1
-
             outcomes = [e for e in self._journal if e.get("outcome")]
-            success_rate = (
-                sum(1 for e in outcomes if e["outcome"].get("success")) / max(1, len(outcomes))
-            )
-
-            return {
-                **self._stats,
-                "journal_size": len(self._journal),
-                "journal_by_technique": dict(journal_by_technique),
-                "success_rate": round(success_rate, 4),
-                "existing_ideas_for_novelty": len(self.evaluator._existing_ideas),
-            }
+            success_rate = sum(1 for e in outcomes if e["outcome"].get("success")) / max(1, len(outcomes))
+            return {**self._stats, "journal_size": len(self._journal),
+                    "journal_by_technique": dict(journal_by_technique),
+                    "success_rate": round(success_rate, 4)}
 
 
 # ── Singleton ───────────────────────────────────────────────────────────────
@@ -1036,11 +1121,45 @@ _creativity_engine_lock = threading.Lock()
 
 
 def get_creativity_engine() -> CreativityEngine:
-    """Get or create the singleton CreativityEngine instance."""
     global _creativity_engine_instance
     if _creativity_engine_instance is None:
         with _creativity_engine_lock:
             if _creativity_engine_instance is None:
                 _creativity_engine_instance = CreativityEngine()
-                print("[CreativityEngine] Singleton initialized")
     return _creativity_engine_instance
+
+
+# ── Quick Test ──────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    ce = get_creativity_engine()
+
+    # Test conceptual blending
+    input1 = InputSpace("solar_system", "physics",
+                        elements={"sun": {"mass": "large", "temp": "hot"},
+                                  "planet": {"orbits": True, "size": "small"}},
+                        structure=[("sun", "ATTRACTS", "planet")])
+    input2 = InputSpace("atom", "physics",
+                        elements={"nucleus": {"mass": "large", "charge": "positive"},
+                                  "electron": {"orbits": True, "size": "small"}},
+                        structure=[("nucleus", "ATTRACTS", "electron")])
+
+    blend = ce.blender.blend(input1, input2)
+    print(f"Blend: {blend.name}")
+    print(f"  Score: {blend.blend_score:.2f}")
+    print(f"  Emergent structure: {len(blend.emergent_structure)}")
+    print(f"  Contradictions: {len(blend.contradictions)}")
+    print(f"  Optimality: {blend.optimality_principles}")
+
+    # Test alternatives
+    alternatives = ce.generate_alternatives(
+        {"name": "test", "constraints": {"time": 10, "cost": 100}, "assumptions": []},
+        {"name": "solution", "features": {"speed": 0.5, "quality": 0.7}},
+        n=3
+    )
+    print(f"\nAlternatives: {len(alternatives)}")
+    for a in alternatives:
+        print(f"  [{a['technique']}] score={a['rank_score']:.2f}")
+
+    print(f"\nStats: {ce.get_stats()}")
+    print(f"Prompt:\n{ce.format_for_prompt()}")

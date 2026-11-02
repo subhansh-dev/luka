@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-predictive_memory.py — RUMI Predictive Memory (Anticipatory Recall)
+predictive_memory.py — Luka Predictive Memory (Anticipatory Recall)
 ======================================================================
 
 Anticipates what memories will be needed based on current context,

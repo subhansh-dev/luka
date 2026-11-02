@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-world_simulation.py — RUMI World Simulation Engine (Pillar 8)
+world_simulation.py — Luka World Simulation Engine (Pillar 8)
 ================================================================
 
 Real-time world model with predictive capabilities.
@@ -13,7 +13,7 @@ Maintains a dynamic internal representation of the external world:
   - Filters events by user relevance (interests, projects, goals)
   - Provides context-aware world state summaries for reasoning
 
-This module gives RUMI situational awareness — the ability to understand
+This module gives Luka situational awareness — the ability to understand
 not just what happened, but what it means and what might happen next.
 """
 
@@ -103,7 +103,7 @@ class Trend:
 
 class WorldSimulation:
     """
-    Real-time world model — RUMI's situational awareness engine.
+    Real-time world model — Luka's situational awareness engine.
 
     Maintains an evolving internal model of the external world,
     tracks trends, predicts outcomes, and filters for relevance.

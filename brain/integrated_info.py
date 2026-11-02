@@ -1,8 +1,8 @@
 """
-integrated_info.py — RUMI Integrated Information (IIT-Inspired)
+integrated_info.py — Luka Integrated Information (IIT-Inspired)
 =================================================================
 
-Measures and optimises how well RUMI integrates information across modules.
+Measures and optimises how well Luka integrates information across modules.
 Inspired by Giulio Tononi's Integrated Information Theory (IIT).
 
 Key idea: a conscious system is one where information is both *integrated*
@@ -522,7 +522,7 @@ class ConsciousnessMetric:
       heightened — strong integration + differentiation
       flow       — peak integration, all modules active
 
-    Maps to RUMI's sleep cycle:
+    Maps to Luka's sleep cycle:
       dormant    → deep_sleep
       minimal    → light_sleep
       moderate   → rem

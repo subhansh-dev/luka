@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-error_handler.py — RUMI Autonomous Error Recovery
+error_handler.py — Luka Autonomous Error Recovery
 Analyzes task failures and decides retry/skip/replan/abort.
 Generates alternative steps when replanning.
 """
@@ -28,7 +28,7 @@ class ErrorDecision(Enum):
     ABORT  = "abort"
 
 
-ERROR_ANALYST_PROMPT = """You are the error recovery module of RUMI AI assistant.
+ERROR_ANALYST_PROMPT = """You are the error recovery module of Luka AI assistant.
 
 A task step has failed. Analyze the error and decide what to do.
 
@@ -80,7 +80,7 @@ def _get_api_key() -> str:
 
 
 def _generate(model_name: str, prompt: str, system: str = "") -> str:
-    from rumi_llm import generate
+    from luka_llm import generate
     return generate(model_name, prompt, system=system)
 
 

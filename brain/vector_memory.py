@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-vector_memory.py — RUMI Semantic Vector Memory
+vector_memory.py — Luka Semantic Vector Memory
 ==================================================
 
 Embedding-based semantic search over all memory stores.
@@ -37,7 +37,7 @@ _EMBEDDING_DIM = 384
 
 class VectorMemory:
     """
-    Semantic search over RUMI's memory stores using dense embeddings.
+    Semantic search over Luka's memory stores using dense embeddings.
 
     Provides:
     - Semantic similarity search (find memories by meaning, not just keywords)

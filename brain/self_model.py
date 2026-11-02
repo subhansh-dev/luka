@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-self_model.py — RUMI Self-Model System (patched v1.1)
+self_model.py — Luka Self-Model System (patched v1.1)
 Changes from v1.0:
   [FIX-1] _save_async now flushes via background thread every 60s — no more data loss
   [FIX-2] Schema evolution uses recursive deep merge — new nested keys get added
@@ -20,7 +20,7 @@ SELF_MODEL_FILE = BRAIN_DIR / "self_model.json"
 
 class SelfModel:
     """
-    Persistent self-model for RUMI.
+    Persistent self-model for Luka.
 
     Tracks:
     - Tool competence: success rates, confidence, skill level
@@ -343,7 +343,7 @@ class SelfModel:
     def format_for_prompt(self, max_chars: int = 800) -> str:
         """
         Format self-model for inclusion in system prompt.
-        Gives RUMI awareness of her own capabilities and state.
+        Gives Luka awareness of her own capabilities and state.
         """
         summary = self.get_summary()
         caps = summary["capabilities"]

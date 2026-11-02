@@ -4,7 +4,7 @@ workspace_context.py — Workspace State Context Injection
 
 Generates a textual summary of the Global Workspace state for injection
 into Gemini prompts. This gives Gemini situational awareness about
-RUMI's internal state — what she's thinking, feeling, predicting.
+Luka's internal state — what she's thinking, feeling, predicting.
 """
 
 import time

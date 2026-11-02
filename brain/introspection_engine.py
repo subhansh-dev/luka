@@ -1,7 +1,7 @@
 """
 introspection_engine.py — Enhanced Self-Awareness & Introspection Engine
 Provides confidence calibration, cognitive bias detection, epistemic humility,
-narrative self-model, value alignment, and existential reasoning for Rumi.
+narrative self-model, value alignment, and existential reasoning for Luka.
 """
 import json
 import time
@@ -582,7 +582,7 @@ class IntrospectionEngine:
             biases_detected = len(self._bias_log)
 
             narrative_parts = [
-                "I am Rumi, a cognitive AI system designed to think, learn, and grow.",
+                "I am Luka, a cognitive AI system designed to think, learn, and grow.",
                 "",
                 "## My Core Values",
             ]
@@ -778,7 +778,7 @@ class IntrospectionEngine:
             mistake_patterns = self.get_mistake_patterns()
 
             return {
-                "identity": "Rumi — Cognitive AI System",
+                "identity": "Luka — Cognitive AI System",
                 "values": list(self.CORE_VALUES.keys()),
                 "calibration": calibration,
                 "bias_awareness": {

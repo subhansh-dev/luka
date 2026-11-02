@@ -1,8 +1,8 @@
-# Contributing to RUMI
+# Contributing to Luka
 
-_Thank you for wanting to contribute to RUMI — the autonomous cognitive AI for scientific research._
+_Thank you for wanting to contribute to Luka — the autonomous cognitive AI for scientific research._
 
-RUMI is a complex system with 60+ brain modules, 15 Scientist AI modules, 40+ action tools, and a sophisticated cognitive architecture. This guide will help you navigate the codebase and make effective contributions.
+Luka is a complex system with 60+ brain modules, 15 Scientist AI modules, 40+ action tools, and a sophisticated cognitive architecture. This guide will help you navigate the codebase and make effective contributions.
 
 ---
 
@@ -26,15 +26,15 @@ RUMI is a complex system with 60+ brain modules, 15 Scientist AI modules, 40+ ac
 
 ```bash
 # Clone
-git clone https://github.com/subhansh-dev/Rumi
-cd Rumi
+git clone https://github.com/subhansh-dev/Luka
+cd Luka
 
 # Install
 pip install -e .
 playwright install chromium
 
 # Run
-rumi
+luka
 ```
 
 **Requirements:** Python 3.12+, ~4GB RAM, Gemini API key (get one at [aistudio.google.com](https://aistudio.google.com/app/apikey))
@@ -44,7 +44,7 @@ rumi
 ## Codebase Overview
 
 ```
-rumi/
+luka/
 ├── main.py              # Entry point — session management, tool registry, LLM integration
 ├── ui.py                # Terminal UI (Rich + prompt_toolkit)
 ├── brain/               # 88 files — cognitive systems (memory, reasoning, learning, consciousness)
@@ -75,7 +75,7 @@ rumi/
 
 ### 1. New Scientist AI Modules
 
-The most valuable contributions extend RUMI's scientific research capabilities:
+The most valuable contributions extend Luka's scientific research capabilities:
 
 - **Discovery pipeline stages**: New stages in the idea → experiment → paper lifecycle
 - **Domain-specific modules**: Physics, biology, chemistry, neuroscience research tools
@@ -113,7 +113,7 @@ Tools are registered via `@register_tool("tool_name")` decorator in `main.py`:
 
 ### Step 1 — Choose an Issue
 
-Check [open issues](https://github.com/subhansh-dev/Rumi/issues) or propose a new one. For significant changes, open an issue first to discuss.
+Check [open issues](https://github.com/subhansh-dev/Luka/issues) or propose a new one. For significant changes, open an issue first to discuss.
 
 ### Step 2 — Fork & Branch
 
@@ -130,8 +130,8 @@ Follow the code patterns below. Keep changes focused on one concern.
 ### Step 4 — Test
 
 ```bash
-# Verify RUMI starts
-python rumi_launcher.py
+# Verify Luka starts
+python luka_launcher.py
 
 # Check that your module loads without errors
 python -c "from brain.your_module import get_your_module; m = get_your_module(); print(m.get_stats())"
@@ -217,7 +217,7 @@ from pathlib import Path
 STATE_FILE = Path(__file__).resolve().parent / "module_state.json"
 
 class YourModule:
-    """Description of what this module contributes to RUMI's cognition."""
+    """Description of what this module contributes to Luka's cognition."""
 
     def __init__(self):
         self._lock = threading.RLock()
@@ -327,8 +327,8 @@ def my_tool(action: str = "default", **kwargs) -> str:
 ### Manual Testing
 
 ```bash
-# Start RUMI and test your change
-rumi
+# Start Luka and test your change
+luka
 
 # Test specific module independently
 python -c "
@@ -375,11 +375,11 @@ def test_module():
 
 ## Identity Files
 
-When contributing changes that affect RUMI's behavior, update the relevant identity file:
+When contributing changes that affect Luka's behavior, update the relevant identity file:
 
 | File | Purpose | Update When |
 |------|---------|-------------|
-| `RUMI.md` | Core identity & persona | Adding new capabilities, changing core behavior |
+| `Luka.md` | Core identity & persona | Adding new capabilities, changing core behavior |
 | `SOUL.md` | Behavioral directives & red lines | Adding ethical guidelines, changing protocols |
 | `USER.md` | User identity & preferences | Rarely — user-specific details |
 | `TOOLS.md` | Capabilities reference | Adding/removing tools or modules |
@@ -390,7 +390,7 @@ When contributing changes that affect RUMI's behavior, update the relevant ident
 ## Pull Request Process
 
 1. **Ensure your branch is up to date** with `main`
-2. **Run a quick smoke test**: `python rumi_launcher.py` should start without errors
+2. **Run a quick smoke test**: `python luka_launcher.py` should start without errors
 3. **Keep PRs focused** — one feature/fix per PR
 4. **Describe your changes** clearly in the PR description
 5. **Link related issues** in the PR description
@@ -420,7 +420,7 @@ Closes #...
 
 ## Questions?
 
-- Open an [issue](https://github.com/subhansh-dev/Rumi/issues)
+- Open an [issue](https://github.com/subhansh-dev/Luka/issues)
 - Reach out to the creator
 
 ---

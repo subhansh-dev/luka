@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-curiosity.py — RUMI Curiosity & Autonomous Exploration Module (v2.0)
+curiosity.py — Luka Curiosity & Autonomous Exploration Module (v2.0)
 ======================================================================
 
 New in v2.0:
@@ -33,13 +33,13 @@ CURIOSITY_RECOVERY_DAYS = 3.0
 # Topic clusters — exploring one reduces curiosity for related topics
 TOPIC_CLUSTERS = {
     "search": ["web_search", "web_research", "deep_dive"],
-    "system": ["computer_settings", "computer_control", "desktop_control", "file_controller"],
+    "system": ["computer_settings", "file_controller"],
     "media": ["youtube_video"],
     "communication": ["send_message", "reminder"],
     "security": ["security_tools"],
     "development": ["code_helper", "dev_agent", "auto_doc"],
     "data": ["data_analysis", "ai_pipeline", "integration_status"],
-    "visual": ["screen_process"],
+    "visual": [],  # screen_process removed — Friday feature
 }
 
 # Reverse map: tool -> cluster name
@@ -51,7 +51,7 @@ for cluster, tools in TOPIC_CLUSTERS.items():
 
 class CuriosityModule:
     """
-    Curiosity and exploration module for RUMI.
+    Curiosity and exploration module for Luka.
     """
 
     def __init__(self):
@@ -316,7 +316,7 @@ class CuriosityModule:
 
     def should_idle_explore(self) -> bool:
         """
-        Should RUMI explore something during idle time?
+        Should Luka explore something during idle time?
         Returns True if idle > 30min AND there's something worth exploring.
         """
         if self.get_idle_duration() < IDLE_THRESHOLD_SECONDS:
@@ -350,7 +350,7 @@ class CuriosityModule:
 
     def estimate_information_gain(self, tool_name: str,
                                     active_inference_stats: dict = None) -> float:
-        """Estimate how much RUMI would learn by exploring a tool."""
+        """Estimate how much Luka would learn by exploring a tool."""
         with self._lock:
             skill_data = self._data["skill_curiosity"].get(tool_name, {
                 "exploration_count": 0,
@@ -384,8 +384,8 @@ class CuriosityModule:
         if available_tools is None:
             available_tools = [
                 "web_search", "weather_report", "youtube_video",
-                "screen_process", "computer_settings", "browser_control",
-                "file_controller", "code_helper", "desktop_control",
+                "computer_settings", "browser_control",
+                "file_controller", "code_helper",
                 "open_app",
                 "send_message", "reminder", "web_research",
                 "ai_pipeline", "data_analysis", "deep_dive",
@@ -493,7 +493,7 @@ class CuriosityModule:
 
     def record_exploration(self, target: str, target_type: str,
                             outcome: str, info_gain: float = 0.0):
-        """Record that RUMI explored something."""
+        """Record that Luka explored something."""
         with self._lock:
             self._data["exploration_history"].append({
                 "timestamp": datetime.now().isoformat(),

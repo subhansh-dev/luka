@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-goal_engine.py — RUMI Hierarchical Goal Management Engine
+goal_engine.py — Luka Hierarchical Goal Management Engine
 =============================================================
 
-Implements a hierarchical goal system that enables Rumi to set, track,
+Implements a hierarchical goal system that enables Luka to set, track,
 decompose, and prioritize goals across multiple levels of abstraction.
 
 Inspired by:
@@ -494,7 +494,7 @@ class GoalEngine:
         )
 
         try:
-            from rumi_llm import generate
+            from luka_llm import generate
 
             def _call():
                 text = generate(

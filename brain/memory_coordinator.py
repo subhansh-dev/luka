@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-memory_coordinator.py — RUMI Unified Memory Coordinator
+memory_coordinator.py — Luka Unified Memory Coordinator
 ===========================================================
 
-Single API that unifies all of RUMI's memory systems:
+Single API that unifies all of Luka's memory systems:
 - Neural Store (Hebbian, synaptic decay, consolidation)
 - Vector Memory (embedding-based semantic search)
 - Episodic Memory (timestamped events, conversation tracking)
@@ -26,7 +26,7 @@ from typing import Optional, List, Dict
 
 class MemoryCoordinator:
     """
-    Unified memory API for RUMI.
+    Unified memory API for Luka.
 
     Instead of calling each memory store individually,
     the coordinator provides a single interface that routes

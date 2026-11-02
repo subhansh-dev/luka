@@ -3,9 +3,9 @@ requires = ["setuptools>=64.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rumi"
+name = "luka"
 version = "2.0.0"
-description = "RUMI — Autonomous Cognitive AI for Scientific Research"
+description = "Luka — Autonomous Cognitive AI for Scientific Research"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
@@ -46,20 +46,20 @@ include = ["discovery*", "brain*", "scientist*", "actions*", "agent*", "security
 exclude = ["data*", "logs*", "assets*"]
 
 [tool.setuptools]
-py-modules = ["rumi_launcher", "main", "ui", "telegram_bot", "thinking_loop"]
+py-modules = ["luka_launcher", "main", "ui", "telegram_bot", "thinking_loop"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
-Homepage = "https://github.com/subhansh-dev/Rumi"
-Repository = "https://github.com/subhansh-dev/Rumi"
-Documentation = "https://github.com/subhansh-dev/Rumi#readme"
-Issues = "https://github.com/subhansh-dev/Rumi/issues"
-Changelog = "https://github.com/subhansh-dev/Rumi/releases"
+Homepage = "https://github.com/subhansh-dev/Luka"
+Repository = "https://github.com/subhansh-dev/Luka"
+Documentation = "https://github.com/subhansh-dev/Luka#readme"
+Issues = "https://github.com/subhansh-dev/Luka/issues"
+Changelog = "https://github.com/subhansh-dev/Luka/releases"
 
 [project.scripts]
-rumi = "rumi_launcher:main"
+luka = "luka_launcher:main"
 
 [tool.ruff]
 line-length = 100

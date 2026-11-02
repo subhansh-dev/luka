@@ -1,5 +1,5 @@
 """
-RUMI Discovery Engine — Autonomous Scientific Discovery Pipeline
+Luka Discovery Engine — Autonomous Scientific Discovery Pipeline
 
 Modules:
 - pubmed, arxiv_api, semantic_scholar, openalex_api: Literature search

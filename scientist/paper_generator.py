@@ -415,7 +415,7 @@ class PaperGenerator:
 
         return self.generate_paper(
             title=f"On the {topic[:80]}",
-            authors=["RUMI AI Scientist"],
+            authors=["Luka AI Scientist"],
             abstract=abstract,
             introduction=introduction,
             hypothesis=hypothesis,

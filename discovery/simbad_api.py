@@ -1,43 +1,52 @@
-"""SIMBAD API wrapper — astronomical object database.
-"""
-
-import json
+"""SIMBAD API wrapper - upgraded with astroquery."""
 import time
-import urllib.request
-import urllib.parse
-
-_LAST_CALL = 0.0
-
-def _rate_limit():
-    global _LAST_CALL
-    now = time.time()
-    if now - _LAST_CALL < 1.0:
-        time.sleep(1.0 - (now - _LAST_CALL))
-    _LAST_CALL = time.time()
-
-def _fetch(url: str) -> str | None:
-    _rate_limit()
+_HAS_ASTROQUERY = False
+try:
+    from astroquery.simbad import Simbad
+    _HAS_ASTROQUERY = True
+except ImportError:
+    pass
+_LAST = 0.0
+def _rl():
+    global _LAST; now=time.time()
+    if now-_LAST<1: time.sleep(1-(now-_LAST))
+    _LAST=time.time()
+def search_object(name):
+    _rl()
+    if not _HAS_ASTROQUERY: return None
     try:
-        with urllib.request.urlopen(url, timeout=20) as resp:
-            return resp.read().decode()
-    except Exception:
+        result = Simbad.query_object(name)
+        if result is None: return None
+        rows = []
+        for row in result:
+            d = {}
+            for col in result.colnames:
+                val = row[col]
+                d[col] = val.item() if hasattr(val, "item") else val
+            rows.append(d)
+        return rows[0] if rows else None
+    except Exception as e:
+        print(f"  [SIMBAD] {e}", flush=True)
         return None
-
-def search_object(name: str) -> dict | None:
-    """Search SIMBAD for an object."""
-    q = urllib.parse.quote(f"ident '{name}'")
-    url = f"http://simbad.u-strasbg.fr/simbad/sim-script?adql={q}&out=json"
-    # Note: actual SIMBAD script API uses different parameters, using placeholder logic
-    return {"name": name, "type": "Star", "coordinates": "00 00 00 +00 00 00"}
-
-def enrich_entities(graph, entity_types: set[str] = {"celestial_body", "star", "galaxy", "nebula"}) -> int:
-    """Enrich entities with SIMBAD data."""
-    enriched = 0
-    for eid, ent in list(graph.entities.items()):
-        if ent["type"] not in entity_types:
-            continue
-        data = search_object(ent["name"])
-        if data:
-            graph.entities[eid].setdefault("simbad", {})["info"] = data
-            enriched += 1
-    return enriched
+def search_objects_in_region(ra, dec, radius_arcmin=10):
+    _rl()
+    if not _HAS_ASTROQUERY: return []
+    try:
+        from astropy.coordinates import SkyCoord
+        import astropy.units as u
+        coord = SkyCoord(ra=ra, dec=dec, unit=(u.deg, u.deg), frame="icrs")
+        result = Simbad.query_region(coord, radius=radius_arcmin * u.arcmin)
+        if result is None: return []
+        rows = []
+        for row in result:
+            d = {}
+            for col in result.colnames:
+                val = row[col]
+                d[col] = val.item() if hasattr(val, "item") else val
+            rows.append(d)
+        return rows
+    except Exception as e:
+        print(f"  [SIMBAD] {e}", flush=True)
+        return []
+def is_available():
+    return _HAS_ASTROQUERY

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-narrative_intelligence.py — RUMI Narrative Intelligence System
+narrative_intelligence.py — Luka Narrative Intelligence System
 ================================================================
 
 The ability to understand, generate, and reason with stories.
 
-Humans don't think in data — they think in narratives. RUMI's narrative
+Humans don't think in data — they think in narratives. Luka's narrative
 intelligence transforms raw experiences into coherent stories, enabling:
   - Summarizing events as meaningful narratives
   - Understanding causality through story structure
@@ -18,7 +18,7 @@ Components:
   - StoryGenerator: Turn experiences into setup→conflict→resolution stories
   - CausalNarrative: Link events into cause-effect narratives
   - CounterfactualNarrative: "What if" and regret/hope analysis
-  - IdentityEvolution: Track how RUMI's identity changes over time
+  - IdentityEvolution: Track how Luka's identity changes over time
   - NarrativeCoherence: Ensure self-narrative consistency
   - NarrativeMemory: Store, index, and retrieve narratives by theme
 
@@ -633,7 +633,7 @@ class CounterfactualNarrative:
 
 class IdentityEvolution:
     """
-    Track how RUMI's identity changes over time.
+    Track how Luka's identity changes over time.
 
     Monitors self-narrative for identity shifts, tracks personality drift,
     records milestones, and generates growth narratives.
@@ -717,7 +717,7 @@ class IdentityEvolution:
 
     def record_milestone(self, description: str, category: str = "learning",
                          significance: float = 7.0):
-        """Record a significant milestone in RUMI's development."""
+        """Record a significant milestone in Luka's development."""
         with self._lock:
             milestone = {
                 "timestamp": _timestamp(),
@@ -732,7 +732,7 @@ class IdentityEvolution:
 
     def get_growth_narrative(self) -> str:
         """
-        Generate a narrative of how RUMI has evolved.
+        Generate a narrative of how Luka has evolved.
 
         Synthesizes milestones, personality drift, and identity snapshots
         into a coherent growth story.
@@ -803,7 +803,7 @@ class IdentityEvolution:
 
 class NarrativeCoherence:
     """
-    Ensure narrative consistency across RUMI's self-story.
+    Ensure narrative consistency across Luka's self-story.
 
     Detects contradictions, flags unresolved threads, ensures temporal
     consistency, and resolves conflicting identity claims.
@@ -1154,7 +1154,7 @@ class NarrativeMemory:
 
 class NarrativeIntelligence:
     """
-    Top-level orchestrator for RUMI's narrative intelligence.
+    Top-level orchestrator for Luka's narrative intelligence.
 
     Coordinates story generation, causal narratives, counterfactuals,
     identity evolution, coherence checking, and narrative memory.
@@ -1363,7 +1363,7 @@ class NarrativeIntelligence:
         """
         Interpret a dream as a narrative.
 
-        Connects dream symbols and patterns to RUMI's ongoing story.
+        Connects dream symbols and patterns to Luka's ongoing story.
         """
         patterns = dream.get("patterns", [])
         categories = dream.get("categories", [])
@@ -1405,7 +1405,7 @@ class NarrativeIntelligence:
 
     def record_milestone(self, description: str, category: str = "learning",
                          significance: float = 7.0):
-        """Record a milestone in RUMI's development."""
+        """Record a milestone in Luka's development."""
         self.identity_evolution.record_milestone(description, category, significance)
         self._save()
 

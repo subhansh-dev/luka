@@ -131,7 +131,7 @@ def _search_semantic_scholar(query: str, limit: int = 10) -> list[dict]:
     url = f"{base}?{params}"
 
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "RUMI-Scientist/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Luka-Scientist/1.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
     except Exception:
@@ -179,7 +179,7 @@ def _search_arxiv(query: str, limit: int = 10) -> list[dict]:
     url = f"{arxiv_base}?{params}"
 
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "RUMI-Scientist/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Luka-Scientist/1.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             xml_data = resp.read().decode("utf-8")
     except Exception:

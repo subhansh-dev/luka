@@ -56,7 +56,8 @@ class DiscoveryScorer:
 
     def score(self, theory: dict, gaps: list = None, anomalies: list = None,
               predictions: list = None, papers: list = None,
-              graph=None) -> dict:
+              graph=None, adversarial_results: dict = None,
+              peer_review: dict = None) -> dict:
         """
         Score a theory/hypothesis on all discovery dimensions.
 
@@ -143,6 +144,74 @@ class DiscoveryScorer:
         # Final discovery score (0-100)
         discovery_score = sum(weighted.values()) * 100.0
 
+        # Pre-compute strengths and weaknesses (needed for feedback)
+        strengths = []
+        weaknesses = []
+        for dim, score in scores.items():
+            if score >= 70:
+                strengths.append(f"{dim}: {score:.0f}/100")
+            elif score < 40:
+                weaknesses.append(f"{dim}: {score:.0f}/100")
+
+        # ── ADVERSARIAL FEEDBACK: penalty based on survival summary ──
+        adversarial_penalty = 0.0
+        adversarial_detail = ""
+        if adversarial_results:
+            summary = adversarial_results.get("survival_summary", {})
+            theory_summary = summary.get("theories", {})
+            theory_killed = theory_summary.get("killed", 0)
+            theory_started = theory_summary.get("started", 0)
+            theory_survived = theory_summary.get("survived", 0)
+            theory_weakened = theory_summary.get("weakened", 0)
+
+            if theory_started > 0:
+                if theory_killed == theory_started:
+                    # All theories killed — heavy penalty
+                    adversarial_penalty = max(adversarial_penalty, 25)
+                    adversarial_detail = f"All theories killed by adversarial test"
+                elif theory_survived == 0 and theory_weakened > 0:
+                    # No survivors but some weakened — moderate penalty
+                    adversarial_penalty = max(adversarial_penalty, 10)
+                    adversarial_detail = f"No theories survived, {theory_weakened} weakened"
+                elif theory_survived > 0:
+                    # At least one theory survived — small penalty for killed mechanisms
+                    mech_summary = summary.get("mechanisms", {})
+                    mech_killed = mech_summary.get("killed", 0)
+                    if mech_killed > 0:
+                        adversarial_penalty = max(adversarial_penalty, 5)
+                        adversarial_detail = f"{theory_survived} theory survived, {mech_killed} mechanisms killed"
+
+        if adversarial_penalty > 0:
+            discovery_score = max(10, discovery_score - adversarial_penalty)
+            weaknesses.append(f"adversarial: {adversarial_detail} (-{adversarial_penalty:.0f}pts)")
+
+        # ── PEER REVIEW FEEDBACK: if review says major revision, penalize ──
+        peer_penalty = 0.0
+        if peer_review:
+            recommendation = peer_review.get("recommendation", "")
+            overall_review = peer_review.get("overall_score", 10)
+            if recommendation in ("major_revision", "reject"):
+                peer_penalty = max(peer_penalty, 15)
+                weaknesses.append(f"peer_review: {recommendation} (score: {overall_review}/10) (-15pts)")
+            elif recommendation == "minor_revision":
+                peer_penalty = max(peer_penalty, 5)
+            # Low methodology/reproducibility scores
+            methodology = peer_review.get("methodology", {})
+            if isinstance(methodology, dict):
+                meth_score = methodology.get("score", 10)
+                if meth_score <= 3:
+                    peer_penalty = max(peer_penalty, 10)
+                    weaknesses.append(f"peer_review: methodology {meth_score}/10 (-10pts)")
+            reproducibility = peer_review.get("reproducibility", {})
+            if isinstance(reproducibility, dict):
+                rep_score = reproducibility.get("score", 10)
+                if rep_score <= 3:
+                    peer_penalty = max(peer_penalty, 10)
+                    weaknesses.append(f"peer_review: reproducibility {rep_score}/10 (-10pts)")
+
+        if peer_penalty > 0:
+            discovery_score = max(10, discovery_score - peer_penalty)
+
         # Grade
         if discovery_score >= 80:
             grade = "A"
@@ -154,15 +223,6 @@ class DiscoveryScorer:
             grade = "D"
         else:
             grade = "F"
-
-        # Strengths and weaknesses
-        strengths = []
-        weaknesses = []
-        for dim, score in scores.items():
-            if score >= 70:
-                strengths.append(f"{dim}: {score:.0f}/100")
-            elif score < 40:
-                weaknesses.append(f"{dim}: {score:.0f}/100")
 
         summary = self._generate_summary(theory, scores, discovery_score, grade)
 
@@ -317,33 +377,72 @@ class DiscoveryScorer:
 
     def _score_evidence(self, theory: dict, papers: list, graph,
                         theory_scores: dict) -> float:
-        """Score evidence strength — quality-weighted."""
-        # Use competition scores if available
-        if "evidence_support" in theory_scores:
-            return theory_scores["evidence_support"] * 100
+        """Score evidence strength — actually counts evidence sources.
 
-        base = 30
+        Checks:
+        1. Papers from literature search (count + quality)
+        2. Citations in theory description (author names, years)
+        3. Quantitative content (numbers, units, equations)
+        4. Graph density (entity-relationship connections)
+        5. Mechanism derivation steps
+        6. Key parameters with sources
+        """
+        base = 10  # Start low — must earn evidence
 
-        # Quality-weighted paper scoring (not just count)
-        if papers:
-            paper_quality = self._score_literature_quality(papers)
-            # Quality score contributes up to 40 points (up from 30)
-            base += min(40, paper_quality * 40)
+        desc = str(theory.get("description", ""))
+        mechanism = str(theory.get("mechanism", ""))
+        full_text = desc + " " + mechanism
 
-        # Graph evidence
+        # 1. Literature papers (up to 30 points)
+        num_papers = len(papers) if papers else 0
+        if num_papers > 0:
+            # Log-scaled: 5 papers = 15pts, 20 papers = 25pts, 50+ = 30pts
+            import math
+            paper_score = min(30, 10 * math.log10(num_papers + 1))
+            base += paper_score
+
+        # 2. Citations in text (up to 15 points)
+        citation_indicators = [
+            "et al", "et al.", "doi:", "journal", "published",
+            "observed", "measured", "detected", "reported",
+            "cassini", "sdo", "soho", "parker", "hubble",
+            "nature", "science", "apj", "prl", "phys rev",
+            "2005", "2010", "2015", "2020", "2024",
+        ]
+        citation_count = sum(1 for kw in citation_indicators if kw in full_text.lower())
+        base += min(15, citation_count * 3)
+
+        # 3. Quantitative content (up to 15 points)
+        import re
+        numbers = re.findall(r'\d+\.?\d*\s*[×x]\s*10[⁻\-\d]+', full_text)
+        numbers += re.findall(r'[≈≅<>=]\s*\d+\.?\d*', full_text)
+        numbers += re.findall(r'\d+\.?\d*\s*(K|Pa|W|m|s|eV|GeV|Hz|T|A|J|kg)', full_text)
+        quant_score = min(15, len(numbers) * 2)
+        base += quant_score
+
+        # 4. Graph evidence (up to 15 points)
         if graph:
             entities = graph.entities if hasattr(graph, 'entities') else {}
             relationships = graph.relationships if hasattr(graph, 'relationships') else {}
-            # More graph connections = more evidence
             if entities:
                 density = len(relationships) / max(1, len(entities))
-                base += min(20, density * 10)
+                base += min(15, density * 5)
 
-        # Mechanism steps (more steps with evidence = stronger)
+        # 5. Mechanism derivation steps (up to 10 points)
         steps = theory.get("steps", [])
         base += min(10, len(steps) * 2)
 
-        return min(100.0, base)
+        # 6. Key parameters with sources (up to 10 points)
+        key_params = theory.get("key_parameters", [])
+        sourced_params = sum(1 for p in key_params
+            if isinstance(p, dict) and p.get("source", "") not in ("", "unknown", "estimated"))
+        base += min(10, sourced_params * 3)
+
+        # 7. Penalty for no evidence at all
+        if num_papers == 0 and citation_count == 0 and len(steps) == 0:
+            base = 5  # Almost no evidence
+
+        return min(100.0, max(5.0, base))
 
     @staticmethod
     def _score_literature_quality(papers: list) -> float:

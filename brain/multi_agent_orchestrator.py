@@ -3,7 +3,7 @@
 multi_agent_orchestrator.py — Simultaneous Multi-Agent Orchestration Engine
 =============================================================================
 
-Enables Rumi to run multiple agency agents in parallel, have them debate,
+Enables Luka to run multiple agency agents in parallel, have them debate,
 chain them in pipelines, and synthesize their outputs into coherent results.
 
 Inspired by:
@@ -68,7 +68,7 @@ def _get_api_client():
     if _api_client is None:
         with _api_client_lock:
             if _api_client is None:
-                from rumi_llm import get_client
+                from luka_llm import get_client
                 _api_client = get_client()
     return _api_client
 

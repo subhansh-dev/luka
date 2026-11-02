@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-proactive_engine.py — RUMI Proactive Assistant System
+proactive_engine.py — Luka Proactive Assistant System
 ========================================================
 Analyzes user patterns and proactively suggests actions.
 Inspired by 2026 AI assistants (Gemini Agent, Claude, GPT-5).

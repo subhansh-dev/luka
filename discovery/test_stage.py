@@ -1,5 +1,5 @@
 """
-test_stage.py — Adversarial Test Stage for RUMI Discovery Pipeline
+test_stage.py — Adversarial Test Stage for Luka Discovery Pipeline
 
 Aggressively attacks every discovery with three questions:
 1. What existing theory already explains this?
@@ -136,11 +136,12 @@ class AdversarialTest:
                     psource = kp.get("source", "unknown")
                     param_text += f"\n  - {pname} = {pval} [{psource}]"
 
-            prompt = f"""You are a ruthless scientific adversary. Your job is to DESTROY this discovery.
-If it survives your attack, it's strong. If it doesn't, it should be killed.
+            prompt = f"""You are a scientific adversary testing: {topic} ({domain}).
+Your job is to test whether this {item_type} adds genuine value FOR THIS SPECIFIC TOPIC.
 
-TOPIC: {topic}
-DOMAIN: {domain}
+CRITICAL RULE: Your existing_theory MUST be about the SAME PHENOMENON in {domain}.
+Do NOT cite theories from unrelated fields (e.g., do not cite quantum optics for a geology topic).
+If no existing {domain} theory explains this, say "None known in {domain}."
 
 THE {item_type.upper()} UNDER ATTACK:
 Name: {name}
@@ -148,33 +149,30 @@ Type: {type_label}
 Description: {desc[:400]}
 Key Parameters: {param_text if param_text else "None"}
 
-EXISTING LITERATURE:
+RELEVANT LITERATURE (use these for your attack):
 {paper_context[:1500]}
 
 ATTACK WITH THESE THREE QUESTIONS:
 
-1. EXISTING THEORY: What existing theory, mechanism, or known phenomenon already explains
-   the same observations this {item_type} tries to explain? Be specific — cite papers or
-   well-established results. If nothing exists, say "No known theory explains this."
+1. EXISTING THEORY: What existing theory in {domain} already explains this phenomenon?
+   Cite papers from the literature above or well-established {domain} results.
+   If nothing in {domain} explains this, say "None known in {domain}."
 
-2. VARIABLE REMOVAL: Can any new variable, entity, or parameter in this {item_type} be
-   REMOVED while still explaining the observations? If the same effect can be achieved
-   with fewer assumptions, the discovery is WEAK. Explain which variables are essential
-   and which are unnecessary.
+2. VARIABLE REMOVAL: Can any variable in this {item_type} be REMOVED while still
+   explaining {topic}? Focus on whether variables are needed for THIS explanation.
 
-3. FALSIFICATION: What specific, measurable observation would FALSIFY this {item_type}?
-   Be quantitative — "if we observe X > Y, this is wrong." If you cannot specify a
-   falsification, the {item_type} is unfalsifiable and should be KILLED.
+3. FALSIFICATION: What specific measurable observation about {topic} would FALSIFY this?
+   Be quantitative. Reference {domain} measurements.
 
 Output JSON:
 {{
-  "existing_theory": "What existing theory explains this (or 'None known')",
+  "existing_theory": "What existing {domain} theory explains this (or 'None known in {domain}')",
   "existing_theory_strength": "strong|moderate|weak|none",
   "can_remove_variables": true/false,
   "removable_variables": ["var1", "var2"] or [],
-  "removal_reason": "Why they can be removed (or why all are essential)",
+  "removal_reason": "Why they can/cannot be removed for {topic}",
   "essential_variables": ["var1"] or [],
-  "falsification": "Specific quantitative observation that would disprove this",
+  "falsification": "Specific measurable observation about {topic} that would disprove this",
   "falsification_quality": "strong|moderate|weak|none",
   "survived": true/false,
   "attack_score": 0.0-1.0,

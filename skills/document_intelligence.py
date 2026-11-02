@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-document_intelligence.py — Rumi Document Intelligence Engine
+document_intelligence.py — Luka Document Intelligence Engine
 ================================================================
 
 Advanced document understanding that goes far beyond "summarize this."

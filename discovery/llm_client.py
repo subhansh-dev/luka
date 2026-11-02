@@ -1,7 +1,7 @@
-"""
-discovery/llm_client.py — Unified LLM Client for RUMI
+"""Finnished OpenRouter import done
+discovery/llm_client.py — Unified LLM Client for Luka
 
-Cerebras→Groq→Gemini auto-fallback with key rotation.
+OpenRouter (primary) → NVIDIA NIM (2 keys) → Cerebras (2 keys) fallback.
 Drop-in replacement for all LLM calls.
 
 Usage:
@@ -13,31 +13,22 @@ Usage:
 
 import json
 import time
-import random
 from pathlib import Path
 
 CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "api_keys.json"
 
 # ── Defaults ──
-GROQ_MODEL = "llama-3.3-70b-versatile"
-GEMINI_MODEL = "gemini-2.5-flash"
-GEMINI_THINKING_MODEL = "gemini-2.5-flash"  # for complex reasoning
+OPENROUTER_MODEL = "nemotron-3-ultra-550b-a55b:free"
+NVIDIA_MODEL = "nvidia/llama-3.3-nemotron-super-49b-v1"
+CEREBRAS_MODEL = "gpt-oss-120b"
 
-# ── Rate limiting with backoff ──
-_last_groq_call = 0.0
-_last_gemini_call = 0.0
+# ── Rate limiting ──
+_last_openrouter_call = 0.0
+_last_nvidia_call = 0.0
 _last_cerebras_call = 0.0
-_groq_backoff_until = 0.0
-_gemini_backoff_until = 0.0
-_cerebras_backoff_until = 0.0
 
-# ── Groq limits (free tier: 30 req/min) ──
-GROQ_MIN_INTERVAL = 2.0  # 2s between calls to stay under limits
-
-# ── Gemini limits (free tier: 15 req/min) ──
-GEMINI_MIN_INTERVAL = 4.0  # 4s between calls for free tier
-
-# ── Cerebras limits (free tier) ──
+OPENROUTER_MIN_INTERVAL = 2.0
+NVIDIA_MIN_INTERVAL = 3.0
 CEREBRAS_MIN_INTERVAL = 2.0
 
 
@@ -48,58 +39,42 @@ def _load_config() -> dict:
         return {}
 
 
-def _get_groq_keys() -> list[str]:
+# ═══════════════════════════════════════════════════════════════
+# OpenRouter — Primary
+# ═══════════════════════════════════════════════════════════════
+
+def _get_openrouter_config() -> dict:
     cfg = _load_config()
-    keys = []
-    for k in ["groq_api_key", "groq_api_key2"]:
-        v = cfg.get(k, "")
-        if v:
-            keys.append(v)
-    return keys
+    key = cfg.get("openrouter_api_key", "")
+    model = cfg.get("openrouter_model", OPENROUTER_MODEL)
+    if not key:
+        return {}
+    return {"key": key, "model": model}
 
 
-def _get_gemini_keys() -> list[str]:
-    cfg = _load_config()
-    keys = []
-    for k in ["gemini_api_key", "gemini_api_key_fallback", "gemini_api_key3",
-              "gemini_api_key4"]:
-        v = cfg.get(k, "")
-        if v:
-            keys.append(v)
-    return keys
-
-
-# ── Groq ──────────────────────────────────────────────────────────────
-
-_groq_key_idx = 0
-
-
-def _rate_limit_groq(max_tokens: int = 4096):
-    global _last_groq_call, _groq_backoff_until
+def _rate_limit_openrouter():
+    global _last_openrouter_call
     now = time.time()
-    # Check if we're in backoff period
-    if now < _groq_backoff_until:
-        time.sleep(_groq_backoff_until - now)
-    elapsed = time.time() - _last_groq_call
-    if elapsed < GROQ_MIN_INTERVAL:
-        time.sleep(GROQ_MIN_INTERVAL - elapsed)
-    _last_groq_call = time.time()
+    elapsed = now - _last_openrouter_call
+    if elapsed < OPENROUTER_MIN_INTERVAL:
+        time.sleep(OPENROUTER_MIN_INTERVAL - elapsed)
+    _last_openrouter_call = time.time()
 
 
-def _call_groq(prompt: str, json_mode: bool = False,
-               max_tokens: int = 4096, temperature: float = 0.3,
-               model: str = GROQ_MODEL) -> str | None:
-    """Call Groq API using raw requests. Rotates keys on 429."""
+def _call_openrouter(prompt: str, json_mode: bool = False,
+                     max_tokens: int = 4096, temperature: float = 0.3) -> str | None:
+    """Call OpenRouter API. OpenAI-compatible endpoint."""
     try:
         import requests
     except ImportError:
         return None
-    global _groq_key_idx
-    keys = _get_groq_keys()
-    if not keys:
+    config = _get_openrouter_config()
+    if not config:
         return None
 
-    # Groq requires the word 'json' in the prompt for json_object mode
+    key = config["key"]
+    model = config["model"]
+
     effective_prompt = prompt
     if json_mode and "json" not in prompt.lower():
         effective_prompt = prompt + "\n\nRespond in JSON format."
@@ -113,123 +88,167 @@ def _call_groq(prompt: str, json_mode: bool = False,
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
 
-    # Try each key on 429 before giving up
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/subhansh-dev/Luka",
+        "X-Title": "Luka Discovery Engine",
+    }
+
+    for attempt in range(3):
+        _rate_limit_openrouter()
+        try:
+            resp = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers, json=payload, timeout=120,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                if content and content.strip():
+                    return content.strip()
+            elif resp.status_code == 429:
+                time.sleep(5 * (attempt + 1))
+                continue
+            elif resp.status_code == 400 and json_mode:
+                # json_object not supported — strip and retry
+                payload.pop("response_format", None)
+                resp2 = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers, json=payload, timeout=120,
+                )
+                if resp2.status_code == 200:
+                    data = resp2.json()
+                    content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                    if content and content.strip():
+                        return content.strip()
+                return None
+            elif resp.status_code in (401, 403):
+                return None  # bad key
+            else:
+                print(f"    [LLM] OpenRouter {resp.status_code}: {resp.text[:100]}", flush=True)
+                return None
+        except requests.exceptions.Timeout:
+            continue
+        except Exception:
+            return None
+
+    return None
+
+
+# ═══════════════════════════════════════════════════════════════
+# NVIDIA NIM — Fallback (2 keys, key rotation)
+# ═══════════════════════════════════════════════════════════════
+
+_nvidia_key_idx = 0
+
+
+def _get_nvidia_keys() -> list[str]:
+    cfg = _load_config()
+    keys = []
+    for k in ["nvidia_api_key", "nvidia_api_key2"]:
+        v = cfg.get(k, "")
+        if v:
+            keys.append(v)
+    return keys
+
+
+def _get_nvidia_config() -> dict:
+    cfg = _load_config()
+    model = cfg.get("nvidia_model", NVIDIA_MODEL)
+    return {"model": model}
+
+
+def _rate_limit_nvidia():
+    global _last_nvidia_call
+    now = time.time()
+    elapsed = now - _last_nvidia_call
+    if elapsed < NVIDIA_MIN_INTERVAL:
+        time.sleep(NVIDIA_MIN_INTERVAL - elapsed)
+    _last_nvidia_call = time.time()
+
+
+def _call_nvidia(prompt: str, json_mode: bool = False,
+                 max_tokens: int = 4096, temperature: float = 0.3) -> str | None:
+    """Call NVIDIA NIM API. Rotates keys on 429/401."""
+    try:
+        import requests
+    except ImportError:
+        return None
+    global _nvidia_key_idx
+    keys = _get_nvidia_keys()
+    if not keys:
+        return None
+    model = _get_nvidia_config().get("model", NVIDIA_MODEL)
+
+    effective_prompt = prompt
+    if json_mode and "json" not in prompt.lower():
+        effective_prompt = prompt + "\n\nRespond in JSON format."
+
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": effective_prompt}],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    if json_mode:
+        payload["response_format"] = {"type": "json_object"}
+
     for key_attempt in range(len(keys)):
-        key = keys[(_groq_key_idx + key_attempt) % len(keys)]
+        key = keys[(_nvidia_key_idx + key_attempt) % len(keys)]
         headers = {
             "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
         }
 
-        for attempt in range(3):
-            _rate_limit_groq(max_tokens)
+        for attempt in range(2):
+            _rate_limit_nvidia()
             try:
                 resp = requests.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    headers=headers, json=payload, timeout=60,
+                    "https://integrate.api.nvidia.com/v1/chat/completions",
+                    headers=headers, json=payload, timeout=120,
                 )
                 if resp.status_code == 200:
                     data = resp.json()
                     content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-                    if content and len(content) > 2:
-                        _groq_key_idx = (_groq_key_idx + key_attempt) % len(keys)
+                    if content and content.strip():
+                        _nvidia_key_idx = (_nvidia_key_idx + key_attempt) % len(keys)
                         return content.strip()
                 elif resp.status_code == 429:
-                    # This key is rate-limited — wait then try next key
-                    time.sleep(5)
-                    break
+                    time.sleep(5 * (attempt + 1))
+                    break  # rotate key
                 elif resp.status_code in (401, 403):
-                    break  # try next key
-                elif resp.status_code == 400:
-                    # Bad request — don't retry with same payload
-                    err_body = resp.text[:200]
-                    if "json" in err_body.lower():
-                        # Remove json_mode and retry
-                        payload.pop("response_format", None)
-                        continue
+                    break  # dead key, rotate
+                elif resp.status_code == 400 and json_mode:
+                    payload.pop("response_format", None)
+                    resp2 = requests.post(
+                        "https://integrate.api.nvidia.com/v1/chat/completions",
+                headers=headers, json=payload, timeout=120,
+                    )
+                    if resp2.status_code == 200:
+                        data = resp2.json()
+                        content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                        if content and content.strip():
+                            _nvidia_key_idx = (_nvidia_key_idx + key_attempt) % len(keys)
+                            return content.strip()
                     return None
                 else:
-                    print(f"    [LLM] Groq {resp.status_code}: {resp.text[:100]}", flush=True)
+                    print(f"    [LLM] NVIDIA {resp.status_code}: {resp.text[:100]}", flush=True)
+                    return None
             except requests.exceptions.Timeout:
                 continue
             except Exception:
                 return None
 
-    _groq_key_idx = (_groq_key_idx + 1) % max(1, len(keys))
+    _nvidia_key_idx = (_nvidia_key_idx + 1) % max(1, len(keys))
     return None
 
 
-# ── Gemini ────────────────────────────────────────────────────────────
-
-_gemini_key_idx = 0
-
-
-def _rate_limit_gemini(max_tokens: int = 4096):
-    global _last_gemini_call
-    now = time.time()
-    elapsed = now - _last_gemini_call
-    if elapsed < GEMINI_MIN_INTERVAL:
-        time.sleep(GEMINI_MIN_INTERVAL - elapsed)
-    _last_gemini_call = time.time()
-
-
-def _call_gemini(prompt: str, json_mode: bool = False,
-                 max_tokens: int = 4096, temperature: float = 0.3,
-                 model: str = GEMINI_MODEL) -> str | None:
-    """Call Gemini API. Rotates keys on 429."""
-    global _gemini_key_idx
-    keys = _get_gemini_keys()
-    if not keys:
-        return None
-
-    try:
-        from google import genai
-        from google.genai import types
-    except ImportError:
-        return None
-
-    # Try each key on 429 before giving up
-    for key_attempt in range(len(keys)):
-        key = keys[(_gemini_key_idx + key_attempt) % len(keys)]
-
-        for attempt in range(2):
-            _rate_limit_gemini(max_tokens)
-            try:
-                client = genai.Client(api_key=key)
-                kwargs = dict(
-                    temperature=temperature,
-                    max_output_tokens=min(max_tokens, 65536),
-                )
-                if json_mode:
-                    kwargs["response_mime_type"] = "application/json"
-                resp = client.models.generate_content(
-                    model=model, contents=prompt,
-                    config=types.GenerateContentConfig(**kwargs),
-                )
-                text = resp.text
-                if text and len(text) > 2:
-                    _gemini_key_idx = (_gemini_key_idx + key_attempt) % len(keys)
-                    return text.strip()
-            except Exception as e:
-                err = str(e)
-                if "429" in err or "rate" in err.lower() or "quota" in err.lower():
-                    # This key exhausted — wait then try next key
-                    time.sleep(5)
-                    break
-                elif "401" in err or "403" in err or "invalid" in err.lower():
-                    break  # bad key, try next
-                else:
-                    print(f"    [LLM] Gemini error: {err[:100]}", flush=True)
-                return None
-
-    _gemini_key_idx = (_gemini_key_idx + 1) % max(1, len(keys))
-    return None
-
-
-# ── Cerebras ──────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════
+# Cerebras — Last resort (2 keys, key rotation)
+# ═══════════════════════════════════════════════════════════════
 
 _cerebras_key_idx = 0
-CEREBRAS_MODEL = "gpt-oss-120b"
 
 
 def _get_cerebras_keys() -> list[str]:
@@ -268,7 +287,6 @@ def _call_cerebras(prompt: str, json_mode: bool = False,
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
 
-    # Try each key on 429 before giving up
     for key_attempt in range(len(keys)):
         key = keys[(_cerebras_key_idx + key_attempt) % len(keys)]
         headers = {
@@ -284,31 +302,35 @@ def _call_cerebras(prompt: str, json_mode: bool = False,
                 data = resp.json()
                 choice = data.get("choices", [{}])[0].get("message", {})
                 content = choice.get("content", "")
-                if not content or len(content) < 3:
-                    content = choice.get("reasoning", "")
-                if content and len(content) > 2:
+                reasoning = choice.get("reasoning", "")
+                if content and content.strip():
                     _cerebras_key_idx = (_cerebras_key_idx + key_attempt) % len(keys)
                     return content.strip()
+                if reasoning and len(reasoning) > 2:
+                    _cerebras_key_idx = (_cerebras_key_idx + key_attempt) % len(keys)
+                    return reasoning.strip()
             elif resp.status_code == 429:
-                time.sleep(5)  # wait before rotating to next key
-                continue  # rotate to next key
+                time.sleep(5)
+                continue
             elif resp.status_code in (401, 403):
                 continue
             elif resp.status_code == 400 and json_mode:
-                # json_mode not supported — retry without it
                 payload.pop("response_format", None)
                 resp2 = requests.post(
                     "https://api.cerebras.ai/v1/chat/completions",
-                    headers=headers, json=payload, timeout=60,
+                headers=headers, json=payload, timeout=60,
                 )
                 if resp2.status_code == 200:
                     data = resp2.json()
                     choice = data.get("choices", [{}])[0].get("message", {})
                     content = choice.get("content", "")
-                    if not content or len(content) < 3:
-                        content = choice.get("reasoning", "")
-                    if content and len(content) > 2:
+                    reasoning = choice.get("reasoning", "")
+                    if content and content.strip():
+                        _cerebras_key_idx = (_cerebras_key_idx + key_attempt) % len(keys)
                         return content.strip()
+                    if reasoning and len(reasoning) > 2:
+                        _cerebras_key_idx = (_cerebras_key_idx + key_attempt) % len(keys)
+                        return reasoning.strip()
             else:
                 print(f"    [LLM] Cerebras {resp.status_code}: {resp.text[:100]}", flush=True)
                 return None
@@ -319,83 +341,62 @@ def _call_cerebras(prompt: str, json_mode: bool = False,
     return None
 
 
-# ── Public API ────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════
+# Public API
+# ═══════════════════════════════════════════════════════════════
 
-# Provider cooldown — skip providers that recently failed
+_openrouter_cooldown_until = 0.0
+_nvidia_cooldown_until = 0.0
 _cerebras_cooldown_until = 0.0
-_groq_cooldown_until = 0.0
-_gemini_cooldown_until = 0.0
-COOLDOWN_SECONDS = 15  # skip a provider for 15s after it fails (shorter = more resilient)
+COOLDOWN_SECONDS = 15
+
 
 def call(prompt: str, json_mode: bool = False, max_tokens: int = 4096,
          temperature: float = 0.3, provider: str = "auto") -> str | None:
-    """Call with auto-routing. Cerebras (fastest) → Groq → Gemini fallback."""
-    global _cerebras_cooldown_until, _groq_cooldown_until, _gemini_cooldown_until
-    now = time.time()
+    """Call with auto-routing: OpenRouter → NVIDIA (2 keys) → Cerebras (2 keys)."""
+    global _openrouter_cooldown_until, _nvidia_cooldown_until, _cerebras_cooldown_until
 
-    if provider == "auto":
-        # Cerebras first (fastest free provider), then Groq, then Gemini
-        for attempt in range(2):  # retry once if all in cooldown
+    if provider in ("auto", "openrouter"):
+        for chain_attempt in range(3):
             now = time.time()
+            # OpenRouter (primary — fastest, most reliable)
+            if now >= _openrouter_cooldown_until:
+                result = _call_openrouter(prompt, json_mode, max_tokens, temperature)
+                if result:
+                    return result
+                _openrouter_cooldown_until = time.time() + COOLDOWN_SECONDS
+            # NVIDIA (fallback, 2 keys with rotation)
+            if now >= _nvidia_cooldown_until:
+                result = _call_nvidia(prompt, json_mode, max_tokens, temperature)
+                if result:
+                    return result
+                _nvidia_cooldown_until = time.time() + COOLDOWN_SECONDS
+            # Cerebras (last resort, 2 keys with rotation)
             if now >= _cerebras_cooldown_until:
                 result = _call_cerebras(prompt, json_mode, max_tokens, temperature)
                 if result:
                     return result
                 _cerebras_cooldown_until = time.time() + COOLDOWN_SECONDS
-            if now >= _groq_cooldown_until:
-                result = _call_groq(prompt, json_mode, max_tokens, temperature)
-                if result:
-                    return result
-                _groq_cooldown_until = time.time() + COOLDOWN_SECONDS
-            if now >= _gemini_cooldown_until:
-                result = _call_gemini(prompt, json_mode, max_tokens, temperature)
-                if result:
-                    return result
-                _gemini_cooldown_until = time.time() + COOLDOWN_SECONDS
-            # All providers in cooldown — wait for the soonest one
-            soonest = min(_cerebras_cooldown_until, _groq_cooldown_until, _gemini_cooldown_until)
-            wait = max(0, soonest - time.time())
-            if wait > 0 and wait < 60 and attempt == 0:
-                print(f"    [LLM] All providers cooling down, waiting {wait:.0f}s...", flush=True)
-                time.sleep(wait + 1)
-                continue
-            break
+
+            if chain_attempt < 2:
+                soonest = min(_openrouter_cooldown_until, _nvidia_cooldown_until, _cerebras_cooldown_until)
+                wait = max(0, soonest - time.time())
+                if 0 < wait < 60:
+                    print(f"    [LLM] All providers failed, retrying in {wait:.0f}s "
+                          f"(attempt {chain_attempt + 1}/3)...", flush=True)
+                    time.sleep(wait + 1)
         return None
+
+    if provider == "nvidia":
+        result = _call_nvidia(prompt, json_mode, max_tokens, temperature)
+        if result:
+            return result
+        _nvidia_cooldown_until = time.time() + COOLDOWN_SECONDS
+        return _call_cerebras(prompt, json_mode, max_tokens, temperature)
+
     if provider == "cerebras":
-        result = _call_cerebras(prompt, json_mode, max_tokens, temperature)
-        if result:
-            return result
-        _cerebras_cooldown_until = time.time() + COOLDOWN_SECONDS
-        # Cerebras failed — try Groq then Gemini
-        if now >= _groq_cooldown_until:
-            result = _call_groq(prompt, json_mode, max_tokens, temperature)
-            if result:
-                return result
-        if now >= _gemini_cooldown_until:
-            return _call_gemini(prompt, json_mode, max_tokens, temperature)
-        return None
-    if provider == "groq":
-        result = _call_groq(prompt, json_mode, max_tokens, temperature)
-        if result:
-            return result
-        _groq_cooldown_until = time.time() + COOLDOWN_SECONDS
-        # Groq failed — try Cerebras then Gemini
-        if now < _cerebras_cooldown_until:
-            pass  # skip cerebras
-        else:
-            result = _call_cerebras(prompt, json_mode, max_tokens, temperature)
-            if result:
-                return result
-        if now < _gemini_cooldown_until:
-            pass  # skip gemini
-        else:
-            return _call_gemini(prompt, json_mode, max_tokens, temperature)
-        return None
-    if provider == "gemini":
-        result = _call_gemini(prompt, json_mode, max_tokens, temperature)
-        if not result:
-            _gemini_cooldown_until = time.time() + COOLDOWN_SECONDS
-        return result
+        return _call_cerebras(prompt, json_mode, max_tokens, temperature)
+
     return None
 
 
@@ -406,45 +407,56 @@ def call_json(prompt: str, max_tokens: int = 8192,
                 temperature=temperature, provider=provider)
 
 
+def call_math(prompt: str, max_tokens: int = 8192,
+              temperature: float = 0.3, json_mode: bool = False) -> str | None:
+    """Math-optimized call — routes through OpenRouter (best model for reasoning)."""
+    return call(prompt, json_mode=json_mode, max_tokens=max_tokens,
+                temperature=temperature, provider="openrouter")
+
+
 def call_thinking(prompt: str, max_tokens: int = 32768,
                   temperature: float = 0.7, provider: str = "auto") -> str | None:
-    """Call with higher token limit for complex reasoning tasks."""
-    # For thinking tasks, prefer Gemini's larger context if available
-    if provider == "auto":
-        result = _call_gemini(prompt, False, max_tokens, temperature,
-                              model=GEMINI_THINKING_MODEL)
-        if result:
-            return result
-        result = _call_cerebras(prompt, False, min(max_tokens, 8192), temperature)
-        if result:
-            return result
-        return _call_groq(prompt, False, max_tokens, temperature)
-    return call(prompt, False, max_tokens, temperature, provider)
+    """High-token call for complex reasoning tasks."""
+    return call(prompt, False, max_tokens, temperature,
+                provider="openrouter" if provider == "auto" else provider)
 
 
 def is_available(provider: str = "auto") -> bool:
     """Check if any LLM provider is configured."""
-    if provider == "groq":
-        return bool(_get_groq_keys())
-    if provider == "gemini":
-        return bool(_get_gemini_keys())
+    if provider == "openrouter":
+        return bool(_get_openrouter_config())
+    if provider == "nvidia":
+        return bool(_get_nvidia_keys())
     if provider == "cerebras":
         return bool(_get_cerebras_keys())
-    return bool(_get_cerebras_keys()) or bool(_get_groq_keys()) or bool(_get_gemini_keys())
+    return (bool(_get_openrouter_config()) or
+            bool(_get_nvidia_keys()) or
+            bool(_get_cerebras_keys()))
 
 
 def get_status() -> dict:
     """Return provider availability status."""
-    groq_keys = _get_groq_keys()
-    gemini_keys = _get_gemini_keys()
+    openrouter_config = _get_openrouter_config()
+    nvidia_keys = _get_nvidia_keys()
     cerebras_keys = _get_cerebras_keys()
-    primary = "cerebras" if cerebras_keys else "groq" if groq_keys else "gemini" if gemini_keys else "none"
+    nvidia_cfg = _get_nvidia_config()
+    primary = ("openrouter" if openrouter_config else
+               "nvidia" if nvidia_keys else
+               "cerebras" if cerebras_keys else "none")
     return {
-        "cerebras": {"available": bool(cerebras_keys), "keys": len(cerebras_keys),
-                     "model": CEREBRAS_MODEL},
-        "groq": {"available": bool(groq_keys), "keys": len(groq_keys),
-                 "model": GROQ_MODEL},
-        "gemini": {"available": bool(gemini_keys), "keys": len(gemini_keys),
-                   "model": GEMINI_MODEL},
+        "openrouter": (
+            {"available": True, "model": openrouter_config.get("model", "N/A")}
+            if openrouter_config else {"available": False}
+        ),
+        "nvidia": (
+            {"available": bool(nvidia_keys), "keys": len(nvidia_keys),
+             "model": nvidia_cfg.get("model", "N/A")}
+            if nvidia_keys else {"available": False}
+        ),
+        "cerebras": (
+            {"available": bool(cerebras_keys), "keys": len(cerebras_keys),
+             "model": CEREBRAS_MODEL}
+            if cerebras_keys else {"available": False}
+        ),
         "primary": primary,
     }

@@ -75,3 +75,6 @@ docs/*.svg
 node_modules/
 npm-debug.log*
 data/discovery_*.txt
+
+# local refactor backup
+*.refactor-bak

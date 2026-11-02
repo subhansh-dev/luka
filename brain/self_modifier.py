@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-self_modifier.py — RUMI Self-Modification Engine
+self_modifier.py — Luka Self-Modification Engine
 ====================================================
 
-Enables RUMI to safely analyze, propose, and track modifications
+Enables Luka to safely analyze, propose, and track modifications
 to her own codebase. Safety-first: never auto-applies to critical files,
 always creates backups, validates syntax before/after every change.
 """
@@ -28,7 +28,7 @@ BRAIN_DIR = Path(__file__).parent.resolve()
 MODIFICATION_DATA_FILE = BRAIN_DIR / "modification_data.json"
 
 CRITICAL_PATTERNS = [
-    "main.py", "RUMI.md", "SOUL.md", "USER.md",
+    "main.py", "Luka.md", "SOUL.md", "USER.md",
     "TOOLS.md", "HEARTBEAT.md",
     "memory/",
     "security/", "config/", "credentials/",
@@ -88,7 +88,7 @@ def _git_revert(commit_hash: str) -> bool:
 # ════════════════════════════════════════════════════════════════════════
 
 class CodeAnalyzer:
-    """Analyze RUMI's codebase for improvement opportunities."""
+    """Analyze Luka's codebase for improvement opportunities."""
 
     def __init__(self):
         self._cache: Dict[str, Any] = {}
@@ -550,7 +550,7 @@ class SafeModification:
 # ════════════════════════════════════════════════════════════════════════
 
 class IntegrityChecker:
-    """Verify that modifications don't break RUMI's functionality."""
+    """Verify that modifications don't break Luka's functionality."""
 
     @staticmethod
     def check_syntax(file_path: str) -> Tuple[bool, str]:
@@ -612,7 +612,7 @@ class IntegrityChecker:
 
     @staticmethod
     def check_consistency(brain_dir: str) -> Dict[str, Any]:
-        """Verify all brain modules follow RUMI conventions."""
+        """Verify all brain modules follow Luka conventions."""
         brain_path = Path(brain_dir)
         results: Dict[str, Any] = {"total_modules": 0, "consistent": 0, "inconsistent": 0, "issues": []}
 
@@ -670,7 +670,7 @@ class IntegrityChecker:
 # ════════════════════════════════════════════════════════════════════════
 
 class EvolutionTracker:
-    """Track RUMI's architectural evolution over time."""
+    """Track Luka's architectural evolution over time."""
 
     def __init__(self, data_file: Path = MODIFICATION_DATA_FILE):
         self._lock = threading.RLock()
@@ -729,7 +729,7 @@ class EvolutionTracker:
         with self._lock:
             mods = self._data.get("modifications", [])[-max_entries:]
             metrics = self._data.get("metrics_history", [])
-            lines = ["═══ RUMI Evolution Report ═══\n"]
+            lines = ["═══ Luka Evolution Report ═══\n"]
 
             if metrics:
                 latest = metrics[-1]
@@ -764,7 +764,7 @@ class EvolutionTracker:
 
 class SelfModifier:
     """
-    Main self-modification engine for RUMI.
+    Main self-modification engine for Luka.
 
     Coordinates analysis, proposals, safe modification,
     integrity checking, and evolution tracking.

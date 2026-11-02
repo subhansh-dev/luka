@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-intrinsic_motivation.py — RUMI Intrinsic Motivation Engine
+intrinsic_motivation.py — Luka Intrinsic Motivation Engine
 ==============================================================
 
 Implements intrinsic motivation based on Self-Determination Theory (SDT),
-enabling Rumi to pursue curiosity-driven exploration, mastery goals,
+enabling Luka to pursue curiosity-driven exploration, mastery goals,
 and autonomous learning without external rewards.
 
 Inspired by:

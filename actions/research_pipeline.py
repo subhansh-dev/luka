@@ -1,7 +1,7 @@
 """
-research_pipeline.py — RUMI Scientist AI Enhanced Pipeline Action Tool
+research_pipeline.py — Luka Scientist AI Enhanced Pipeline Action Tool
 
-Exposes the ResearchPipeline as a callable action tool for RUMI.
+Exposes the ResearchPipeline as a callable action tool for Luka.
 Integrates with the main.py tool registry system.
 """
 

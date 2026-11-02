@@ -1,4 +1,4 @@
-# brain package — Rumi's neural memory system
+# brain package — Luka's neural memory system
 
 # Global Workspace (Thalamus) — unified consciousness
 try:

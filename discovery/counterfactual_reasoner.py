@@ -1,7 +1,7 @@
 """
 counterfactual_reasoner.py — If theory T is true, then consequences C1, C2, C3 must follow.
 
-This is the core of scientific reasoning that RUMI was missing.
+This is the core of scientific reasoning that Luka was missing.
 
 Scientists don't just propose mechanisms. They ask:
   "If G(z) = G0(1 + αz), then BBN deuterium abundance shifts by X%."

@@ -1,5 +1,5 @@
 """
-pipeline.py — RUMI Scientist AI: Enhanced Research Pipeline Orchestrator
+pipeline.py — Luka Scientist AI: Enhanced Research Pipeline Orchestrator
 
 Extends the core discovery_engine with:
   - Active learning loop (curiosity-driven topic prioritization)

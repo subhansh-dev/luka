@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-theory_of_mind.py — RUMI Theory of Mind (User Mental Model)
+theory_of_mind.py — Luka Theory of Mind (User Mental Model)
 ================================================================
 
 Models the user's mental state to provide personalized, context-aware

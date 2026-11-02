@@ -38,7 +38,7 @@ class SkillDefinition:
 
 
 class SkillRegistry:
-    """Central registry of all Rumi skills."""
+    """Central registry of all Luka skills."""
 
     def __init__(self):
         self.skills: dict = {}
@@ -136,13 +136,6 @@ class SkillRegistry:
                 freedom="medium",
                 gotchas=["Wallpaper path must exist", "Organize moves files"],
                 parameters={"type": "object", "properties": {"action": {"type": "string"}}, "required": ["action"]},
-            ),
-            SkillDefinition(
-                name="screen_process",
-                trigger="When the user wants to capture the screen or camera and analyze it with vision",
-                freedom="medium",
-                gotchas=["Camera index must be configured", "Spawns daemon thread"],
-                parameters={"type": "object", "properties": {"source": {"type": "string", "enum": ["screen", "camera"]}}, "required": ["source"]},
             ),
             SkillDefinition(
                 name="dev_agent",

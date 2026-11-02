@@ -72,7 +72,7 @@ class MissingVariableGenerator:
 
         # Build context for LLM
         gap_text = self._format_gaps(gaps[:6])
-        anomaly_text = self._format_anomalies(anomalies[:6])
+        anomaly_text = self._format_anomalies(anomalies[:3])
 
         # Get graph context
         graph_context = self._build_graph_context()
@@ -80,10 +80,14 @@ class MissingVariableGenerator:
         # Build paper context
         paper_text = ""
         if papers:
-            for p in papers[:6]:
-                abstract = p.get("abstract", "")[:300]
+            for p in papers[:3]:
+                abstract = p.get("abstract", "")[:150]
                 if abstract:
-                    paper_text += f"\n- {p.get('title', '?')}: {abstract}\n"
+                    paper_text += f"\n- {p.get('title', '?')[:60]}: {abstract}\n"
+
+        # Truncate archive context
+        if len(archive_context) > 800:
+            archive_context = archive_context[:800] + "\n[Truncated]"
 
         prompt = f"""You are a brilliant scientific theorist specializing in discovering hidden variables.
 
@@ -107,16 +111,7 @@ RELEVANT PAPERS:
 Your task: propose HIDDEN VARIABLES — unseen entities, processes, forces, or conditions
 that could explain the gaps and anomalies above.
 
-Before proposing hidden variables, think through this structured reasoning:
-
-<discovery_reasoning>
-1. WHAT GAPS EXIST? — List the knowledge gaps and anomalies that need explanation.
-2. WHAT'S MISSING? — What unseen entity, process, or force could fill these gaps?
-3. WHAT EXISTS ALREADY? — Are there known concepts that partially explain this?
-4. WHAT WOULD THE MATH LOOK LIKE? — For each proposed variable, what equations would govern it?
-5. CAN I DERIVE THE EQUATIONS? — If the variable connects to known physics, derive the relationship.
-6. HOW WOULD I MEASURE IT? — What experiment would confirm or refute this variable?
-</discovery_reasoning>
+CRITICAL: You MUST respond with ONLY valid JSON. No prose, no explanation, no markdown outside the JSON block.
 
 REQUIREMENTS — PREFER quantitative, but don't reject qualitative:
 1. PREFER mathematical formalism. If you can derive an equation from first principles or
@@ -193,14 +188,21 @@ Output JSON:
 }}
 
 Generate 2-3 hidden variables. Quality over quantity. Each MUST have equations and
-quantitative predictions. Reject any proposal that is just a fancy name without math."""
+quantitative predictions. Reject any proposal that is just a fancy name without math.
+
+RESPOND WITH ONLY THE JSON OBJECT. NO PROSE BEFORE OR AFTER. NO EXPLANATION."""
 
         try:
-            raw = self.llm_call(prompt, max_tokens=8192)
+            # Use call_json to force JSON response format
+            from discovery.llm_client import call_json
+            raw = call_json(prompt, max_tokens=4096, provider="auto")
+            # Fallback: if JSON mode fails, try regular call
+            if not raw:
+                raw = self.llm_call(prompt, max_tokens=4096)
             if not raw:
                 try:
                     from discovery.llm_client import call_json
-                    raw = call_json(prompt, max_tokens=8192, provider="auto")
+                    raw = call_json(prompt, max_tokens=4096, provider="auto")
                 except Exception:
                     pass
             if raw:
@@ -208,6 +210,8 @@ quantitative predictions. Reject any proposal that is just a fancy name without 
                 result = extract_json(raw, expected_key="hidden_variables")
                 if result is None and isinstance(raw, str):
                     print(f"    [WARN] hidden_variables: JSON extraction failed ({len(raw)} chars)", flush=True)
+                    preview = raw[:200].replace('\n', ' ')
+                    print(f"    [DEBUG] Response preview: {preview}", flush=True)
 
                 if isinstance(result, dict):
                     # Validate and enrich

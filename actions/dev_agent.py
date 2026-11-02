@@ -60,7 +60,7 @@ def _get_api_key() -> str:
 
 
 def _generate(model_name: str, prompt: str) -> str:
-    from rumi_llm import generate
+    from luka_llm import generate
     return generate(model_name, prompt)
 
 

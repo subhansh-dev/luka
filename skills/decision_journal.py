@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-decision_journal.py — RUMI Decision Journal
+decision_journal.py — Luka Decision Journal
 ==============================================
 Auditable reasoning trace for non-trivial actions. Records what options
 were considered, why one was chosen, what was expected, and what happened.

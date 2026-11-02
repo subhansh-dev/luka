@@ -1,6 +1,6 @@
 # TOOLS.md — Capabilities Reference
 
-_Complete reference of RUMI's cognitive systems, action tools, skills, agents, and diagnostics._
+_Complete reference of Luka's cognitive systems, action tools, skills, agents, and diagnostics._
 
 ---
 
@@ -167,11 +167,8 @@ _Complete reference of RUMI's cognitive systems, action tools, skills, agents, a
 | Tool | Description |
 |------|-------------|
 | `open_app` | Launch any application on the computer |
-| `computer_control` | Mouse, keyboard, hotkeys, scroll, screenshot, type automation |
 | `computer_settings` | Volume, brightness, WiFi, power management, window control |
-| `desktop_control` | Wallpaper, organize files, clean desktop, system stats |
 | `file_controller` | Full file system: list, create, delete, move, copy, rename, read, write, search |
-| `screen_process` | Screen capture and vision analysis (camera or display) |
 
 ### Communication
 
@@ -230,21 +227,17 @@ _Complete reference of RUMI's cognitive systems, action tools, skills, agents, a
 | `self_narrative` | Read or add to identity story |
 | `proactive_suggest` | Get proactive suggestions based on learned patterns |
 | `integration_status` | Report available advanced Python modules |
-| `api_server` | Start/stop RUMI REST API server |
+| `api_server` | Start/stop Luka REST API server |
 | `cognitive_code` (status) | Cognitive coding engine system status |
 
 ### Utilities
 
 | Tool | Description |
 |------|-------------|
-| `system_sentinel` | Monitor CPU, RAM, disk health |
-| `neural_clipboard` | Monitor clipboard and retrieve history |
 | `auto_doc` | Auto-generate project documentation |
-| `gesture_music` | Hand gesture-controlled music system |
 | `music_control` | Media playback control (play, pause, skip, volume) |
 | `security_tools` | Cybersecurity tool suite (requires cyber_enabled) |
-| `ac_control` | Air conditioner control (IR/WiFi) |
-| `shutdown_rumi` | Graceful shutdown with memory save |
+| `shutdown_luka` | Graceful shutdown with memory save |
 
 ---
 
@@ -262,8 +255,6 @@ _Complete reference of RUMI's cognitive systems, action tools, skills, agents, a
 | `experience_replay` | Past experience review for pattern extraction and learning |
 | `adaptive_planner` | Dynamic task planning and strategy optimization |
 | `auto_doc` | Automatic project documentation generation |
-| `neural_clipboard` | Cross-session context transfer via clipboard monitoring |
-| `sentinel` | Background system monitoring and alerting |
 
 ---
 

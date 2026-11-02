@@ -51,7 +51,7 @@ def _get_api_key() -> str:
 
 
 def _generate(model_name: str, prompt: str, system: str = "") -> str:
-    from rumi_llm import generate
+    from luka_llm import generate
     return generate(model_name, prompt, system=system)
 
 
@@ -278,8 +278,6 @@ def _call_tool(
         "youtube_video":      ("actions.youtube_video",     "youtube_video",     False),
         "weather_report":     ("actions.weather_report",    "weather_action",    False),
         "computer_settings":  ("actions.computer_settings", "computer_settings", False),
-        "desktop_control":    ("actions.desktop",           "desktop_control",   False),
-        "computer_control":   ("actions.computer_control",  "computer_control",  False),
         "web_research":       ("actions.web_research",      "web_research",      False),
         "security_tools":     ("actions.security_tools",    "security_tools",    False),
     }
@@ -291,12 +289,6 @@ def _call_tool(
             raise ValueError("generated_code requires a 'description' parameter.")
         timeout = parameters.get("timeout", 120)
         return _run_generated_code(description, speak=speak, timeout=timeout)
-
-    # Special case: screen_process (fire-and-forget)
-    if tool == "screen_process":
-        from actions.screen_processor import screen_process
-        screen_process(parameters=parameters, player=None)
-        return "Screen captured and analyzed."
 
     # Lookup in tool map
     if tool in TOOL_MAP:

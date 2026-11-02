@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-adaptive_planner.py — RUMI Adaptive Planner
+adaptive_planner.py — Luka Adaptive Planner
 ==============================================
 Dynamic re-planning on failure. When a multi-step plan fails, re-assesses
 from the failure point and generates alternatives. Tracks strategy success

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-meta_learner.py — RUMI Meta-Learning System
+meta_learner.py — Luka Meta-Learning System
 ===============================================
 
-"Learning to learn" — RUMI adapts her own learning strategies based on
+"Learning to learn" — Luka adapts her own learning strategies based on
 experience. This module sits above the learning engine and active inference,
 tuning their parameters and selecting strategies automatically.
 
@@ -597,7 +597,7 @@ class AntiCatastrophicForgetting:
     - Important values get lower effective learning rates
     - Periodic rehearsal of old knowledge during idle time
 
-    This prevents RUMI from "forgetting" well-learned skills when
+    This prevents Luka from "forgetting" well-learned skills when
     learning something new.
     """
 
@@ -722,7 +722,7 @@ class AntiCatastrophicForgetting:
 
 class MetaLearner:
     """
-    Top-level meta-learning orchestrator for RUMI.
+    Top-level meta-learning orchestrator for Luka.
 
     Coordinates all meta-learning subsystems and integrates with
     brain.learning, brain.active_inference, and brain.self_improve_engine.
@@ -1082,7 +1082,7 @@ class MetaLearner:
             }
 
     def format_for_prompt(self, max_chars: int = 2000) -> str:
-        """Format meta-learning state for inclusion in RUMI's prompt."""
+        """Format meta-learning state for inclusion in Luka's prompt."""
         with self._lock:
             stats = self.get_stats()
             lines = ["## Meta-Learning Status"]

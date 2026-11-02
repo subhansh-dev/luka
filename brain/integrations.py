@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-integrations.py — RUMI System Integrations
+integrations.py — Luka System Integrations
 Optional dependency management, data analysis, charting, scheduling,
 web scraping, system monitoring, and extension status reporting.
 """

@@ -47,13 +47,15 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSubmit, isBusy, disabled
   return (
     <Box flexDirection="column">
       <CompletionList items={filtered} selectedIndex={selectedIndex} visible={showCompletions} />
-      <Box flexDirection="row" paddingX={1}>
-        <Text color={theme.accent.cyan} bold>{'> '}</Text>
+      {/* Separator line */}
+      <Text color={theme.border.subtle}>{'─'.repeat(70)}</Text>
+      <Box flexDirection="row" paddingX={1} paddingY={0}>
+        <Text color={isBusy ? theme.accent.amber : theme.accent.cyan} bold>{'❯ '}</Text>
         <TextInput
           value={value}
           onChange={handleChange}
           onSubmit={handleSubmit}
-          placeholder={isBusy ? 'queuing...' : 'ask RUMI anything...'}
+          placeholder={isBusy ? 'luka is thinking...' : 'ask luka anything...'}
         />
       </Box>
     </Box>

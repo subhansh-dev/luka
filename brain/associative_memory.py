@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-associative_memory.py — RUMI Associative Memory (Spreading Activation)
+associative_memory.py — Luka Associative Memory (Spreading Activation)
 =========================================================================
 
 Implements spreading activation networks for context-dependent recall.

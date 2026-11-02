@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# RUMI Scientist AI — Unix Launcher (Linux/macOS)
+# Luka Scientist AI — Unix Launcher (Linux/macOS)
 # ==============================================================================
 set -e
 
@@ -9,7 +9,7 @@ cd "$SCRIPT_DIR"
 
 echo ""
 echo "  ╔══════════════════════════════════════════════════════╗"
-echo "  ║           RUMI Scientist AI  v1.0.0                 ║"
+echo "  ║           Luka Scientist AI  v1.0.0                 ║"
 echo "  ║     Autonomous Cognitive AI for Research            ║"
 echo "  ╚══════════════════════════════════════════════════════╝"
 echo ""
@@ -41,15 +41,15 @@ else
 fi
 echo ""
 
-# --- Launch RUMI ---
-echo "[LAUNCH] Starting RUMI Scientist AI..."
+# --- Launch Luka ---
+echo "[LAUNCH] Starting Luka Scientist AI..."
 echo ""
-python3 rumi_launcher.py
+python3 luka_launcher.py
 EXIT_CODE=$?
 
 # --- On exit ---
 if [ $EXIT_CODE -ne 0 ]; then
-    echo "[RUMI] Exited with code $EXIT_CODE"
+    echo "[Luka] Exited with code $EXIT_CODE"
 fi
 echo ""
-echo "[RUMI] Session ended."
+echo "[Luka] Session ended."

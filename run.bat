@@ -1,14 +1,15 @@
-@echo off
+﻿@echo off
 setlocal enabledelayedexpansion
+chcp 65001 >nul
 :: ============================================================================
-:: RUMI Scientist AI — Windows Launcher (v3)
+:: Luka Scientist AI — Windows Launcher (v3)
 :: Finds Python 3.13+ WITH rich + prompt_toolkit installed.
 :: ============================================================================
-title RUMI Scientist AI
+title Luka Scientist AI
 
 echo.
 echo  ╔══════════════════════════════════════════════════════╗
-echo  ║           RUMI Scientist AI  v3.0.0                 ║
+echo  ║           Luka Scientist AI  v3.0.0                 ║
 echo  ║     Autonomous Scientific Discovery Engine           ║
 echo  ╚══════════════════════════════════════════════════════╝
 echo.
@@ -64,17 +65,17 @@ echo [OK] Using: %PYTHON_CMD%
 %PYTHON_CMD% --version
 echo.
 
-:: --- Launch RUMI ---
+:: --- Launch Luka ---
 if "%1"=="" (
-    echo [LAUNCH] Starting RUMI Scientist AI...
+    echo [LAUNCH] Starting Luka Scientist AI...
     echo.
-    %PYTHON_CMD% rumi_launcher.py
+    %PYTHON_CMD% luka_launcher.py
 ) else (
     echo [LAUNCH] Running discovery pipeline: %*
     echo.
-    %PYTHON_CMD% run_discovery_v2.py %*
+    %PYTHON_CMD% run_discovery.py %*
 )
 
 echo.
-echo [RUMI] Session ended.
+echo [Luka] Session ended.
 pause

@@ -29,10 +29,7 @@ if str(_project_root) not in sys.path:
 
 from discovery.domains import DOMAINS, get_domain, entity_types_list, build_detect_prompt, entity_colors, DOMAIN_ALIAS_MAP, list_domains
 
-try:
-    import sounddevice as sd
-except ImportError:
-    sd = None
+sd = None
 
 try:
     from google import genai
@@ -187,7 +184,7 @@ except Exception as e:
 
 _telegram_ok = False
 try:
-    from rumi_telegram_patch import TelegramBridge
+    from luka_telegram_patch import TelegramBridge
     _telegram_ok = True
 except Exception as e:
     print(f"[Luka] TelegramBridge: {e}", flush=True)
@@ -209,14 +206,14 @@ weather_action = None
 send_message = None
 reminder = None
 computer_settings = None
-screen_process, _ = _safe_action_import("actions.screen_processor", "screen_process")
+screen_process = None  # Removed — Friday feature
 youtube_video = None
-desktop_control, _ = _safe_action_import("actions.desktop", "desktop_control")
+desktop_control = None  # Removed — Friday feature
 browser_control, _ = _safe_action_import("actions.browser_control", "browser_control")
 file_controller, _ = _safe_action_import("actions.file_controller", "file_controller")
 dev_agent, _ = _safe_action_import("actions.dev_agent", "dev_agent")
 web_search_action, _ = _safe_action_import("actions.web_search", "web_search")
-computer_control, _ = _safe_action_import("actions.computer_control", "computer_control")
+computer_control = None  # Removed — Friday desktop feature
 web_research, _ = _safe_action_import("actions.web_research", "web_research")
 agency_agent_action, _ = _safe_action_import("actions.agency_agent", "agency_agent")
 agency_list_agents = None
@@ -661,7 +658,7 @@ _security_ok = False
 try:
     from security import (
         get_permission_manager, get_audit_logger, get_config_validator,
-        get_lock_state, RiskTier, Decision,
+        RiskTier, Decision,
     )
     from security.audit_logger import redact_params
     from security.config_validator import ConfigValidationError
@@ -670,11 +667,7 @@ except Exception as e:
     print(f"[Luka] Security: {e}", flush=True)
 
 _rate_limiter_available = False
-try:
-    from security.tools_guard import get_rate_limiter
-    _rate_limiter_available = True
-except ImportError:
-    pass
+# tools_guard removed — Friday security feature
 
 if not _security_ok:
     print("[Luka] Security module not available — using permissive fallback", flush=True)
@@ -693,7 +686,6 @@ if not _security_ok:
         ASK = "ask"
     get_permission_manager = lambda: _FakePermMgr()
     get_audit_logger = lambda: _FakeAudit()
-    get_lock_state = lambda: _FakeLockState()
     Decision = _FakeDecision()
     RiskTier = type('RiskTier', (), {'HIGH': 2, 'MEDIUM': 1, 'LOW': 0})()
     redact_params = lambda x: x
@@ -758,8 +750,6 @@ except Exception:
 _skills_ok = False
 try:
     from skills.deep_dive import DeepDiveAgent
-    from skills.sentinel import SystemSentinel
-    from skills.neural_clipboard import NeuralClipboard
     from skills.auto_doc import AutoDocEngine
     from skills.cognitive_gating import assess_complexity
     from skills.working_memory import get_working_memory
@@ -815,11 +805,6 @@ _VALID_PARAMS = {
         "action", "browser", "url", "query", "engine", "selector",
         "text", "description", "direction", "amount", "key", "path",
         "incognito", "clear_first",
-    },
-    "computer_control": {
-        "action", "text", "x", "y", "keys", "key", "direction",
-        "amount", "seconds", "title", "description", "data_type",
-        "field", "clear_first", "path",
     },
     "computer_settings": {
         "action", "description", "value",
@@ -1057,18 +1042,6 @@ TOOL_DECLARATIONS = [
         }
     },
     {
-        "name": "screen_process",
-        "description": "Captures and analyzes the screen or webcam image. MUST be called when user asks what is on screen, what you see, analyze my screen, look at camera, etc. You have NO visual ability without this tool. After calling this tool, stay SILENT — the vision module speaks directly.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "angle": {"type": "STRING", "description": "'screen' to capture display, 'camera' for webcam. Default: 'screen'"},
-                "text": {"type": "STRING", "description": "The question or instruction about the captured image"}
-            },
-            "required": ["text"]
-        }
-    },
-    {
         "name": "computer_settings",
         "description": "System-level computer control: volume, brightness, window management, fullscreen, dark mode, WiFi, restart, shutdown, lock screen, zoom, screenshots, refresh/reload page. For input-level actions (type, click, hotkey, scroll, mouse) use computer_control.",
         "parameters": {
@@ -1199,32 +1172,7 @@ TOOL_DECLARATIONS = [
         }
     },
     {
-        "name": "computer_control",
-        "description": "Input-level computer control: type text, click, hotkeys, scroll, move mouse, screenshots, find elements on screen. For system-level actions (volume, brightness, WiFi, shutdown) use computer_settings.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "action": {"type": "STRING", "description": "type | smart_type | click | double_click | right_click | hotkey | press | scroll | move | copy | paste | screenshot | wait | clear_field | focus_window | screen_find | screen_click | random_data | user_data"},
-                "text": {"type": "STRING", "description": "Text to type or paste"},
-                "x": {"type": "INTEGER", "description": "X coordinate"},
-                "y": {"type": "INTEGER", "description": "Y coordinate"},
-                "keys": {"type": "STRING", "description": "Key combination e.g. 'ctrl+c'"},
-                "key": {"type": "STRING", "description": "Single key e.g. 'enter'"},
-                "direction": {"type": "STRING", "description": "up | down | left | right"},
-                "amount": {"type": "INTEGER", "description": "Scroll amount (default: 3)"},
-                "seconds": {"type": "NUMBER", "description": "Seconds to wait"},
-                "title": {"type": "STRING", "description": "Window title for focus_window"},
-                "description": {"type": "STRING", "description": "Element description for screen_find/screen_click"},
-                "data_type": {"type": "STRING", "description": "Data type for random_data"},
-                "field": {"type": "STRING", "description": "Field for user_data: name|email|city"},
-                "clear_first": {"type": "BOOLEAN", "description": "Clear field before typing (default: true)"},
-                "path": {"type": "STRING", "description": "Save path for screenshot"},
-            },
-            "required": ["action"]
-        }
-    },
-    {
-        "name": "shutdown_rumi",
+        "name": "shutdown_luka",
         "description": "Shuts down the assistant completely. Call this when the user expresses intent to end the conversation, close the assistant, say goodbye, or stop Luka. The user can say this in ANY language.",
         "parameters": {
             "type": "OBJECT",
@@ -1394,26 +1342,6 @@ TOOL_DECLARATIONS = [
                 "max_sources": {"type": "INTEGER", "description": "Maximum sources to scrape (default: 5)"}
             },
             "required": ["query"]
-        }
-    },
-    {
-        "name": "system_sentinel",
-        "description": "Monitor system health: CPU, RAM, disk usage.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "action": {"type": "STRING", "description": "status | start | stop"}
-            }
-        }
-    },
-    {
-        "name": "neural_clipboard",
-        "description": "Monitor clipboard changes and retrieve clipboard history.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "action": {"type": "STRING", "description": "start | history | status"}
-            }
         }
     },{
         "name": "auto_doc",
@@ -2350,9 +2278,9 @@ class RumiLive:
             self._audit = _FakeAudit() if not _security_ok else _NullModule()
 
         try:
-            self._lock_st = get_lock_state()
-        except Exception:
-            self._lock_st = _FakeLockState() if not _security_ok else _NullModule()
+            self._lock_st = _FakeLockState()  # lock_state removed — Friday feature
+        except NameError:
+            self._lock_st = type('_NullLock', (), {'check_and_log': lambda *a, **kw: (True, "")})()
 
         self._action_source = "mic"
         try:
@@ -2373,12 +2301,6 @@ class RumiLive:
         self._modes = {"think": False, "deep_dive": False, "focus": False}
         self.current_domain = "space_astronomy"
         self._voice_enabled = False
-        try:
-            _d = json.loads(API_CONFIG_PATH.read_text(encoding="utf-8"))
-            if "voice_enabled" in _d:
-                self._voice_enabled = bool(_d["voice_enabled"])
-        except Exception:
-            pass
 
         self._last_audio_time = 0.0
         self._last_send_time = 0.0
@@ -2397,11 +2319,11 @@ class RumiLive:
         self._send_lock = None
 
         self._tool_executor = ThreadPoolExecutor(
-            max_workers=6, thread_name_prefix="rumi-tool")
+            max_workers=6, thread_name_prefix="luka-tool")
         self._long_task_executor = ThreadPoolExecutor(
-            max_workers=2, thread_name_prefix="rumi-long")
+            max_workers=2, thread_name_prefix="luka-long")
         self._audio_executor = ThreadPoolExecutor(
-            max_workers=1, thread_name_prefix="rumi-audio")
+            max_workers=1, thread_name_prefix="luka-audio")
 
         self._health = {
             "status": "starting", "connected": False,
@@ -2472,8 +2394,6 @@ class RumiLive:
                 self._creative_studio = _NullModule()
                 self._document_intelligence = _NullModule()
 
-            self._sentinel = None
-            self._clipboard = None
             self._gesture_music = None
             self._gesture_stop_event = threading.Event()
 
@@ -4034,7 +3954,43 @@ Output ONLY valid JSON as a list of objects with this structure:
         if not self._loop:
             self._post_output("ERR: Session not connected. Wait for reconnection or restart Luka.")
             return
-        if command == "discover":
+        if command == "cause":
+            # Cause mode: run curious questioning (Newton Step) then discovery
+            if args:
+                self._post_output(f"[bold cyan]Cause Mode (Newton Step)[/bold cyan]")
+                self._post_output(f"[dim]Observation: {args}[/dim]")
+                self.ui.set_discovery_step("curious questioning")
+                try:
+                    from discovery.curious_questioning import CuriousQuestioning
+                    from discovery.llm_client import call_json as llm_call
+                    cq = CuriousQuestioning(llm_call=llm_call)
+                    cause_data = cq.run(args, "", papers=[])
+                    core_question = cause_data.get("reframed", "")
+                    questions = cause_data.get("questions", [])
+                    hypothesis = cause_data.get("question_hypothesis", "")
+                    self._post_output(f"[green]Questions generated: {len(questions)}[/green]")
+                    if core_question:
+                        self._post_output(f"[green]Core question: {core_question[:120]}[/green]")
+                    if hypothesis:
+                        self._post_output(f"[green]Hypothesis: {hypothesis[:120]}[/green]")
+                    # Use the reframed question as the discovery topic
+                    topic = core_question if core_question and len(core_question) > 20 else args
+                    self._post_output(f"[dim]Running discovery on: {topic[:80]}[/dim]")
+                    # Now run the full discovery pipeline
+                    self.ui._discovery_running = True
+                    future = asyncio.run_coroutine_threadsafe(
+                        self._run_discovery_pipeline(topic), self._loop
+                    )
+                    def _on_cause_done(fut):
+                        try: fut.result()
+                        except Exception as e: self._post_output(f"ERR: {e}")
+                        finally: self.ui._discovery_running = False
+                    future.add_done_callback(_on_cause_done)
+                except Exception as e:
+                    self._post_output(f"ERR: Cause mode failed: {e}")
+            else:
+                self._post_output("Usage: /cause <observation>")
+        elif command == "discover":
             if args:
                 # Support manual domain override: /discover materials: battery cathodes
                 domain_override = None
@@ -5199,7 +5155,7 @@ Output ONLY valid JSON as a list of objects with keys: title, objective, methodo
                 result = await self._tool_proactive_suggest(args)
             elif name == "agi_status":
                 result = await self._tool_agi_status(args)
-            elif name == "shutdown_rumi":
+            elif name == "shutdown_luka":
                 return await self._tool_shutdown(fc)
             elif name in TOOL_REGISTRY:
                 result = await TOOL_REGISTRY[name](self, args)
@@ -5556,7 +5512,7 @@ Output ONLY valid JSON as a list of objects with keys: title, objective, methodo
                             source="user", reason="User requested shutdown")
         except Exception:
             pass
-        self.ui.write_log("SYS: Rumi Shutdown requested.")
+        self.ui.write_log("SYS: Luka Shutdown requested.")
         self._schedule_shutdown = True
         return types.FunctionResponse(
             id=fc.id, name=fc.name, response={"result": "Shutting down. Goodbye, sir."})
@@ -6251,16 +6207,7 @@ Output ONLY valid JSON as a list of objects with keys: title, objective, methodo
 
     @register_tool("screen_process")
     async def _tool_screen(self, args):
-        if not screen_process:
-            return "screen_process module not loaded."
-        threading.Thread(
-            target=_safe_thread(screen_process, "screen_process",
-                                parameters=args, response=None,
-                                player=self.ui, session_memory=None),
-            daemon=True).start()
-        return ("Vision module activated and will speak directly to the user. "
-                "You MUST NOT produce any audio response. Output nothing. "
-                "The vision module handles all communication for this request.")
+        return "screen_process removed — not needed for space discovery."
 
     @register_tool("computer_settings")
     async def _tool_computer_settings(self, args):
@@ -6288,11 +6235,7 @@ Output ONLY valid JSON as a list of objects with keys: title, objective, methodo
 
     @register_tool("desktop_control")
     async def _tool_desktop(self, args):
-        if not desktop_control:
-            return "desktop_control module not loaded."
-        r = await self._run_tool_with_timeout(
-            lambda: desktop_control(parameters=args, player=self.ui))
-        return r if r is not None else "desktop_control returned no result."
+        return "desktop_control removed — not needed for space discovery."
 
     @register_tool("dev_agent")
     async def _tool_dev_agent(self, args):
@@ -6414,11 +6357,7 @@ Output ONLY valid JSON as a list of objects with keys: title, objective, methodo
 
     @register_tool("computer_control")
     async def _tool_computer_control(self, args):
-        if not computer_control:
-            return "computer_control module not loaded."
-        r = await self._run_tool_with_timeout(
-            lambda: computer_control(parameters=args, player=self.ui))
-        return r if r is not None else "computer_control returned no result."
+        return "computer_control removed — not needed for space discovery."
 
     @register_tool("web_research")
     async def _tool_web_research(self, args):
@@ -6569,46 +6508,11 @@ Output ONLY valid JSON as a list of objects with keys: title, objective, methodo
 
     @register_tool("system_sentinel")
     async def _tool_sentinel(self, args):
-        act = args.get("action", "status").lower()
-        if act == "start":
-            if not self._sentinel:
-                if not _skills_ok:
-                    return "Sentinel module not available."
-                self._sentinel = SystemSentinel()
-                return "System sentinel monitoring started."
-            return "Already running."
-        elif act == "stop":
-            if self._sentinel:
-                self._sentinel.stop()
-                self._sentinel = None
-                return "Stopped."
-            return "Not running."
-        else:
-            if self._sentinel:
-                s = self._sentinel.get_current_stats()
-                return f"CPU: {s['cpu']:.0f}%, RAM: {s['ram']:.0f}%, Disk: {s['disk']:.0f}%"
-            return "Sentinel not running. Call with action=start first."
+        return "system_sentinel removed — not needed for space discovery."
 
     @register_tool("neural_clipboard")
     async def _tool_clipboard(self, args):
-        act = args.get("action", "status").lower()
-        if act == "start":
-            if not self._clipboard:
-                if not _skills_ok:
-                    return "Clipboard module not available."
-                self._clipboard = NeuralClipboard()
-                return "Neural clipboard monitoring started."
-            return "Already running."
-        elif act == "history":
-            if self._clipboard:
-                hist = self._clipboard.get_history()
-                items = "\n".join(f"  {c[:80]}" for c in hist[-5:])
-                return f"Clipboard history ({len(hist)} items):\n{items}"
-            return "Clipboard not active. Call with action=start first."
-        else:
-            if self._clipboard:
-                return f"Clipboard active, {len(self._clipboard.get_history())} items."
-            return "Clipboard inactive."
+        return "neural_clipboard removed — not needed for space discovery."
 
     @register_tool("auto_doc")
     async def _tool_auto_doc(self, args):
@@ -8339,7 +8243,7 @@ Output ONLY valid JSON as a list of objects with keys: title, objective, methodo
 
                             should_play = True
                             if self._modes["focus"]:
-                                if "rumi" not in full_in.lower():
+                                if "luka" not in full_in.lower():
                                     should_play = False
                                     _audio_buf.clear()
                                     if full_in:
@@ -8356,7 +8260,7 @@ Output ONLY valid JSON as a list of objects with keys: title, objective, methodo
                                 full_out = " ".join(out_buf).strip()
                                 if full_out:
                                     # Route response through write_log for [Luka] label + Rich formatting
-                                    self.ui.write_log(f"Rumi: {full_out}")
+                                    self.ui.write_log(f"Luka: {full_out}")
                                     try:
                                         if hasattr(self.telegram, 'send_response'):
                                             self.telegram.send_response(full_out)
@@ -8927,5 +8831,5 @@ if __name__ == "__main__":
 
 
 def main():
-    """Module-level entry point for the rumi CLI."""
+    """Module-level entry point for the luka CLI."""
     RumiLive.main()

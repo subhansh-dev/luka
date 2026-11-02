@@ -143,7 +143,7 @@ class NoveltyDetector:
                 })
             return [r for r in results if r["similarity"] > 0.05]
         except Exception as e:
-            print(f"[RUMI] NoveltyDetector PubMed search failed: {e}", flush=True)
+            print(f"[Luka] NoveltyDetector PubMed search failed: {e}", flush=True)
             return []
 
     def _text_overlap(self, keywords, text):

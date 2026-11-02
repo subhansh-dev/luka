@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-self_improve_engine.py — RUMI RLHF-Inspired Self-Improvement Engine
+self_improve_engine.py — Luka RLHF-Inspired Self-Improvement Engine
 ======================================================================
 
 Stores action-outcome pairs as learning experiences, extracts lessons
@@ -40,7 +40,7 @@ def _timestamp() -> str:
 
 class SelfImproveEngine:
     """
-    RLHF-inspired self-improvement engine for RUMI.
+    RLHF-inspired self-improvement engine for Luka.
 
     Tracks action-outcome pairs, scores quality, extracts lessons,
     and monitors improvement velocity over time.

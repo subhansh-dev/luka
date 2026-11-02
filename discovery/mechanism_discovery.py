@@ -1,5 +1,5 @@
 """
-mechanism_discovery.py — RUMI Mechanism Discovery Engine
+mechanism_discovery.py — Luka Mechanism Discovery Engine
 
 For every unexplained correlation, search for:
 - conservation_laws

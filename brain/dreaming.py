@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-dreaming.py — RUMI Dreaming & Replay System (v2.0)
+dreaming.py — Luka Dreaming & Replay System (v2.0)
 =====================================================
 
 New in v2.0:
@@ -38,7 +38,7 @@ PATTERN_MIN_STRENGTH = 0.1          # Below this, pattern is removed
 
 class DreamingSystem:
     """
-    Dreaming and replay system for RUMI.
+    Dreaming and replay system for Luka.
     """
 
     def __init__(self):
@@ -113,7 +113,7 @@ class DreamingSystem:
         self._last_activity_time = time.time()
 
     def is_idle(self) -> bool:
-        """Check if RUMI has been idle long enough to dream."""
+        """Check if Luka has been idle long enough to dream."""
         return (time.time() - self._last_activity_time) >= IDLE_THRESHOLD_SECONDS
 
     # ── FEAT-2: Pattern Decay ──────────────────────────────────────────
@@ -509,8 +509,8 @@ class DreamingSystem:
 
             known_tools = [
                 "web_search", "weather_report", "youtube_video",
-                "screen_process", "computer_settings", "browser_control",
-                "file_controller", "code_helper", "desktop_control",
+                "computer_settings", "browser_control",
+                "file_controller", "code_helper",
                 "open_app",
                 "send_message", "reminder", "web_research",
                 "ai_pipeline", "data_analysis", "deep_dive",
@@ -621,6 +621,178 @@ class DreamingSystem:
                     f"{correct_val}/{total_val}" if total_val > 0 else "none"
                 ),
             }
+
+
+# ── V3.0: Prioritized Replay Buffer ────────────────────────────────────
+
+    def _compute_replay_priority(self, memory: dict) -> float:
+        """Compute replay priority: surprise × recency × value."""
+        surprise = 0.5
+        recency = 0.5
+        value = 0.5
+
+        # Surprise: high prediction error
+        if "error" in memory:
+            surprise = min(1.0, float(memory.get("error", 0.5)) * 2)
+        elif "strength" in memory:
+            surprise = 1.0 - min(1.0, memory.get("strength", 5) / 10.0)
+
+        # Recency
+        if "created" in memory:
+            try:
+                dt = datetime.fromisoformat(memory["created"])
+                hours_since = (datetime.now() - dt).total_seconds() / 3600
+                recency = max(0.1, 1.0 - hours_since / 24.0)
+            except (ValueError, TypeError):
+                recency = 0.5
+
+        # Value: success rate relevance
+        if "value" in memory:
+            try:
+                value = min(1.0, float(memory["value"]) * 2)
+            except (TypeError, ValueError):
+                value = 0.5
+
+        return surprise * 0.4 + recency * 0.3 + value * 0.3
+
+    def _prioritized_replay(self, memories: list, n_samples: int = 10) -> list:
+        """Sample memories with priority weighting."""
+        if not memories:
+            return []
+
+        priorities = np.array([self._compute_replay_priority(m) for m in memories])
+        priorities = priorities / (np.sum(priorities) + 1e-10)
+
+        indices = np.random.choice(len(memories), size=min(n_samples, len(memories)),
+                                   p=priorities, replace=False)
+        return [memories[i] for i in indices]
+
+    def _simulate_sharp_wave_ripple(self, memories: list) -> list:
+        """Simulate sharp-wave ripple: burst replay of high-priority sequences."""
+        if len(memories) < 3:
+            return memories
+
+        # Burst: replay related memories in rapid succession
+        priorities = [self._compute_replay_priority(m) for m in memories]
+        sorted_mems = [m for _, m in sorted(zip(priorities, memories), reverse=True)]
+
+        # Take top 3, then find related memories
+        burst = sorted_mems[:3]
+        remaining = sorted_mems[3:]
+
+        # Find memories related to burst items
+        for mem in remaining:
+            for b in burst:
+                if self._memories_related(mem, b):
+                    burst.append(mem)
+                    if len(burst) >= 8:
+                        break
+            if len(burst) >= 8:
+                break
+
+        return burst[:8]
+
+    def _memories_related(self, m1: dict, m2: dict) -> bool:
+        """Check if two memories are related."""
+        for key in ["category", "key", "tool"]:
+            if key in m1 and key in m2:
+                if str(m1[key]).lower() == str(m2[key]).lower():
+                    return True
+        return False
+
+    # ── V3.0: Synaptic Homeostasis ────────────────────────────────────────
+
+    def _synaptic_homeostasis(self):
+        """Normalize memory strengths (SHY hypothesis)."""
+        with self._lock:
+            if not self._journal["patterns"]:
+                return
+
+            strengths = [p.get("strength", 0.5) for p in self._journal["patterns"]]
+            mean = np.mean(strengths)
+            std = np.std(strengths) + 1e-10
+
+            # Downscale strong, upscale weak (multiplicative normalization)
+            for p in self._journal["patterns"]:
+                s = p.get("strength", 0.5)
+                z = (s - mean) / std
+                # Soft shrink toward mean
+                p["strength"] = max(0.1, min(1.0, s - 0.05 * z))
+
+            # Prune below threshold
+            self._journal["patterns"] = [
+                p for p in self._journal["patterns"]
+                if p.get("strength", 0) >= PATTERN_MIN_STRENGTH
+            ]
+
+    # ── V3.0: Hippocampal-Cortical Transfer ───────────────────────────────
+
+    def _hippocampal_cortical_transfer(self):
+        """
+        Transfer consolidated patterns from hippo (rapid) to cortex (slow).
+        Strong patterns (confirmed 3+ times) are "consolidated" and
+        can be abstracted into schemas.
+        """
+        consolidated = [p for p in self._journal["patterns"]
+                       if p.get("confirmations", 0) >= 3
+                       or p.get("strength", 0) > 0.7]
+
+        if len(consolidated) < 2:
+            return
+
+        # Abstract schemas from consolidated patterns
+        schemas = []
+        for p in consolidated:
+            schemas.append({
+                "schema": p.get("pattern", ""),
+                "strength": p.get("strength", 0.5),
+                "confirmations": p.get("confirmations", 0),
+                "consolidated_at": datetime.now().isoformat(),
+            })
+
+        # Store schemas for cortical integration
+        with self._lock:
+            existing = self._journal.get("cortical_schemas", [])
+            self._journal["cortical_schemas"] = existing + schemas
+            if len(self._journal["cortical_schemas"]) > 50:
+                self._journal["cortical_schemas"] = self._journal["cortical_schemas"][-50:]
+
+            # Mark as consolidated
+            for p in self._journal["patterns"]:
+                if p.get("confirmations", 0) >= 3 and not p.get("consolidated", False):
+                    p["consolidated"] = True
+                    p["consolidated_at"] = datetime.now().isoformat()
+
+    # ── V3.0: Enhanced Dream Cycle ────────────────────────────────────────
+    def _run_dream_cycle_v3(self):
+        """Run enhanced dream cycle with prioritized replay + SHY."""
+        self._synaptic_homeostasis()
+        self._hippocampal_cortical_transfer()
+
+        # Get memories with prioritized replay
+        memories = self._get_memories_for_replay()
+        if memories:
+            replayed = self._prioritized_replay(memories, n_samples=15)
+            replayed = self._simulate_sharp_wave_ripple(replayed)
+
+            # Feed to creativity engine for dream integration
+            try:
+                from brain.creativity_engine import get_creativity_engine
+                ce = get_creativity_engine()
+                if ce:
+                    ce.dream_integration(replayed)
+            except Exception:
+                pass
+
+    def get_stats_v3(self) -> dict:
+        """Get v3.0 stats."""
+        base = self.get_stats()
+        with self._lock:
+            schemas = len(self._journal.get("cortical_schemas", []))
+            consolidated = sum(1 for p in self._journal.get("patterns", [])
+                              if p.get("consolidated", False))
+            return {**base, "cortical_schemas": schemas,
+                    "consolidated_patterns": consolidated}
 
 
 # ── Singleton ───────────────────────────────────────────────────────────────

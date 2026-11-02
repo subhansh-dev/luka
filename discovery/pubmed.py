@@ -14,9 +14,9 @@ def _get_email() -> str:
         cfg = json.loads(
             (Path(__file__).resolve().parent.parent / "config" / "api_keys.json").read_text(encoding="utf-8-sig")
         )
-        return cfg.get("ncbi_email", "rumi@research.ai")
+        return cfg.get("ncbi_email", "luka@research.ai")
     except Exception:
-        return "rumi@research.ai"
+        return "luka@research.ai"
 
 
 def search(query: str, max_results: int = 20, retstart: int = 0) -> list[str]:

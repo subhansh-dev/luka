@@ -1,5 +1,5 @@
 """
-brain/transfer_learning.py — Transfer Learning System for RUMI
+brain/transfer_learning.py — Transfer Learning System for Luka
 
 Enables learning in domain A and applying that knowledge in domain B.
 Distills domain-independent abstract skills from specific experiences,

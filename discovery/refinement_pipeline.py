@@ -1,5 +1,5 @@
 """
-RUMI Refinement Pipeline — 13-stage post-processing layer.
+Luka Refinement Pipeline — 13-stage post-processing layer.
 Takes raw pipeline output and produces scientist-grade refined discoveries.
 
 Stages:
@@ -40,36 +40,15 @@ def _llm(prompt, max_tokens=4096, json_mode=False):
     if not raw:
         return None
     if json_mode:
-        text = raw.strip() if isinstance(raw, str) else str(raw)
-        # Strip markdown code blocks
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-            text = text.rsplit("```", 1)[0].strip()
-        # Try direct parse
+        # Use the improved extract_json from json_extract module
         try:
-            parsed = json.loads(text)
-            if isinstance(parsed, dict):
-                return parsed
-        except json.JSONDecodeError:
+            from discovery.json_extract import extract_json
+            result = extract_json(raw)
+            if result and isinstance(result, dict):
+                return result
+        except Exception:
             pass
-        # Try extracting JSON object
-        match = re.search(r"\{.*\}", text, re.DOTALL)
-        if match:
-            try:
-                parsed = json.loads(match.group())
-                if isinstance(parsed, dict):
-                    return parsed
-            except json.JSONDecodeError:
-                pass
-        # Try fixing common JSON issues
-        for candidate in [text, text.replace("'", '"'), re.sub(r',\s*}', '}', text), re.sub(r',\s*]', ']', text)]:
-            try:
-                parsed = json.loads(candidate)
-                if isinstance(parsed, dict):
-                    return parsed
-            except (json.JSONDecodeError, Exception):
-                continue
-        # All JSON parsing failed — wrap raw text in a dict so callers don't crash
+        # Fallback: wrap raw text
         return {"_raw": raw[:2000], "_parse_failed": True}
     return raw
 
@@ -696,7 +675,7 @@ Return JSON:
 # ═══════════════════════════════════════════════════════════════
 
 def scientific_courtroom(topic, winner, reviews, scoring):
-    """Prosecutor, Defense, Judge, Jury. Only survivors become RUMI Discoveries."""
+    """Prosecutor, Defense, Judge, Jury. Only survivors become Luka Discoveries."""
     if not winner:
         return {"verdict": "no_hypothesis", "survived": False}
 

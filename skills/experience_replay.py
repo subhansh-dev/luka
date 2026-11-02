@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-experience_replay.py — RUMI Experience Replay & Skill Library
+experience_replay.py — Luka Experience Replay & Skill Library
 ================================================================
 After successfully completing multi-step tasks, saves the procedure as
 a reusable template. Future similar requests retrieve and adapt templates

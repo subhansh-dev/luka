@@ -1,6 +1,6 @@
 // ui-tui/src/app.tsx
 import React, { useState, useCallback } from 'react';
-import { Box, useInput } from 'ink';
+import { Box, useInput, Text } from 'ink';
 import { theme } from './theme';
 import { useGateway } from './hooks/useGateway';
 import { Banner } from './components/banner';
@@ -53,7 +53,10 @@ export const App: React.FC = () => {
 
   return (
     <Box flexDirection="column" height="100%">
+      {/* Banner */}
       <Banner version="3.1" model={gw.model} />
+
+      {/* Discovery panel (only shows when active) */}
       <DiscoveryPanel
         topic={gw.discovery.topic}
         progress={gw.discovery.progress}
@@ -63,7 +66,9 @@ export const App: React.FC = () => {
         edges={gw.discovery.edges}
         isActive={gw.discovery.isActive}
       />
-      <Box flexDirection="column" flexShrink={1}>
+
+      {/* Main content area — transcript + streaming + tools */}
+      <Box flexDirection="column" flexGrow={1} flexShrink={1}>
         <Transcript entries={gw.transcript.entries} />
         <Streaming
           content={gw.transcript.streamingContent}
@@ -71,7 +76,11 @@ export const App: React.FC = () => {
         />
         <ToolTrail tools={gw.tools} />
       </Box>
+
+      {/* Queued messages */}
       <QueuedMessages messages={gw.queuedMessages} />
+
+      {/* Status bar */}
       <StatusBar
         state={gw.state}
         model={gw.model}
@@ -82,11 +91,15 @@ export const App: React.FC = () => {
         diveMode={gw.diveMode}
         elapsed={gw.elapsed}
       />
+
+      {/* Input */}
       <InputArea
         onSubmit={handleInput}
         isBusy={gw.state !== 'READY' && gw.state !== 'IDLE'}
         disabled={overlay !== 'none'}
       />
+
+      {/* Overlays */}
       <CommandPalette visible={overlay === 'palette'} onSelect={handleSlashFromPalette} onClose={() => setOverlay('none')} />
       <SessionSwitcher
         sessions={gw.sessions}

@@ -1,5 +1,5 @@
 // ui-tui/src/theme.ts
-// RUMI — Premium AI Research Operating System
+// Luka — Premium AI Research Operating System
 
 export const theme = {
   bg: {

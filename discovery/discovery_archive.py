@@ -1,7 +1,7 @@
 """
 discovery_archive.py — Persistent Discovery Memory Across Runs
 
-RUMI should remember what it discovered before. This module:
+Luka should remember what it discovered before. This module:
 1. Saves key results from each run to a persistent archive
 2. Loads past discoveries at the start of new runs
 3. Provides context: "you already found X, don't re-discover it"
@@ -116,7 +116,7 @@ def save_to_archive(report: dict, topic: str, domain: str):
 def get_archive_context(topic: str, domain: str) -> str:
     """Generate context from past discoveries for a new run.
 
-    This tells RUMI: "you already found these things, don't re-discover them.
+    This tells Luka: "you already found these things, don't re-discover them.
     Build on them or explore new angles."
     """
     archive = load_archive()

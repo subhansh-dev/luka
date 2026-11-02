@@ -170,7 +170,7 @@ Output JSON:
 }}"""
 
         try:
-            raw = self.llm_call(prompt, max_tokens=8192)
+            raw = self.llm_call(prompt, max_tokens=4096)
             if raw:
                 if isinstance(raw, str):
                     raw = raw.strip()

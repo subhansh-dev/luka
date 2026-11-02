@@ -1,5 +1,5 @@
 """
-peer_review.py — Critical Evaluation for RUMI Discoveries
+peer_review.py — Critical Evaluation for Luka Discoveries
 
 Structured 6-dimension assessment of the top discovery.
 Evaluates novelty, methodology, significance, clarity, limitations,

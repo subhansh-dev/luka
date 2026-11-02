@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-discovery_orchestrator.py — RUMI Autonomous Discovery Orchestrator
+discovery_orchestrator.py — Luka Autonomous Discovery Orchestrator
 =====================================================================
 
 The master orchestrator that connects all scientific capabilities into

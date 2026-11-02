@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-learning.py — RUMI Learning & Evolution Engine
+learning.py — Luka Learning & Evolution Engine
 ==================================================
 
 Inspired by human cognitive science:
@@ -90,7 +90,7 @@ class EventType:
 
 class LearningEngine:
     """
-    Core learning engine for RUMI.
+    Core learning engine for Luka.
 
     Implements:
     1. Error-driven learning: mistakes get reflected on, patterns extracted
@@ -447,7 +447,7 @@ class LearningEngine:
             unique_ctx = list(set(c for c in corrections if c))
             if unique_ctx:
                 insights.append(
-                    f"User corrected RUMI {len(corrections)}x recently. "
+                    f"User corrected Luka {len(corrections)}x recently. "
                     f"Areas: {', '.join(unique_ctx[:3])}")
 
         if not insights:
@@ -507,7 +507,7 @@ class LearningEngine:
 
             # Write fresh header
             header = (
-                "# RUMI Learnings (rotated)\n\n"
+                "# Luka Learnings (rotated)\n\n"
                 f"_Previous learnings archived to {backup.name}_\n\n"
                 "---\n\n"
             )
@@ -812,7 +812,7 @@ def init_learnings_file():
     _ensure_dir()
     if not LEARNINGS_FILE.exists():
         header = (
-            "# RUMI Learnings\n\n"
+            "# Luka Learnings\n\n"
             "_What I've learned through experience, reflection, and evolution._\n\n"
             "Each entry represents a real lesson — from mistakes, successes, "
             "user feedback, or metacognitive reflection.\n\n"

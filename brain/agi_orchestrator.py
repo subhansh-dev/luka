@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-agi_orchestrator.py — RUMI AGI Orchestrator
+agi_orchestrator.py — Luka AGI Orchestrator
 ===============================================
 
 Master orchestrator that wires all cognitive modules into a unified AGI loop.
@@ -64,7 +64,7 @@ COGNITIVE_STAGES = [
 
 class AGIOrchestrator:
     """
-    Master orchestrator for RUMI's unified cognitive loop.
+    Master orchestrator for Luka's unified cognitive loop.
 
     Coordinates all brain modules, manages the cognitive pipeline,
     and provides system-wide status and intelligence metrics.
@@ -1130,7 +1130,7 @@ class AGIOrchestrator:
 
     def get_iq_proxy(self) -> dict:
         """
-        Compute proxy metrics for RUMI's "intelligence".
+        Compute proxy metrics for Luka's "intelligence".
 
         Estimates intelligence dimensions from available module data:
         - SWE-bench estimate: code task success rate

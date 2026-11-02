@@ -1,6 +1,6 @@
 """CrossRef API — free, no key needed.
 
-Fourth paper source for RUMI. Covers all academic disciplines.
+Fourth paper source for Luka. Covers all academic disciplines.
 Rate limit: 50 req/sec with polite pool (mailto header).
 """
 
@@ -35,7 +35,7 @@ def search_papers(query: str, max_results: int = 20) -> list[dict]:
     for attempt in range(3):
         try:
             req = urllib.request.Request(url, headers={
-                "User-Agent": "RUMI/1.0 (mailto:subhansh.dev@gmail.com)"
+                "User-Agent": "Luka/1.0 (mailto:subhansh.dev@gmail.com)"
             })
             with urllib.request.urlopen(req, timeout=20) as resp:
                 data = json.loads(resp.read().decode())

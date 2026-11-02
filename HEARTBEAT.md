@@ -1,6 +1,6 @@
 # HEARTBEAT.md — Periodic System Checks
 
-_Periodic proactive checks performed during idle time. These keep RUMI aware of system health, user activity, and research opportunities._
+_Periodic proactive checks performed during idle time. These keep Luka aware of system health, user activity, and research opportunities._
 
 ---
 

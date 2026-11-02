@@ -1,5 +1,5 @@
 """
-scientist/__init__.py — RUMI Scientist AI Package
+scientist/__init__.py — Luka Scientist AI Package
 
 A full end-to-end autonomous scientific research system inspired by:
   - Sakana AI's The AI Scientist v2 (Agentic Tree Search)

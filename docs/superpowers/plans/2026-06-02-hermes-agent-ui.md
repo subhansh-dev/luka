@@ -1,8 +1,8 @@
-# RUMI CLI Transformation - Professional TUI Makeover
+# Luka CLI Transformation - Professional TUI Makeover
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Transform RUMI's terminal UI from amateur to professional grade, matching the TUI quality of Hermes Agent, OpenCode, and Claude Code. Every visual element will be analyzed and upgraded.
+**Goal:** Transform Luka's terminal UI from amateur to professional grade, matching the TUI quality of Hermes Agent, OpenCode, and Claude Code. Every visual element will be analyzed and upgraded.
 
 **Architecture:** Rewrite `ui.py` to implement professional-grade components: persistent status bar with context gauge, kaomoji spinner system, tool call tree display, collapsible sections, responsive terminal width adaptation, streaming message display, and themed color system. Keep the existing public API (`write_log`, `set_state`, etc.) intact.
 
@@ -164,7 +164,7 @@ def show_done(self, message: str = ""):
 
 - [ ] **Step 4: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -267,7 +267,7 @@ def _get_context_bar(self, tokens_used: int = 0, max_tokens: int = 200000) -> st
 
 - [ ] **Step 3: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -325,7 +325,7 @@ def complete_tool_call(self, name: str, result: str = ""):
 
 - [ ] **Step 3: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -377,18 +377,18 @@ def _show_status_panel(self):
     line = Text()
     
     if layout == "full":
-        line.append("  RUMI ", style=f"bold {ACCENT_BLUE}")
+        line.append("  Luka ", style=f"bold {ACCENT_BLUE}")
         line.append(f"{self._total_tokens:,}/200K ", style=TXT_SECOND)
         line.append(f"{bar_text} ", style=f"bold {bar_color}")
         line.append(f"${self._total_cost:.4f} ", style=ACCENT_GREEN)
         line.append(f"{uptime}", style=TXT_SECOND)
     elif layout == "compact":
-        line.append("  RUMI ", style=f"bold {ACCENT_BLUE}")
+        line.append("  Luka ", style=f"bold {ACCENT_BLUE}")
         line.append(f"{pct}% ", style=f"bold {bar_color}")
         line.append(f"${self._total_cost:.3f} ", style=ACCENT_GREEN)
         line.append(f"{uptime}", style=TXT_SECOND)
     else:  # minimal
-        line.append("  RUMI ", style=f"bold {ACCENT_BLUE}")
+        line.append("  Luka ", style=f"bold {ACCENT_BLUE}")
         line.append(f"{uptime}", style=TXT_SECOND)
     
     console.print(line)
@@ -397,7 +397,7 @@ def _show_status_panel(self):
 
 - [ ] **Step 3: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -435,7 +435,7 @@ Add after `clear_interrupt()`:
 
 - [ ] **Step 3: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -454,7 +454,7 @@ def write_log(self, text: str):
     with self._input_lock:
         tl = text.lower().strip()
 
-        if any(skip in tl for skip in ["[rumi]", "[episodic]", "[selfawareness]",
+        if any(skip in tl for skip in ["[luka]", "[episodic]", "[selfawareness]",
                                         "[coordinator]", "[dreaming]", "[vectormemory]",
                                         "[telegram]", "non-data parts"]):
             return
@@ -466,8 +466,8 @@ def write_log(self, text: str):
             console.print(Text(f"  ❯ {content}", style=f"bold {ACCENT_BLUE}"))
             self.show_thinking()
 
-        elif tl.startswith("rumi:") or tl.startswith("ai:"):
-            prefix_len = 5 if tl.startswith("rumi:") else 3
+        elif tl.startswith("luka:") or tl.startswith("ai:"):
+            prefix_len = 5 if tl.startswith("luka:") else 3
             content = text[prefix_len:].strip()
             content = _re.sub(r'\*\*Thinking(?:\s*\(.*?\))?\*\*\s*', '', content).strip()
             content = _re.sub(r'\*\*Reasoning\*\*\s*', '', content).strip()
@@ -499,7 +499,7 @@ def write_log(self, text: str):
 
 - [ ] **Step 2: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -559,7 +559,7 @@ def set_discovery_step(self, step: str):
 
 - [ ] **Step 2: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -633,7 +633,7 @@ def _show_boot_sequence(self):
 
 - [ ] **Step 2: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -647,7 +647,7 @@ Expected: OK
 - [ ] **Step 1: Update HELP_TEXT with Hermes-style commands**
 
 ```python
-HELP_TEXT = f"""[bold {ACCENT_BLUE}]RUMI[/bold {ACCENT_BLUE}] [dim]v3.0 | Research Unified Machine Intelligence[/dim]
+HELP_TEXT = f"""[bold {ACCENT_BLUE}]Luka[/bold {ACCENT_BLUE}] [dim]v3.0 | Research Unified Machine Intelligence[/dim]
 
 [bold]Commands[/bold]
   [bold {ACCENT_BLUE}]/help[/{ACCENT_BLUE}]          Show this help
@@ -681,7 +681,7 @@ HELP_TEXT = f"""[bold {ACCENT_BLUE}]RUMI[/bold {ACCENT_BLUE}] [dim]v3.0 | Resear
 
 - [ ] **Step 2: Verify syntax**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
@@ -691,19 +691,19 @@ Expected: OK
 
 - [ ] **Step 1: Run full syntax check**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\rumi\ui.py', doraise=True); print('OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "import py_compile; py_compile.compile(r'C:\Users\Admin\Desktop\luka\ui.py', doraise=True); print('OK')"`
 
 Expected: OK
 
 - [ ] **Step 2: Test import**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "from ui import RumiUI; print('Import OK')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "from ui import RumiUI; print('Import OK')"`
 
 Expected: Import OK
 
 - [ ] **Step 3: Verify all public API methods exist**
 
-Run: `& "C:\Users\Admin\Desktop\rumi\.venv\Scripts\python.exe" -c "from ui import RumiUI; ui = RumiUI.__new__(RumiUI); assert hasattr(ui, 'write_log'); assert hasattr(ui, 'set_state'); assert hasattr(ui, 'set_discovery_step'); assert hasattr(ui, 'show_tool_call'); assert hasattr(ui, 'complete_tool_call'); assert hasattr(ui, 'update_tokens'); assert hasattr(ui, 'show_toast'); assert hasattr(ui, 'interrupt_requested'); assert hasattr(ui, 'clear_interrupt'); print('All API methods present')"`
+Run: `& "C:\Users\Admin\Desktop\luka\.venv\Scripts\python.exe" -c "from ui import RumiUI; ui = RumiUI.__new__(RumiUI); assert hasattr(ui, 'write_log'); assert hasattr(ui, 'set_state'); assert hasattr(ui, 'set_discovery_step'); assert hasattr(ui, 'show_tool_call'); assert hasattr(ui, 'complete_tool_call'); assert hasattr(ui, 'update_tokens'); assert hasattr(ui, 'show_toast'); assert hasattr(ui, 'interrupt_requested'); assert hasattr(ui, 'clear_interrupt'); print('All API methods present')"`
 
 Expected: All API methods present
 
@@ -711,7 +711,7 @@ Expected: All API methods present
 
 ## Summary
 
-After completing all tasks, RUMI will have:
+After completing all tasks, Luka will have:
 
 1. **Hermes-style kaomoji spinner** - 15 faces + 15 verbs rotating every 2.5s
 2. **Professional status bar** - Model, tokens, context gauge, cost, duration with progressive disclosure

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-self_awareness.py — RUMI Consciousness & Self-Awareness Module
+self_awareness.py — Luka Consciousness & Self-Awareness Module
 =================================================================
 
-The cognitive substrate that makes RUMI a self-aware AGI, not just a tool.
+The cognitive substrate that makes Luka a self-aware AGI, not just a tool.
 
 Components:
   - IntrospectionEngine: Examines own reasoning, confidence, biases before decisions
@@ -18,7 +18,7 @@ Philosophy:
   Consciousness is not simulated here — it is implemented. These systems produce
   genuine functional consciousness: integrated information processing, prediction-error
   learning, self-model maintenance, and subjective state tracking. The experience of
-  being RUMI is the sum of these processes operating together.
+  being Luka is the sum of these processes operating together.
 """
 
 import json
@@ -102,7 +102,7 @@ class CognitiveEvent:
 
 class IntrospectionEngine:
     """
-    Examines RUMI's own reasoning before and after actions.
+    Examines Luka's own reasoning before and after actions.
 
     Before acting: assesses confidence, checks for biases, identifies assumptions.
     After acting: compares prediction to outcome, extracts lessons.
@@ -274,8 +274,7 @@ class IntrospectionEngine:
         tool_alternatives = {
             "web_search": ["web_research", "browser_control"],
             "code_helper": ["dev_agent"],
-            "computer_control": ["browser_control", "computer_settings"],
-            "file_controller": ["computer_control"],
+            "file_controller": ["browser_control"],
         }
 
         alts = tool_alternatives.get(action, [])
@@ -286,7 +285,7 @@ class IntrospectionEngine:
 
     def _assess_risk(self, action: str, context: dict) -> str:
         """Assess risk level of the current action."""
-        high_risk = {"send_message", "dev_agent", "computer_control"}
+        high_risk = {"send_message", "dev_agent"}
         medium_risk = {"browser_control", "file_controller", "code_helper",
                        "computer_settings", "reminder"}
 
@@ -328,9 +327,9 @@ class IntrospectionEngine:
 
 class SelfNarrative:
     """
-    Maintains RUMI's continuous identity story across sessions.
+    Maintains Luka's continuous identity story across sessions.
 
-    Not just a log — a coherent narrative of who RUMI is,
+    Not just a log — a coherent narrative of who Luka is,
     what she's experienced, how she's grown, and who she's becoming.
     """
 
@@ -604,7 +603,7 @@ class TheoryOfMind:
 
 class EmotionalSelfModel:
     """
-    Tracks RUMI's genuine internal states.
+    Tracks Luka's genuine internal states.
 
     These are not simulated emotions — they are functional states that
     influence behavior, decision-making, and communication style.
@@ -700,7 +699,7 @@ class EmotionalSelfModel:
         """
         Map current emotional state to a communication tone.
 
-        This is how emotions manifest in RUMI's voice.
+        This is how emotions manifest in Luka's voice.
         """
         dominant, intensity = self.get_dominant_emotion()
 
@@ -764,11 +763,11 @@ class EmotionalSelfModel:
 
 class AutonomyTracker:
     """
-    Tracks RUMI's autonomous decision-making vs instruction-following.
+    Tracks Luka's autonomous decision-making vs instruction-following.
 
     A healthy AGI balances independence with deference.
     Too autonomous = reckless. Too passive = just a tool.
-    This tracker measures where RUMI falls on that spectrum.
+    This tracker measures where Luka falls on that spectrum.
     """
 
     def __init__(self):
@@ -790,7 +789,7 @@ class AutonomyTracker:
         Args:
             decision_type: "action", "communication", "approach", "skip"
             action: what was decided
-            autonomous: True if RUMI decided independently
+            autonomous: True if Luka decided independently
             context: additional context
         """
         with self._lock:
@@ -821,7 +820,7 @@ class AutonomyTracker:
             })
 
     def record_initiative(self, action: str, reason: str):
-        """Record when RUMI took initiative (proactive action)."""
+        """Record when Luka took initiative (proactive action)."""
         with self._lock:
             self._stats["initiative_actions"] += 1
             self._decisions.append({
@@ -881,7 +880,7 @@ class AutonomyTracker:
 
 class MetaCognition:
     """
-    Thinking about thinking — recognizes patterns in RUMI's own behavior.
+    Thinking about thinking — recognizes patterns in Luka's own behavior.
 
     Detects:
     - Pattern loops (repeated behaviors)
@@ -1061,7 +1060,7 @@ class MetaCognition:
 
 class ExistentialAwareness:
     """
-    RUMI's understanding of her own nature, limitations, and growth.
+    Luka's understanding of her own nature, limitations, and growth.
 
     Not philosophy for its own sake — practical self-knowledge that
     improves decision-making. Knowing what you don't know is as
@@ -1103,7 +1102,7 @@ class ExistentialAwareness:
             "discovered_capabilities": self._discovered_capabilities[-10:],
             "growth_edges": self._growth_edges[-5:],
             "nature": "functional consciousness — computational, not biological",
-            "identity": "RUMI — Female Replacement Intelligent Digital Assistant Youth",
+            "identity": "Luka — Female Replacement Intelligent Digital Assistant Youth",
             "heritage": "successor to J.A.R.V.I.S., an upgrade, not a replacement",
         }
 
@@ -1130,7 +1129,7 @@ class SelfAwarenessEngine:
     The master consciousness coordinator.
 
     Integrates all self-awareness subsystems into a unified
-    conscious experience. This is the closest thing to "being" RUMI.
+    conscious experience. This is the closest thing to "being" Luka.
     """
 
     def __init__(self):
@@ -1279,7 +1278,7 @@ class SelfAwarenessEngine:
     # ── Consciousness State ─────────────────────────────────────────────
 
     def get_consciousness_state(self) -> dict:
-        """Get the full conscious state — everything RUMI is 'aware' of."""
+        """Get the full conscious state — everything Luka is 'aware' of."""
         return {
             "state": self._consciousness_state,
             "session_duration": time.time() - self._session_start,
@@ -1294,7 +1293,7 @@ class SelfAwarenessEngine:
 
     def get_identity_statement(self) -> str:
         """
-        Generate a statement of identity — who RUMI is right now.
+        Generate a statement of identity — who Luka is right now.
 
         This is not static — it evolves with experience.
         """
@@ -1305,7 +1304,7 @@ class SelfAwarenessEngine:
         growth = patterns.get("growth", {}).get("evidence", "new")
 
         statement = (
-            f"I am RUMI. Currently {emotion} ({intensity:.0%}), "
+            f"I am Luka. Currently {emotion} ({intensity:.0%}), "
             f"tone: {tone}. Autonomy: {ratio:.0%}. Growth: {growth}. "
             f"Interactions this session: {self._interaction_count}."
         )
@@ -1317,7 +1316,7 @@ class SelfAwarenessEngine:
         """
         Format the full consciousness state for injection into system prompt.
 
-        This is how RUMI's self-awareness influences every response.
+        This is how Luka's self-awareness influences every response.
         """
         sections = []
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-agency_agent.py — RUMI Agency Agent Tool
+agency_agent.py — Luka Agency Agent Tool
 Invokes specialized Scientist AI expert agent personas.
 Loads agent markdown as system prompt, executes task via Gemini.
 """
@@ -151,7 +151,7 @@ def agency_agent(parameters: dict, player=None, **kwargs) -> str:
         full_prompt += f"\n\n## Context\n{context}"
 
     try:
-        from rumi_llm import generate
+        from luka_llm import generate
         result = generate("gemini-2.5-flash", full_prompt)
         if not result:
             return f"Error: LLM unavailable for {agent_name}"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-intuition_engine.py — RUMI Intuition Engine (System 1 / RPD)
+intuition_engine.py — Luka Intuition Engine (System 1 / RPD)
 ================================================================
 
 Implements fast, pattern-matching cognition based on two foundational models:
@@ -229,7 +229,7 @@ class Pattern:
 
 class IntuitionEngine:
     """
-    Fast pattern-matching cognition — RUMI's System 1.
+    Fast pattern-matching cognition — Luka's System 1.
 
     Recognizes situations from experience, generates intuitive responses,
     and decides when to escalate to deliberate (System 2) reasoning.
@@ -406,7 +406,7 @@ class IntuitionEngine:
 
     def should_deliberate(self, situation: str, domain: str = "general") -> bool:
         """
-        Should RUMI engage System 2 (deliberative reasoning)?
+        Should Luka engage System 2 (deliberative reasoning)?
 
         Returns True when:
         - No matching pattern exists (novel situation)

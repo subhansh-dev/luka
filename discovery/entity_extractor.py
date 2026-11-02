@@ -75,8 +75,17 @@ RELATION_PATTERNS = {
         r'(\w[\w\s]+?)\s+(?:constrains|limits|rules out|excludes|bounds)\s+(\w[\w\s]+)',
         r'(?:constraints?|limits?|bounds?)\s+(?:on|from)\s+(\w[\w\s]+)',
     ],
+    "modulates": [
+        r'(\w[\w\s]+?)\s+(?:modulates|alters|affects|influences|perturbs)\s+(\w[\w\s]+)',
+    ],
+    "measured_by": [
+        r'(\w[\w\s]+?)\s+(?:measured|observed|detected|constrained)\s+(?:by|using|with)\s+(\w[\w\s]+)',
+    ],
+    "predicted_by": [
+        r'(\w[\w\s]+?)\s+(?:predicted|derived|calculated|computed)\s+(?:by|from|using)\s+(\w[\w\s]+)',
+    ],
     "associated_with": [
-        r'(\w[\w\s]+?)\s+(?:and|with|plus|alongside)\s+(\w[\w\s]+)',
+        r'(\w[\w\s]+?)\s+(?:correlates?|co-?occurs?|coexists?)\s+with\s+(\w[\w\s]+)',
         r'(\w[\w\s]+?)\s+(?:correlates?|associated|linked|connected)\s+(?:with|to)\s+(\w[\w\s]+)',
     ],
     "measured_by": [
@@ -252,7 +261,21 @@ def _extract_relationships(text: str, entities: list, papers: list) -> list:
                                 "confidence": 0.7,
                             })
 
-    return relationships[:30]  # Cap at 30 relationships
+    # Post-process: boost confidence for specific relations, prune generic ones
+    filtered = []
+    for r in relationships:
+        rel = r.get("relation", "")
+        if rel in ("causes", "explains", "modulates", "measured_by", "predicted_by", "constrains"):
+            r["confidence"] = max(r.get("confidence", 0.6), 0.7)
+            filtered.append(r)
+        elif rel == "associated_with":
+            # Only keep if confidence is high enough
+            if r.get("confidence", 0) >= 0.65:
+                filtered.append(r)
+        else:
+            filtered.append(r)
+
+    return filtered[:30]  # Cap at 30 relationships
 
 
 def _infer_relationship_type(text: str, e1: str, e2: str) -> str:

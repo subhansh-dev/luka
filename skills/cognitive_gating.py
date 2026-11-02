@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-cognitive_gating.py — RUMI Cognitive Load Manager
+cognitive_gating.py — Luka Cognitive Load Manager
 ====================================================
 Routes incoming requests through appropriate processing pipelines based on
 complexity. Inspired by Kahneman's dual-process theory (System 1 vs System 2).

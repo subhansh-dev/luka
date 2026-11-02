@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-meta_reflect.py — RUMI Metacognition Engine
+meta_reflect.py — Luka Metacognition Engine
 ==============================================
 Self-reflection and error recovery. After tool calls, evaluates whether
 the output was correct and complete. Maintains a failure journal to

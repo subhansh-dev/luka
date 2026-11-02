@@ -2,7 +2,7 @@
 algorithmic_discovery.py — Generate hypotheses, mechanisms, and predictions
 WITHOUT LLM calls. Uses graph analysis, pattern matching, and domain knowledge.
 
-This is the fallback that ensures RUMI ALWAYS produces results, even when
+This is the fallback that ensures Luka ALWAYS produces results, even when
 LLM APIs are down or rate-limited.
 
 v2.1: Domain-grounded generation — hypotheses are built from actual entities

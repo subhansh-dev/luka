@@ -27,7 +27,8 @@ class MechanismGenerator:
 
     def generate_mechanisms(self, hidden_variables: list, gaps: list,
                             anomalies: list, topic: str, domain: str,
-                            papers: list = None, archive_context: str = "") -> dict:
+                            papers: list = None, archive_context: str = "",
+                            constraint: dict = None) -> dict:
         """
         Generate causal mechanisms for the proposed hidden variables and observed gaps.
 
@@ -53,21 +54,25 @@ class MechanismGenerator:
         if not self.llm_call:
             return {"mechanisms": [], "error": "No LLM client available"}
 
-        # Build context
-        hv_text = self._format_hidden_variables(hidden_variables[:5])
-        gap_text = self._format_gaps(gaps[:4])
-        anomaly_text = self._format_anomalies(anomalies[:4])
+        # Build context — cap each section to keep total prompt manageable
+        hv_text = self._format_hidden_variables(hidden_variables[:3])
+        gap_text = self._format_gaps(gaps[:3])
+        anomaly_text = self._format_anomalies(anomalies[:3])
         graph_context = self._build_graph_context()
 
         paper_context = ""
         if papers:
-            for p in papers[:5]:
-                abstract = p.get("abstract", "")[:250]
+            for p in papers[:3]:
+                abstract = p.get("abstract", "")[:150]
                 if abstract:
-                    paper_context += f"\n- [{p.get('title', '?')}] {abstract}\n"
+                    paper_context += f"\n- [{p.get('title', '?')[:60]}] {abstract}\n"
 
         # Get existing causal relationships from graph
         causal_context = self._extract_causal_chains()
+
+        # Truncate archive context — it can be huge from prior runs
+        if len(archive_context) > 1000:
+            archive_context = archive_context[:1000] + "\n[Truncated]"
 
         prompt = f"""You are a mechanistic scientist — you explain HOW things work, not just THAT they correlate.
 
@@ -93,20 +98,11 @@ PAPERS:
 
 Your task: generate CAUSAL MECHANISMS that explain the observations.
 
+CRITICAL: You MUST respond with ONLY valid JSON. No prose, no explanation, no markdown outside the JSON block.
+
 A mechanism is NOT just "X causes Y." A mechanism is:
   "X activates pathway P with rate constant k1, which produces intermediate I
    at concentration [I] = k1[X]/k2, which converts to effect Y when [I] > threshold"
-
-Before generating mechanisms, think through this structured reasoning:
-
-<discovery_reasoning>
-1. WHAT DO I KNOW? — List the key observations, anomalies, and gaps from the context.
-2. WHAT COULD EXPLAIN THIS? — Brainstorm at least 5 possible mechanisms (including conventional ones).
-3. WHICH ARE MOST PROMISING? — Rank by: (a) explains the most observations, (b) has existing evidence, (c) is testable.
-4. WHAT EQUATIONS APPLY? — For each promising mechanism, identify what known equations could govern it.
-5. CAN I DERIVE ANYTHING? — If any equation can be derived from first principles, do the derivation.
-6. WHAT WOULD FALSIFY EACH? — For each mechanism, state what observation would kill it.
-</discovery_reasoning>
 
 REQUIREMENTS — prefer quantitative, derive when possible:
 1. PREFER quantitative relationships (equations, rates, thresholds). If no equation exists
@@ -118,7 +114,10 @@ REQUIREMENTS — prefer quantitative, derive when possible:
      "From Newton's second law and the gravitational force law:
       F = ma = GMm/r² → a = GM/r² → for M = 10³⁰ kg, r = 7×10⁸ m: a ≈ 0.006 m/s²"
    A derived value is stronger than an estimated one.
-4. PREFER predictions with MAGNITUDE. If no magnitude is possible, state the direction
+4. NUMERICAL VERIFICATION: For EVERY equation, plug in real numbers and compute the result.
+   Example: "For a = 1 um: P = -pi^2 * hbar * c / (240 * a^4) = -1.3e-3 Pa"
+   NEVER leave an equation without a numerical example.
+5. PREFER predictions with MAGNITUDE. If no magnitude is possible, state the direction
    and what measurement would constrain it.
 5. Identify the KEY PARAMETER that controls the mechanism and its expected range.
 6. Distinguish: is this a KNOWN mechanism applied in new context, or genuinely NOVEL?
@@ -171,29 +170,31 @@ Output JSON:
         "If you intervene on X by amount A, Y should change by amount B",
         "Counterfactual: if X hadn't happened, Y would differ by amount C"
       ],
+      "numerical_verification": "Plug in real numbers: For [specific value], compute [result with units]",
       "key_parameter_to_measure": "What single measurement would confirm this?",
       "falsification": "Specific quantitative observation that disproves this"
     }}
   ]
 }}
 
-Generate 3-5 mechanisms. Each must have at least 3 causal steps. 
-Prefer mechanisms that make counterfactual predictions (most powerful causal level)."""
+Generate 3-5 mechanisms. Each must have at least 3 causal steps.
+Prefer mechanisms that make counterfactual predictions (most powerful causal level).
+
+RESPOND WITH ONLY THE JSON OBJECT. NO PROSE BEFORE OR AFTER. NO EXPLANATION."""
 
         try:
-            raw = self.llm_call(prompt, max_tokens=8192)
-            # Fallback: if primary provider fails, try the other
+            from discovery.llm_client import call_json
+            raw = call_json(prompt, max_tokens=4096, provider="auto")
             if not raw:
-                try:
-                    from discovery.llm_client import call_json
-                    raw = call_json(prompt, max_tokens=8192, provider="auto")
-                except Exception:
-                    pass
+                raw = self.llm_call(prompt, max_tokens=4096)
             if raw:
                 from discovery.json_extract import extract_json
                 result = extract_json(raw, expected_key="mechanisms")
                 if result is None and isinstance(raw, str):
                     print(f"    [WARN] mechanisms: JSON extraction failed ({len(raw)} chars)", flush=True)
+                    # Debug: show first 200 chars of response
+                    preview = raw[:200].replace('\n', ' ')
+                    print(f"    [DEBUG] Response preview: {preview}", flush=True)
 
                 if isinstance(result, dict):
                     for m in result.get("mechanisms", []):

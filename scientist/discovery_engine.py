@@ -1,7 +1,7 @@
 """
 discovery_engine.py — Autonomous Scientific Discovery Pipeline
 
-The master orchestrator for RUMI's Scientist AI. Runs the complete
+The master orchestrator for Luka's Scientist AI. Runs the complete
 discovery loop:
   [DE-1] Idea → Novelty Check → Hypothesis Formulation
   [DE-2] Hypothesis → Experiment Design → Execution → Analysis

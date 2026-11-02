@@ -1,7 +1,7 @@
 """
-continuous_operation.py — RUMI runs forever, self-directed.
+continuous_operation.py — Luka runs forever, self-directed.
 
-RUMI doesn't stop. It:
+Luka doesn't stop. It:
 1. Picks its own research topics (curiosity-driven)
 2. Discovers new hypotheses
 3. Tests them
@@ -10,7 +10,7 @@ RUMI doesn't stop. It:
 6. Publishes results
 7. Sleeps and wakes up smarter
 
-This is the brain that makes RUMI autonomous.
+This is the brain that makes Luka autonomous.
 """
 
 import json
@@ -59,7 +59,7 @@ RESEARCH_FRONTIER = {
 
 @dataclass
 class ResearchState:
-    """RUMI's current research state."""
+    """Luka's current research state."""
     current_topic: str = ""
     current_domain: str = ""
     current_phase: str = "idle"  # idle, selecting, hypothesis, simulation, debate, publication
@@ -78,7 +78,7 @@ class ResearchState:
 
 class CuriosityEngine:
     """
-    RUMI's curiosity — decides what to research next.
+    Luka's curiosity — decides what to research next.
 
     Uses a weighted random selection based on:
     - How many times each topic has been explored (less explored = more curious)
@@ -270,7 +270,7 @@ class TheoryEvolution:
 
 class MemoryManager:
     """
-    RUMI's long-term memory — persists across sessions.
+    Luka's long-term memory — persists across sessions.
 
     Stores:
     - Successful theories
@@ -361,7 +361,7 @@ class MemoryManager:
 
 class ContinuousOperation:
     """
-    The autonomous loop — RUMI runs forever.
+    The autonomous loop — Luka runs forever.
 
     Each cycle:
     1. SELECT topic (curiosity engine)

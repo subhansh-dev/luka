@@ -41,7 +41,7 @@ if not BOT_TOKEN:
     print("[Telegram]     Get a token from: https://t.me/BotFather")
     print("[Telegram]     Find your user ID at: https://t.me/userinfobot")
     print("[Telegram] " + "=" * 55)
-    print("[Telegram] Bot disabled. RUMI will run without Telegram.")
+    print("[Telegram] Bot disabled. Luka will run without Telegram.")
     print("[Telegram]")
     sys.exit(0)
 # ──────────────────────────────────────────────────────────────────────────────
@@ -96,7 +96,7 @@ async def wait_for_response(timeout: int = 20) -> str:
         if response:
             return response
         await asyncio.sleep(0.1)
-    return "RUMI didn't respond in time!"
+    return "Luka didn't respond in time!"
 
 
 async def main():
@@ -151,7 +151,7 @@ async def main():
 
                     if text == "/start":
                         await send_message(chat_id,
-                            "RUMI is online!\nText me any command and I'll forward it to your laptop.\n\nCommands:\n/lock - Lock mic-triggered actions\n/unlock - Unlock mic-triggered actions\n/status - Check security status")
+                            "Luka is online!\nText me any command and I'll forward it to your laptop.\n\nCommands:\n/lock - Lock mic-triggered actions\n/unlock - Unlock mic-triggered actions\n/status - Check security status")
                         continue
 
                     if text == "/lock":
@@ -170,7 +170,7 @@ async def main():
                         continue
 
                     write_inbox(text)
-                    await send_message(chat_id, "⚡ Sending to RUMI...")
+                    await send_message(chat_id, "⚡ Sending to Luka...")
 
                     response = await wait_for_response(timeout=20)
                     await send_message(chat_id, f"🤖 {response}")

@@ -7,7 +7,7 @@ try:
     from brain.benchmark_runner import get_benchmark_runner
     _brain_benchmark_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.benchmark_runner: {e}", flush=True)
+    print(f"[Luka] brain.benchmark_runner: {e}", flush=True)
     get_benchmark_runner = None
 
 _brain_neurosym_ok = False
@@ -15,7 +15,7 @@ try:
     from brain.neurosymbolic_reasoner import get_neurosymbolic_reasoner
     _brain_neurosym_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.neurosymbolic_reasoner: {e}", flush=True)
+    print(f"[Luka] brain.neurosymbolic_reasoner: {e}", flush=True)
     get_neurosymbolic_reasoner = None
 
 _brain_haif_ok = False
@@ -23,7 +23,7 @@ try:
     from brain.hierarchical_active_inference import get_hierarchical_aif
     _brain_haif_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.hierarchical_active_inference: {e}", flush=True)
+    print(f"[Luka] brain.hierarchical_active_inference: {e}", flush=True)
     get_hierarchical_aif = None
 
 _brain_agi_orch_ok = False
@@ -31,7 +31,7 @@ try:
     from brain.agi_orchestrator import get_agi_orchestrator
     _brain_agi_orch_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.agi_orchestrator: {e}", flush=True)
+    print(f"[Luka] brain.agi_orchestrator: {e}", flush=True)
     get_agi_orchestrator = None
 
 _brain_code_reasoning_ok = False
@@ -39,7 +39,7 @@ try:
     from brain.code_reasoning_engine import get_code_reasoning_engine
     _brain_code_reasoning_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.code_reasoning_engine: {e}", flush=True)
+    print(f"[Luka] brain.code_reasoning_engine: {e}", flush=True)
     get_code_reasoning_engine = None
 
 _brain_findings_bus_ok = False
@@ -47,7 +47,7 @@ try:
     from brain.findings_bus import get_findings_bus
     _brain_findings_bus_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.findings_bus: {e}", flush=True)
+    print(f"[Luka] brain.findings_bus: {e}", flush=True)
     get_findings_bus = None
 
 _brain_world_model_ok = False
@@ -55,7 +55,7 @@ try:
     from brain.world_model import get_world_model
     _brain_world_model_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.world_model: {e}", flush=True)
+    print(f"[Luka] brain.world_model: {e}", flush=True)
     get_world_model = None
 
 _brain_self_improve_ok = False
@@ -63,7 +63,7 @@ try:
     from brain.self_improve_engine import get_self_improve_engine
     _brain_self_improve_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.self_improve_engine: {e}", flush=True)
+    print(f"[Luka] brain.self_improve_engine: {e}", flush=True)
     get_self_improve_engine = None
 
 _brain_transfer_ok = False
@@ -71,7 +71,7 @@ try:
     from brain.transfer_learning import get_transfer_learning
     _brain_transfer_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.transfer_learning: {e}", flush=True)
+    print(f"[Luka] brain.transfer_learning: {e}", flush=True)
     get_transfer_learning = None
 
 _brain_analogy_ok = False
@@ -79,7 +79,7 @@ try:
     from brain.analogy_engine import get_analogy_engine
     _brain_analogy_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.analogy_engine: {e}", flush=True)
+    print(f"[Luka] brain.analogy_engine: {e}", flush=True)
     get_analogy_engine = None
 
 _brain_causal_ok = False
@@ -87,7 +87,7 @@ try:
     from brain.causal_reasoner import get_causal_reasoner
     _brain_causal_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.causal_reasoner: {e}", flush=True)
+    print(f"[Luka] brain.causal_reasoner: {e}", flush=True)
     get_causal_reasoner = None
 
 _brain_creativity_ok = False
@@ -95,7 +95,7 @@ try:
     from brain.creativity_engine import get_creativity_engine
     _brain_creativity_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.creativity_engine: {e}", flush=True)
+    print(f"[Luka] brain.creativity_engine: {e}", flush=True)
     get_creativity_engine = None
 
 _brain_meta_learner_ok = False
@@ -103,7 +103,7 @@ try:
     from brain.meta_learner import get_meta_learner
     _brain_meta_learner_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.meta_learner: {e}", flush=True)
+    print(f"[Luka] brain.meta_learner: {e}", flush=True)
     get_meta_learner = None
 
 _brain_self_modifier_ok = False
@@ -111,7 +111,7 @@ try:
     from brain.self_modifier import get_self_modifier
     _brain_self_modifier_ok = True
 except Exception as e:
-    print(f"[RUMI] brain.self_modifier: {e}", flush=True)
+    print(f"[Luka] brain.self_modifier: {e}", flush=True)
     get_self_modifier = None
 
 _agi_benchmark_v2_ok = False
@@ -119,7 +119,7 @@ try:
     from benchmarks.agi_benchmark_v2 import get_agi_benchmark_v2
     _agi_benchmark_v2_ok = True
 except Exception as e:
-    print(f"[RUMI] benchmarks.agi_benchmark_v2 (cognitive benchmark): {e}", flush=True)
+    print(f"[Luka] benchmarks.agi_benchmark_v2 (cognitive benchmark): {e}", flush=True)
     get_agi_benchmark_v2 = None
 
 
@@ -139,7 +139,7 @@ def get_llm():
         router = get_model_router()
         provider = router.get_primary_provider()
 
-        from rumi_llm import generate as _rumi_generate
+        from luka_llm import generate as _rumi_generate
         _, model_config = router.get_route("general")
 
         def _unified_llm(prompt: str, max_tokens: int = 1024, temperature: float = 0.7) -> str:
@@ -166,6 +166,6 @@ def get_llm():
             return _openai_llm
 
     except Exception as e:
-        print(f"[RUMI] get_llm() setup failed: {e}", flush=True)
+        print(f"[Luka] get_llm() setup failed: {e}", flush=True)
 
     return None

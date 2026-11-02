@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-api_server.py — RUMI REST API Server
+api_server.py — Luka REST API Server
 Provides remote control, status monitoring, and memory access via HTTP.
 """
 import sys
@@ -39,7 +39,7 @@ if _HAVE_FASTAPI:
 
 
 class RumiAPIServer:
-    """REST API server for RUMI — remote control, status, and data queries."""
+    """REST API server for Luka — remote control, status, and data queries."""
 
     def __init__(self):
         self.app: Optional[Any] = None
@@ -53,7 +53,7 @@ class RumiAPIServer:
         if not _HAVE_FASTAPI:
             return
 
-        self.app = FastAPI(title="Rumi API", version="1.0.0")
+        self.app = FastAPI(title="Luka API", version="1.0.0")
         self._add_cors()                             # [#3]
         self._add_security_middleware()
         self._register_routes()
@@ -109,7 +109,7 @@ class RumiAPIServer:
             uptime = round(time.time() - self._start_time) if self._start_time else 0
             return {
                 "status": "online",
-                "name":   "Rumi",
+                "name":   "Luka",
                 "uptime": f"{uptime}s",
             }
 
@@ -272,7 +272,7 @@ class RumiAPIServer:
             name="RumiAPI",
         )
         self._server_thread.start()
-        print(f"[API] Rumi API server running at http://{host}:{port}")
+        print(f"[API] Luka API server running at http://{host}:{port}")
 
     def _run_server(self):                           # [#9]
         try:

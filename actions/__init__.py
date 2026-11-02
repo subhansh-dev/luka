@@ -1,4 +1,4 @@
-# actions package — RUMI action tools
+# actions package — Luka action tools
 
 # Paper Search — Academic paper search (arXiv, Semantic Scholar)
 try:

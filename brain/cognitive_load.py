@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-cognitive_load.py — RUMI Cognitive Load Management
+cognitive_load.py — Luka Cognitive Load Management
 ======================================================
 
-Implements Sweller's Cognitive Load Theory for managing RUMI's working memory
+Implements Sweller's Cognitive Load Theory for managing Luka's working memory
 and processing resources. Just as humans have limited working memory capacity,
-RUMI has finite computational resources per request.
+Luka has finite computational resources per request.
 
 Three types of cognitive load (Sweller, 1988):
   1. Intrinsic Load: inherent complexity of the task itself
@@ -147,7 +147,7 @@ class MemoryChunk:
 
 class CognitiveLoadManager:
     """
-    Manages cognitive load and working memory for RUMI.
+    Manages cognitive load and working memory for Luka.
 
     Estimates task complexity, tracks active modules, detects overload,
     and implements load-shedding strategies.

@@ -1,7 +1,7 @@
 """
 discovery/claim_provenance.py — Full Provenance Tracking for Every Claim
 
-Every claim in RUMI's output gets:
+Every claim in Luka's output gets:
   - SOURCE: which paper or computation it came from
   - INFERENCE: the logical steps from evidence to claim
   - CONFIDENCE: propagated through the chain

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-hierarchical_active_inference.py — RUMI Hierarchical Active Inference
+hierarchical_active_inference.py — Luka Hierarchical Active Inference
 =======================================================================
 
 Extends the flat ActiveInferenceEngine with a 3-level hierarchical model
@@ -811,7 +811,7 @@ class HierarchicalActiveInference:
     def format_for_prompt(self, max_chars: int = 800) -> str:
         """
         Format hierarchical state for system prompt injection.
-        Gives RUMI awareness of her own cognitive state across levels.
+        Gives Luka awareness of her own cognitive state across levels.
         """
         stats = self.get_stats()
 

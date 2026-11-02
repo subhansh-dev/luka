@@ -76,10 +76,6 @@ computer_control
   direction: "up" | "down" (for scroll)
   description: string (for screen_find/screen_click)
 
-screen_process
-  text: string (required) — what to analyze or ask about the screen
-  angle: "screen" | "camera" (optional)
-
 send_message
   receiver: string (required)
   message_text: string (required)
@@ -89,11 +85,6 @@ reminder
   date: string YYYY-MM-DD (required)
   time: string HH:MM (required)
   message: string (required)
-
-desktop_control
-  action: "wallpaper" | "organize" | "clean" | "list" | "task" (required)
-  path: string (optional)
-  task: string (optional)
 
 youtube_video
   action: "play" | "summarize" | "trending" (required)
@@ -193,7 +184,7 @@ def _get_api_key() -> str:
 
 
 def _generate(model_name: str, prompt: str, system: str = "") -> str:
-    from rumi_llm import generate
+    from luka_llm import generate
     return generate(model_name, prompt, system=system)
 
 
@@ -201,8 +192,8 @@ def _generate(model_name: str, prompt: str, system: str = "") -> str:
 
 VALID_TOOLS = {
     "open_app", "web_search", "browser_control",
-    "file_controller", "computer_settings", "computer_control",
-    "screen_process", "send_message", "reminder", "desktop_control",
+    "file_controller", "computer_settings",
+    "send_message", "reminder",
     "youtube_video", "weather_report", "code_helper",
     "dev_agent", "web_research", "security_tools", "ai_pipeline",
     "agency_agent",
@@ -214,12 +205,9 @@ REQUIRED_PARAMS = {
     "weather_report":    ["city"],
     "send_message":      ["receiver", "message_text", "platform"],
     "reminder":          ["date", "time", "message"],
-    "screen_process":    ["text"],
     "code_helper":       ["action"],
     "dev_agent":         ["description"],
-    "computer_control":  ["action"],
     "file_controller":   ["action"],
-    "desktop_control":   ["action"],
     "youtube_video":     ["action"],
     "browser_control":   ["action"],
     "computer_settings": [],
